@@ -1,0 +1,24 @@
+<style type="text/css" media="screen">
+    .alert {
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        padding: 15px;
+        margin-bottom: 20px;
+        border: 1px solid transparent;
+        border-radius: 4px;
+    }
+    .alert-danger {
+        color: #a94442;
+        background-color: #f2dede;
+        border-color: #ebccd1;
+    }
+    p{
+        margin: 0;
+    }
+</style>
+<div class="alert alert-danger" role="alert">
+    <p>
+        <strong class="badge badge-danger"><?php echo $error->getStringSeverity(); ?></strong>
+        <?php echo $error->getMessage(); ?>
+    </p>
+    <small class="text-muted text-italic"><?php echo $error->getFile(); ?>:<?php echo $error->getLine(); ?></small>
+</div>
