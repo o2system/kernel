@@ -15,8 +15,8 @@ namespace O2System\Kernel\Http;
 // ------------------------------------------------------------------------
 
 use O2System\Gear\Trace;
-use O2System\Kernel\Abstracts\AbstractException;
-use O2System\Kernel\Spl\Exceptions\ErrorException;
+use O2System\Spl\Exceptions\Abstracts\AbstractException;
+use O2System\Spl\Exceptions\ErrorException;
 use O2System\Spl\Traits\Collectors\FilePathCollectorTrait;
 
 /**
@@ -24,9 +24,13 @@ use O2System\Spl\Traits\Collectors\FilePathCollectorTrait;
  *
  * @package O2System\Kernel\Http
  */
-class Output
+class Output extends Message\Response
 {
     use FilePathCollectorTrait;
+
+    protected $mimeType = 'text/html';
+
+    protected $charset  = 'utf8';
 
     // ------------------------------------------------------------------------
 
@@ -39,6 +43,8 @@ class Output
      */
     public function __construct ()
     {
+        parent::__construct();
+
         // Set Output Views Directory
         $this->setFileDirName( 'Views' );
         $this->addFilePath( PATH_KERNEL );
@@ -51,6 +57,52 @@ class Output
     }
 
     // ------------------------------------------------------------------------
+
+    public function addHeader ( $name, $value )
+    {
+        $this->headers[ $name ] = $value;
+
+        return $this;
+    }
+
+    /**
+     * Output::setContentType
+     *
+     * @param string $mimeType
+     * @param string $charset
+     *
+     * @return $this
+     */
+    public function setContentType ( $mimeType, $charset = null )
+    {
+        static $mimes = [];
+
+        if ( empty( $mimes ) ) {
+            $mimes = require( str_replace( 'Http', 'Config', __DIR__ ) . DIRECTORY_SEPARATOR . 'Mimes.php' );
+        }
+
+        if ( strpos( $mimeType, '/' ) === false ) {
+            $extension = ltrim( $mimeType, '.' );
+            // Is this extension supported?
+            if ( isset( $mimes[ $extension ] ) ) {
+                $mimeType =& $mimes[ $extension ];
+                if ( is_array( $mimeType ) ) {
+                    $mimeType = current( $mimeType );
+                }
+            }
+        }
+
+        $this->mimeType = $mimeType;
+
+        $this->addHeader(
+            'Content-Type',
+            $mimeType
+            . ( empty( $charset ) ? '' : '; charset=' . $charset )
+        );
+
+        return $this;
+    }
+    // --------------------------------------------------------------------
 
     /**
      * Output::register
@@ -99,13 +151,13 @@ class Output
      *
      * Kernel defined error handler function.
      *
-     * @param int    $errno      The first parameter, errno, contains the level of the error raised, as an integer.
-     * @param string $errstr     The second parameter, errstr, contains the error message, as a string.
-     * @param string $errfile    The third parameter is optional, errfile, which contains the filename that the error
+     * @param int    $errorSeverity      The first parameter, errno, contains the level of the error raised, as an integer.
+     * @param string $errorMessage     The second parameter, errstr, contains the error message, as a string.
+     * @param string $errorFile    The third parameter is optional, errfile, which contains the filename that the error
      *                           was raised in, as a string.
-     * @param string $errline    The fourth parameter is optional, errline, which contains the line number the error
+     * @param string $errorLine    The fourth parameter is optional, errline, which contains the line number the error
      *                           was raised at, as an integer.
-     * @param array  $errcontext The fifth parameter is optional, errcontext, which is an array that points to the
+     * @param array  $errorContext The fifth parameter is optional, errcontext, which is an array that points to the
      *                           active symbol table at the point the error occurred. In other words, errcontext will
      *                           contain an array of every variable that existed in the scope the error was triggered
      *                           in. User error handler must not modify error context.
@@ -113,22 +165,22 @@ class Output
      * @return bool If the function returns FALSE then the normal error handler continues.
      * @throws ErrorException
      */
-    public function errorHandler ( $errno, $errstr, $errfile, $errline, array $errcontext = [ ] )
+    public function errorHandler ($errorSeverity, $errorMessage, $errorFile, $errorLine, array $errorContext = [] )
     {
-        $isFatalError = ( ( ( E_ERROR | E_COMPILE_ERROR | E_CORE_ERROR | E_USER_ERROR ) & $errno ) === $errno );
+        $isFatalError = ( ( ( E_ERROR | E_COMPILE_ERROR | E_CORE_ERROR | E_USER_ERROR ) & $errorSeverity ) === $errorSeverity );
 
         // When the error is fatal the Kernel will throw it as an exception.
         if ( $isFatalError ) {
-            throw new ErrorException( $errstr, $errno, $errfile, $errline );
+            throw new ErrorException( $errorMessage, $errorSeverity, $errorFile, $errorLine, $errorContext );
         }
 
         // Should we ignore the error? We'll get the current error_reporting
         // level and add its bits with the severity bits to find out.
-        if ( ( $errno & error_reporting() ) !== $errno ) {
+        if ( ( $errorSeverity & error_reporting() ) !== $errorSeverity ) {
             return false;
         }
 
-        $error = new ErrorException( $errstr, $errno, $errfile, $errline );
+        $error = new ErrorException( $errorMessage, $errorSeverity, $errorFile, $errorLine, $errorContext );
 
         // Logged the error
         logger()->error(
@@ -142,24 +194,23 @@ class Output
             )
         );
 
-        $errdisplay = str_ireplace( [ 'off', 'none', 'no', 'false', 'null' ], 0, ini_get( 'display_errors' ) );
+        $displayError = str_ireplace( [ 'off', 'none', 'no', 'false', 'null' ], 0, ini_get( 'display_errors' ) );
 
         // Should we display the error?
-        if ( $errdisplay == 1 ) {
+        if ( $displayError == 1 ) {
             if ( is_ajax() ) {
-                $this->showJSON(
-                    null,
-                    500,
-                    'INTERNAL_SERVER_ERROR',
-                    implode(
-                        ' ',
-                        [
-                            '[ ' . $error->getStringSeverity() . ' ] ',
-                            $error->getMessage(),
-                            $error->getFile() . ':' . $error->getLine(),
-                        ]
-                    )
-                );
+                $this->setContentType( 'application/json' );
+                $this->statusCode = 500;
+                $this->reasonPhrase = 'Internal Server Error';
+
+                $this->send( implode(
+                    ' ',
+                    [
+                        '[ ' . $error->getStringSeverity() . ' ] ',
+                        $error->getMessage(),
+                        $error->getFile() . ':' . $error->getLine(),
+                    ]
+                ) );
             } else {
                 ob_start();
                 include PATH_KERNEL . 'Views/http/error.phtml';
@@ -173,58 +224,96 @@ class Output
 
     // ------------------------------------------------------------------------
 
-    public function showJSON ( $data, $status = 200, $description = 'OK', $message = 'OK' )
+    /**
+     * Output::send
+     *
+     * @param $data
+     * @param array $headers
+     */
+    public function send ($data = null, array $headers = [] )
     {
-        if ( ! is_int( $status ) ) {
-            $status = 500;
-            $description = 'INTERNAL_SERVER_ERROR';
-            $message = 'Invalid type of status';
+        $statusCode = $this->statusCode;
+        $reasonPhrase = $this->reasonPhrase;
+
+        if( is_ajax() ) {
+            $contentType = isset( $_SERVER['HTTP_X_REQUESTED_CONTENT_TYPE'] ) ? $_SERVER['HTTP_X_REQUESTED_CONTENT_TYPE'] : 'application/json';
+            $this->setContentType( $contentType );
         }
 
-        if ( empty( $data ) AND $status === 200 ) {
-            $status = 204;
-            $description = 'NO_CONTENT';
-        }
+        $this->sendHeaders($headers);
 
-        $langDescription = language()->getLine( $langDescriptionLine = $status . '_' . $description . '_DESCRIPTION' );
-
-        if ( $langDescription !== $langDescriptionLine ) {
-            $description = $langDescription;
-        }
-        if ( $langDescription !== $langDescriptionLine ) {
-            $description = $langDescriptionLine;
-        } else {
-            $description = readable( str_replace( '_DESCRIPTION', '', $description ) );
-        }
-
-        if ( empty( $data ) ) {
+        if ( is_array( $data ) OR is_object( $data ) ) {
             $response = [
-                'status'      => (int) $status,
-                'description' => '',
-                'message'     => $message,
+                'status' => (int) $statusCode,
+                'reason' => $reasonPhrase,
             ];
-        } else {
+
+            if ( array_key_exists( 'message', $data ) ) {
+                $response[ 'message' ] = $data[ 'message' ];
+                unset( $data[ 'message' ] );
+            }
+
+            if ( count( $data ) ) {
+                $response[ 'result' ] = $data;
+            }
+
+            if ( $this->mimeType === 'application/json' ) {
+                echo json_encode( $response, JSON_PRETTY_PRINT );
+            } elseif ( $this->mimeType === 'application/xml' ) {
+                $xml = new \SimpleXMLElement( '<response/>' );
+
+                $result = $response[ 'result' ];
+                unset( $response[ 'result' ] );
+
+                foreach ( $response as $item => $value ) {
+                    $xml->addAttribute( $item, $value );
+                }
+
+                function array_to_xml ( $data, \SimpleXMLElement &$xml )
+                {
+                    foreach ( $data as $key => $value ) {
+                        if ( is_numeric( $key ) ) {
+                            $key = 'item' . $key; //dealing with <0/>..<n/> issues
+                        }
+                        if ( is_array( $value ) ) {
+                            $subnode = $xml->addChild( $key );
+                            array_to_xml( $value, $subnode );
+                        } else {
+                            $xml->addChild( "$key", htmlspecialchars( "$value" ) );
+                        }
+                    }
+                }
+
+                array_to_xml( $result, $xml );
+
+                echo $xml->asXML();
+            } else {
+                echo serialize( $data );
+            }
+
+        } elseif ( $this->mimeType === 'application/json' ) {
             $response = [
-                'status'      => (int) $status,
-                'description' => '',
-                'message'     => $message,
-                'result'      => $data,
+                'status' => (int) $statusCode,
+                'reason' => $reasonPhrase,
             ];
+
+            if( ! empty( $data ) ) {
+                $response[ 'message' ] = $data;
+            }
+
+            echo json_encode( $response, JSON_PRETTY_PRINT );
+        } elseif ( $this->mimeType === 'application/xml' ) {
+            $xml = new \SimpleXMLElement( '<response/>' );
+            $xml->addAttribute('status', $statusCode);
+            $xml->addAttribute('reason', $reasonPhrase);
+
+            if( ! empty( $data ) ) {
+                $xml->addChild('message', $data);
+            }
+            echo $xml->asXML();
+        } else {
+            echo $data;
         }
-
-        // Set Http Header
-        header( 'HTTP/1.0 ' . $status . ' ' . $description );
-
-        echo json_encode( $response, JSON_PRETTY_PRINT );
-
-        exit( EXIT_SUCCESS );
-    }
-
-    // ------------------------------------------------------------------------
-
-    public function show ( $string, array $headers = [ ] )
-    {
-        echo $string;
 
         exit( EXIT_SUCCESS );
     }
@@ -240,8 +329,19 @@ class Output
      */
     public function exceptionHandler ( $exception )
     {
-        // Standard PHP Libraries Error
-        if ( $exception instanceof \Error ) {
+        if( is_ajax() ) {
+            $this->statusCode = 500;
+            $this->reasonPhrase = 'Internal Server Error';
+
+            $this->send( implode(
+                ' ',
+                [
+                    ( $exception->getCode() != 0 ? '[ ' . $exception->getCode() . ']' : '' ),
+                    $exception->getMessage(),
+                    $exception->getFile() . ':' . $exception->getLine(),
+                ]
+            ) );
+        } elseif ( $exception instanceof \Error ) {
             $error = new ErrorException(
                 $exception->getMessage(),
                 $exception->getCode(),
@@ -272,8 +372,7 @@ class Output
                     break;
                 }
             }
-        } // Standard PHP Libraries Exception
-        elseif ( $exception instanceof \Exception ) {
+        } elseif ( $exception instanceof \Exception ) {
             foreach ( $this->filePaths as $filePath ) {
                 $filePath .= 'http' . DIRECTORY_SEPARATOR . 'exception-spl.phtml';
 
@@ -300,52 +399,85 @@ class Output
 
     // ------------------------------------------------------------------------
 
-    public function showError ( $code = 204, $header = 'NO_CONTENT', $description = 'NO_CONTENT', $message = '' )
+    /**
+     * Output::sendError
+     *
+     * @param int $code
+     * @param null|array|string $vars
+     * @param array $headers
+     */
+    public function sendError ($code = 204, $vars = null, $headers = [] )
     {
-        $langHeader = language()->getLine( $langHeaderLine = $code . '_' . $header . '_HEADER' );
-        $langDescription = language()->getLine( $langDescriptionLine = $code . '_' . $description . '_DESCRIPTION' );
+        static $errors = [];
 
-        if ( $langHeader !== $langHeaderLine ) {
-            $header = $langHeader;
-        } else {
-            $header = readable( str_replace( '_HEADER', '', $header ) );
+        if ( empty( $errors ) ) {
+            $errors = require( str_replace( 'Http', 'Config', __DIR__ ) . DIRECTORY_SEPARATOR . 'Errors.php' );
         }
 
-        if ( $langDescription !== $langDescriptionLine ) {
-            $description = $langDescriptionLine;
-        } else {
-            $description = readable( str_replace( '_DESCRIPTION', '', $description ) );
+        if ( isset( $errors[ $code ] ) ) {
+            $languageKey = $errors[ $code ];
         }
 
-        // Set Http Header
-        header( 'HTTP/1.0 ' . $code . ' ' . $header );
+        $languageKey = strtoupper( $code . '_' . $languageKey );
 
-        ob_start();
-        include PATH_KERNEL . 'Views' . DIRECTORY_SEPARATOR . 'http' . DIRECTORY_SEPARATOR . 'error-code.phtml';
-        $buffer = ob_get_contents();
-        ob_end_clean();
-        echo $buffer;
+        $error = [
+            'code' => $code,
+            'title' => language()->getLine( $languageKey . '_TITLE' ),
+            'message' => language()->getLine( $languageKey . '_MESSAGE' )
+        ];
+
+        $this->statusCode = $code;
+        $this->reasonPhrase = $error['title'];
+
+        if ( is_string( $vars ) ) {
+            $error[ 'message' ] = $vars;
+        } elseif( is_array( $vars ) ) {
+            $error = array_merge( $error, $vars );
+        }
+
+        if( is_ajax() or $this->mimeType !== 'text/html' ) {
+            $this->statusCode = $code;
+            $this->reasonPhrase = $error['title'];
+            $this->send();
+        } else {
+            $this->sendHeaders($headers);
+            extract( $error );
+
+            ob_start();
+            include PATH_KERNEL . 'Views' . DIRECTORY_SEPARATOR . 'http' . DIRECTORY_SEPARATOR . 'error-code.phtml';
+            $buffer = ob_get_contents();
+            ob_end_clean();
+            echo $buffer;
+        }
 
         exit( EXIT_ERROR );
     }
 
-    // ------------------------------------------------------------------------
-
-    protected function getAssetsUrl ( $path = null )
+    protected function sendHeaders( array $headers = [] )
     {
-        $scriptFilename = str_replace( [ '/', '\\' ], '/', dirname( $_SERVER[ 'SCRIPT_FILENAME' ] ) );
-        $scriptName = str_replace( [ '/', '\\' ], '/', dirname( $_SERVER[ 'SCRIPT_NAME' ] ) );
-        $kernelDirectory = str_replace( [ '/', '\\' ], '/', PATH_KERNEL );
+        ini_set('expose_php', 0);
 
-        if ( strpos( $scriptName, 'public' ) ) {
-            $scriptFilename = str_replace( 'public', '', $scriptFilename );
-            $scriptName = str_replace( 'public', '', $scriptName );
+        // collect headers that already sent
+        foreach(headers_list() as $header) {
+            $headerParts = explode(':', $header);
+            $headerParts = array_map('trim', $headerParts);
+            $headers[ $headerParts[0] ] = $headerParts[1];
+            header_remove($header[0]);
         }
 
-        return '//' . $_SERVER[ 'HTTP_HOST' ] . $scriptName . str_replace(
-            $scriptFilename,
-            '',
-            $kernelDirectory
-        ) . 'Views/http/assets/' . ( is_array( $path ) ? implode( '/', $path ) : $path );
+        if ( count( $headers ) ) {
+            $this->headers = array_merge( $this->headers, $headers );
+        }
+
+        if( $this->statusCode === 204 ) {
+            $this->statusCode = 200;
+            $this->reasonPhrase = 'OK';
+        }
+
+        header( 'HTTP/' . $this->protocol . ' ' . $this->statusCode . ' ' . $this->reasonPhrase );
+
+        foreach ( $this->headers as $name => $value ) {
+            header( $name . ': ' . trim( $value ) );
+        }
     }
 }

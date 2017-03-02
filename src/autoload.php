@@ -11,9 +11,9 @@
 // ------------------------------------------------------------------------
 
 // Load Kernel Helper Manually
-require 'Helpers/Common.php';
-require 'Helpers/Inflector.php';
-require 'Kernel.php';
+require __DIR__ . DIRECTORY_SEPARATOR . 'Helpers/Common.php';
+require __DIR__ . DIRECTORY_SEPARATOR . 'Helpers/Inflector.php';
+require __DIR__ . DIRECTORY_SEPARATOR . 'Kernel.php';
 
 /**
  * O2System Kernel Autoload
@@ -22,7 +22,9 @@ require 'Kernel.php';
  */
 spl_autoload_register(
     function ( $className ) {
-        if ( strpos( $className, 'O2System\Kernel\\' ) === false ) {
+        if ( $className === 'O2System\Kernel' ) {
+            require __DIR__ . DIRECTORY_SEPARATOR . 'Kernel.php';
+        } elseif ( strpos( $className, 'O2System\Kernel\\' ) === false ) {
             return;
         }
 

@@ -12,7 +12,7 @@
 
 namespace O2System;
 
-    // ------------------------------------------------------------------------
+// ------------------------------------------------------------------------
 
 /*
  *---------------------------------------------------------------
@@ -41,7 +41,9 @@ class Kernel extends Psr\Patterns\AbstractSingletonPattern
      *
      * @var array
      */
-    private $services = [ ];
+    private $services = [];
+
+    // ------------------------------------------------------------------------
 
     /**
      * Kernel::__construct
@@ -83,6 +85,12 @@ class Kernel extends Psr\Patterns\AbstractSingletonPattern
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Kernel::addService
+     *
+     * @param object|string $service
+     * @param string|null   $offset
+     */
     public function addService ( $service, $offset = null )
     {
         if ( is_object( $service ) ) {
@@ -111,6 +119,16 @@ class Kernel extends Psr\Patterns\AbstractSingletonPattern
         }
     }
 
+    // ------------------------------------------------------------------------
+
+    /**
+     * Kernel::getService
+     *
+     * @param string $offset
+     * @param bool   $getInstance
+     *
+     * @return mixed
+     */
     public function &getService ( $offset, $getInstance = true )
     {
         $getService[ $offset ] = false;
@@ -126,11 +144,26 @@ class Kernel extends Psr\Patterns\AbstractSingletonPattern
         return $getService[ $offset ];
     }
 
+    // ------------------------------------------------------------------------
+
+    /**
+     * Kernel::hasService
+     *
+     * @param $offset
+     *
+     * @return bool
+     */
     public function hasService ( $offset )
     {
         return (bool) array_key_exists( $offset, $this->services );
     }
 
+    // ------------------------------------------------------------------------
+
+    /**
+     * Kernel::cliIO
+     *
+     */
     private function cliIO ()
     {
         // Instantiate Kernel Cli Input
@@ -140,6 +173,12 @@ class Kernel extends Psr\Patterns\AbstractSingletonPattern
         $this->addService( new Kernel\Cli\Output() );
     }
 
+    // ------------------------------------------------------------------------
+
+    /**
+     * Kernel::httpIO
+     *
+     */
     private function httpIO ()
     {
         // Instantiate Kernel Http Input
@@ -149,6 +188,14 @@ class Kernel extends Psr\Patterns\AbstractSingletonPattern
         $this->addService( new Kernel\Http\Output() );
     }
 
+    // ------------------------------------------------------------------------
+
+    /**
+     * Kernel::loadService
+     *
+     * @param string      $service
+     * @param string|null $offset
+     */
     public function loadService ( $service, $offset = null )
     {
         if ( class_exists( $service ) ) {

@@ -120,7 +120,7 @@ if ( ! function_exists( 'is_cli' ) ) {
      */
     function is_cli ()
     {
-        return ( PHP_SAPI === 'cli' || defined( 'STDIN' ) );
+        return ( php_sapi_name() === 'cli' );
     }
 }
 
@@ -215,10 +215,10 @@ if ( ! function_exists( 'stringify_attributes' ) ) {
      */
     function stringify_attributes ( $attributes, $js = false )
     {
-        $atts = null;
+        $attribute = null;
 
         if ( empty( $attributes ) ) {
-            return $atts;
+            return $attribute;
         }
 
         if ( is_string( $attributes ) ) {
@@ -227,13 +227,13 @@ if ( ! function_exists( 'stringify_attributes' ) ) {
 
         $attributes = (array) $attributes;
 
-        foreach ( $attributes as $key => $val ) {
-            $atts .= ( $js ) ? $key . '=' . $val . ',' : ' ' . $key . '="' . $val . '"';
+        foreach ( $attributes as $key => $value ) {
+            $attribute .= ( $js ) ? $key . '=' . $value . ',' : ' ' . $key . '="' . $value . '"';
 
         }
 
 
-        return rtrim( $atts, ',' );
+        return rtrim( $attribute, ',' );
     }
 }
 
@@ -393,6 +393,13 @@ if ( ! function_exists( 'prepare_class_name' ) ) {
         $class = trim( $class );
 
         $segments = explode( '\\', $class );
+
+        if( count( $segments) > 1 ) {
+        	if( $segments[ 0 ] === $segments[ 1 ] ) {
+        		array_shift( $segments );
+        	}
+        }
+
         $segments = array_map( 'studlycapcase', $segments );
 
         return implode( '\\', $segments );
@@ -438,7 +445,7 @@ if ( ! function_exists( 'prepare_namespace' ) ) {
      */
     function prepare_namespace ( $class, $get_namespace = true )
     {
-        return ( $get_namespace === true ? get_namespace( $class ) : prepare_filename( $class ) );
+        return ( $get_namespace === true ? get_namespace( $class ) : prepare_class_name( $class ) );
     }
 }
 

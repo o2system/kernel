@@ -153,25 +153,39 @@ class Input
             // of the simpler filter_input();
             switch ( $type ) {
                 case INPUT_GET:
-                    $value = isset( $_GET[ $offset ] ) ? $_GET[ $offset ] : null;
+                    $value = isset( $_GET[ $offset ] )
+                        ? $_GET[ $offset ]
+                        : null;
                     break;
                 case INPUT_POST:
-                    $value = isset( $_POST[ $offset ] ) ? $_POST[ $offset ] : null;
+                    $value = isset( $_POST[ $offset ] )
+                        ? $_POST[ $offset ]
+                        : null;
                     break;
                 case INPUT_SERVER:
-                    $value = isset( $_SERVER[ $offset ] ) ? $_SERVER[ $offset ] : null;
+                    $value = isset( $_SERVER[ $offset ] )
+                        ? $_SERVER[ $offset ]
+                        : null;
                     break;
                 case INPUT_ENV:
-                    $value = isset( $_ENV[ $offset ] ) ? $_ENV[ $offset ] : null;
+                    $value = isset( $_ENV[ $offset ] )
+                        ? $_ENV[ $offset ]
+                        : null;
                     break;
                 case INPUT_COOKIE:
-                    $value = isset( $_COOKIE[ $offset ] ) ? $_COOKIE[ $offset ] : null;
+                    $value = isset( $_COOKIE[ $offset ] )
+                        ? $_COOKIE[ $offset ]
+                        : null;
                     break;
                 case INPUT_REQUEST:
-                    $value = isset( $_REQUEST[ $offset ] ) ? $_REQUEST[ $offset ] : null;
+                    $value = isset( $_REQUEST[ $offset ] )
+                        ? $_REQUEST[ $offset ]
+                        : null;
                     break;
                 case INPUT_SESSION:
-                    $value = isset( $_SESSION[ $offset ] ) ? $_SESSION[ $offset ] : null;
+                    $value = isset( $_SESSION[ $offset ] )
+                        ? $_SESSION[ $offset ]
+                        : null;
                     break;
                 default:
                     $value = '';
@@ -424,5 +438,43 @@ class Input
     final public function session ( $offset = null, $filter = null )
     {
         return $this->filter( INPUT_SESSION, $offset, $filter );
+    }
+
+    //--------------------------------------------------------------------
+
+    /**
+     * Input::ipAddress
+     *
+     * Fetch input ip address.
+     * Determines and validates the visitor's IP address.
+     *
+     * @param string|array $proxyIps List of proxy ip addresses.
+     *
+     * @return string
+     */
+    public function ipAddress ( $proxyIps = null )
+    {
+        if ( ! empty( $proxyIps ) && ! is_array( $proxyIps ) ) {
+            $proxyIps = explode( ',', str_replace( ' ', '', $proxyIps ) );
+        }
+
+        foreach ( [
+                      'HTTP_CLIENT_IP',
+                      'HTTP_FORWARDED',
+                      'HTTP_X_FORWARDED_FOR',
+                      'HTTP_X_CLIENT_IP',
+                      'HTTP_X_CLUSTER_CLIENT_IP',
+                      'REMOTE_ADDR'
+                  ] as $header ) {
+            if ( null !== ( $ipAddress = $this->server( $header ) ) ) {
+                if ( filter_var( $ipAddress, FILTER_VALIDATE_IP ) ) {
+                    if( ! in_array( $ipAddress, $proxyIps ) ) {
+                        break;
+                    }
+                }
+            }
+        }
+
+        return ( empty( $ipAddress ) ? '0.0.0.0' : $ipAddress );
     }
 }

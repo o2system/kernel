@@ -10,22 +10,16 @@
  */
 // ------------------------------------------------------------------------
 
-namespace O2System\Kernel\Spl\Exceptions\Logic;
+namespace O2System\Kernel\Cli\Writers;
 
 // ------------------------------------------------------------------------
 
-use O2System\Kernel\Spl\Exceptions\LogicException;
-
 /**
- * Class BadFunctionCallException
+ * Class Box
  *
- * Exception thrown if a callback refers to an undefined function or if some arguments are missing.
- *
- * @see     http://php.net/manual/en/class.badfunctioncallexception.php
- *
- * @package O2System\Kernel\Spl\Exceptions\Logic
+ * @package O2System\Kernel\Cli\Writers
  */
-class BadFunctionCallException extends LogicException
+class Box
 {
 
 }

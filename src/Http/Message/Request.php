@@ -38,7 +38,7 @@ class Request extends AbstractMessage implements
     /**
      * Request Uri
      *
-     * @var Uri
+     * @var Uri|\O2System\Framework\Http\Message\Uri
      */
     protected $uri;
 
@@ -192,7 +192,7 @@ class Request extends AbstractMessage implements
      * This method MUST return a UriInterface instance.
      *
      * @see http://tools.ietf.org/html/rfc3986#section-4.3
-     * @return Uri Returns a UriInterface instance
+     * @return Uri|\O2System\Framework\Http\Message\Uri Returns a UriInterface instance
      *     representing the URI of the request.
      */
     public function &getUri ()

@@ -14,7 +14,7 @@
 namespace O2System\Kernel\Http\Message;
 
 
-use O2System\Kernel\Spl\Exceptions\Logic\BadFunctionCall\BadPhpExtensionCallException;
+use O2System\Spl\Exceptions\Logic\BadFunctionCall\BadPhpExtensionCallException;
 use O2System\Psr\Http\Message\StreamInterface;
 use O2System\Psr\Http\Message\UploadedFileInterface;
 

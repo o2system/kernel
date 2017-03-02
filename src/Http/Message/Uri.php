@@ -228,7 +228,7 @@ class Uri implements UriInterface
             $xPath = explode( '/', trim( $xPath[ 0 ], '/' ) );
             array_pop( $xPath );
 
-            $this->path = empty( $xPath ) ? null : implode( '/', $xPath );
+            $this->path = empty( $xPath ) ? null : implode( '/', $xPath ) . '/';
 
             $this->query = isset( $_SERVER[ 'QUERY_STRING' ] ) ? $_SERVER[ 'QUERY_STRING' ] : null;
 
@@ -472,7 +472,7 @@ class Uri implements UriInterface
      * @see https://tools.ietf.org/html/rfc3986#section-3.3
      * @return string The URI path.
      */
-    public function getPath ()
+    public function &getPath ()
     {
         return $this->path;
     }
@@ -532,7 +532,21 @@ class Uri implements UriInterface
     }
 
     // ------------------------------------------------------------------------
+    
+    public function getSubDomain ( $level = '3rd' )
+    {
+        if ( isset( $this->subDomains[ $level ] ) ) {
+            return $this->subDomains[ $level ];
+        }
 
+        return false;
+    }
+
+    public function getSubDomains ()
+    {
+        return $this->subDomains;
+    } 
+    
     /**
      * UriInterface::withScheme
      *
@@ -548,19 +562,19 @@ class Uri implements UriInterface
      *
      * @param string $scheme The scheme to use with the new instance.
      *
-     * @return static A new instance with the specified scheme.
+     * @return static|\O2System\Framework\Http\Message\Uri A new instance with the specified scheme.
      * @throws \InvalidArgumentException for invalid schemes.
      * @throws \InvalidArgumentException for unsupported schemes.
      */
     public function withScheme ( $scheme )
     {
         if ( in_array( $scheme, [ 'http', 'https' ] ) ) {
-            $newInstance = clone $this;
+            $uri = clone $this;
             $this->scheme = $scheme;
 
-            // $newInstance->port = $scheme;
+            // $uri->port = $scheme;
 
-            return $newInstance;
+            return $uri;
         }
 
         throw new InvalidArgumentException( 'Invalid Schemes' );
@@ -583,7 +597,7 @@ class Uri implements UriInterface
      * @param string      $user     The user name to use for authority.
      * @param null|string $password The password associated with $user.
      *
-     * @return static A new instance with the specified user information.
+     * @return static|\O2System\Framework\Http\Message\Uri A new instance with the specified user information.
      */
     public function withUserInfo ( $user, $password = null )
     {
@@ -607,15 +621,15 @@ class Uri implements UriInterface
      *
      * @param string $host The hostname to use with the new instance.
      *
-     * @return static A new instance with the specified host.
+     * @return static|\O2System\Framework\Http\Message\Uri A new instance with the specified host.
      * @throws \InvalidArgumentException for invalid hostnames.
      */
     public function withHost ( $host )
     {
-        $newInstance = clone $this;
-        $newInstance->host = $host;
+        $uri = clone $this;
+        $uri->host = $host;
 
-        return $newInstance;
+        return $uri;
     }
 
     // ------------------------------------------------------------------------
@@ -637,15 +651,15 @@ class Uri implements UriInterface
      * @param null|int $port The port to use with the new instance; a null value
      *                       removes the port information.
      *
-     * @return static A new instance with the specified port.
+     * @return static|\O2System\Framework\Http\Message\Uri A new instance with the specified port.
      * @throws \InvalidArgumentException for invalid ports.
      */
     public function withPort ( $port )
     {
-        $newInstance = clone $this;
-        $newInstance->port = $port;
+        $uri = clone $this;
+        $uri->port = $port;
 
-        return $newInstance;
+        return $uri;
     }
 
     // ------------------------------------------------------------------------
@@ -672,15 +686,15 @@ class Uri implements UriInterface
      *
      * @param string $path The path to use with the new instance.
      *
-     * @return static A new instance with the specified path.
+     * @return static|\O2System\Framework\Http\Message\Uri A new instance with the specified path.
      * @throws \InvalidArgumentException for invalid paths.
      */
     public function withPath ( $path )
     {
-        $newInstance = clone $this;
-        $newInstance->path = ltrim( $path, '/' );
+        $uri = clone $this;
+        $uri->path = ltrim( $path, '/' );
 
-        return $newInstance;
+        return $uri;
     }
 
     // ------------------------------------------------------------------------
@@ -700,15 +714,15 @@ class Uri implements UriInterface
      *
      * @param string $query The query string to use with the new instance.
      *
-     * @return static A new instance with the specified query string.
+     * @return static|\O2System\Framework\Http\Message\Uri A new instance with the specified query string.
      * @throws \InvalidArgumentException for invalid query strings.
      */
     public function withQuery ( $query )
     {
-        $newInstance = clone $this;
-        $newInstance->query = $query;
+        $uri = clone $this;
+        $uri->query = $query;
 
-        return $newInstance;
+        return $uri;
     }
 
     // ------------------------------------------------------------------------
@@ -728,14 +742,14 @@ class Uri implements UriInterface
      *
      * @param string $fragment The fragment to use with the new instance.
      *
-     * @return static A new instance with the specified fragment.
+     * @return static|\O2System\Framework\Http\Message\Uri A new instance with the specified fragment.
      */
     public function withFragment ( $fragment )
     {
-        $newInstance = clone $this;
-        $newInstance->fragment = $fragment;
+        $uri = clone $this;
+        $uri->fragment = $fragment;
 
-        return $newInstance;
+        return $uri;
     }
 
     // ------------------------------------------------------------------------

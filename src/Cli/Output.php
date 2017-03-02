@@ -16,7 +16,7 @@ namespace O2System\Kernel\Cli;
 
 use O2System\Gear\Trace;
 use O2System\Kernel\Abstracts\AbstractException;
-use O2System\Kernel\Spl\Exceptions\ErrorException;
+use O2System\Spl\Exceptions\ErrorException;
 use O2System\Spl\Traits\Collectors\FilePathCollectorTrait;
 
 /**
