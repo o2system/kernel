@@ -10,7 +10,7 @@
  */
 // ------------------------------------------------------------------------
 
-namespace O2System\Kernel\Registries;
+namespace O2System\Kernel\Datastructures;
 
 // ------------------------------------------------------------------------
 
@@ -42,7 +42,7 @@ class Config extends SplArrayObject
      *
      * @var bool
      */
-    private $isCamelcaseOffset;
+    private $camelcaseOffset;
 
     // ------------------------------------------------------------------------
 
@@ -54,13 +54,13 @@ class Config extends SplArrayObject
      *
      * @return Config Returns an SplArrayObject object on success.
      */
-    public function __construct ( array $config = [ ], $flag = self::CAMELCASE_OFFSET )
+    public function __construct( array $config = [], $flag = self::CAMELCASE_OFFSET )
     {
         parent::__construct( $config );
 
-        $this->isCamelcaseOffset = $flag;
+        $this->camelcaseOffset = $flag;
 
-        if ( $this->isCamelcaseOffset === true ) {
+        if ( $this->camelcaseOffset === true ) {
             if ( count( $config ) > 0 ) {
                 foreach ( $config as $offset => $value ) {
                     $this->offsetSet( $offset, $value );
@@ -82,12 +82,12 @@ class Config extends SplArrayObject
      *
      * @return void
      */
-    public function offsetSet ( $offset, $value )
+    public function offsetSet( $offset, $value )
     {
-        if ( $this->isCamelcaseOffset === true ) {
+        if ( $this->camelcaseOffset === true ) {
             if ( is_array( $value ) ) {
                 if ( is_string( key( $value ) ) ) {
-                    $newValue = [ ];
+                    $newValue = [];
 
                     foreach ( $value as $key => $val ) {
                         $newValue[ camelcase( $key ) ] = $val;

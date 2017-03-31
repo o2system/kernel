@@ -25,7 +25,7 @@ class Curl extends AbstractTransport
         CURLOPT_HEADER         => true,
     ];
 
-    public function getResponse ( RequestInterface $request )
+    public function getResponse( RequestInterface $request )
     {
         $response = new Response;
 

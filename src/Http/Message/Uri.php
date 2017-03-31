@@ -104,7 +104,7 @@ class Uri implements UriInterface
      *
      * @var array
      */
-    protected $subDomains = [ ];
+    protected $subDomains = [];
 
     /**
      * Uri Top Level Domain
@@ -118,7 +118,7 @@ class Uri implements UriInterface
      *
      * @var array
      */
-    protected $tlds = [ ];
+    protected $tlds = [];
 
     // ------------------------------------------------------------------------
 
@@ -127,7 +127,7 @@ class Uri implements UriInterface
      *
      * @param string|null $httpStringRequest
      */
-    public function __construct ( $httpStringRequest = null )
+    public function __construct( $httpStringRequest = null )
     {
         if ( isset( $httpStringRequest ) ) {
             $httpStringRequest = ltrim( $httpStringRequest, '//' );
@@ -244,7 +244,7 @@ class Uri implements UriInterface
          * Define Uri Tld
          */
         if ( count( $xHost ) > 1 ) {
-            $this->tlds = [ ];
+            $this->tlds = [];
 
             foreach ( $xHost as $key => $hostname ) {
                 if ( strlen( $hostname ) <= 3 AND $key >= 1 AND $hostname !== 'www' ) {
@@ -321,7 +321,7 @@ class Uri implements UriInterface
      * @see https://tools.ietf.org/html/rfc3986#section-3.1
      * @return string The URI scheme.
      */
-    public function getScheme ()
+    public function getScheme()
     {
         return $this->scheme;
     }
@@ -348,7 +348,7 @@ class Uri implements UriInterface
      * @see https://tools.ietf.org/html/rfc3986#section-3.2
      * @return string The URI authority, in "[user-info@]host[:port]" format.
      */
-    public function getAuthority ()
+    public function getAuthority()
     {
         if ( empty( $this->host ) ) {
             return null;
@@ -388,7 +388,7 @@ class Uri implements UriInterface
      *
      * @return string The URI user information, in "username[:password]" format.
      */
-    public function getUserInfo ()
+    public function getUserInfo()
     {
         $userInfo = $this->username;
 
@@ -414,7 +414,7 @@ class Uri implements UriInterface
      * @see http://tools.ietf.org/html/rfc3986#section-3.2.2
      * @return string The URI host.
      */
-    public function getHost ()
+    public function getHost()
     {
         return $this->host;
     }
@@ -438,7 +438,7 @@ class Uri implements UriInterface
      *
      * @return null|int The URI port.
      */
-    public function getPort ()
+    public function getPort()
     {
         return $this->port;
     }
@@ -472,7 +472,7 @@ class Uri implements UriInterface
      * @see https://tools.ietf.org/html/rfc3986#section-3.3
      * @return string The URI path.
      */
-    public function &getPath ()
+    public function &getPath()
     {
         return $this->path;
     }
@@ -501,7 +501,7 @@ class Uri implements UriInterface
      * @see https://tools.ietf.org/html/rfc3986#section-3.4
      * @return string The URI query string.
      */
-    public function getQuery ()
+    public function getQuery()
     {
         return $this->query;
     }
@@ -526,14 +526,14 @@ class Uri implements UriInterface
      * @see https://tools.ietf.org/html/rfc3986#section-3.5
      * @return string The URI fragment.
      */
-    public function getFragment ()
+    public function getFragment()
     {
         return $this->fragment;
     }
 
     // ------------------------------------------------------------------------
-    
-    public function getSubDomain ( $level = '3rd' )
+
+    public function getSubDomain( $level = '3rd' )
     {
         if ( isset( $this->subDomains[ $level ] ) ) {
             return $this->subDomains[ $level ];
@@ -542,11 +542,11 @@ class Uri implements UriInterface
         return false;
     }
 
-    public function getSubDomains ()
+    public function getSubDomains()
     {
         return $this->subDomains;
-    } 
-    
+    }
+
     /**
      * UriInterface::withScheme
      *
@@ -566,7 +566,7 @@ class Uri implements UriInterface
      * @throws \InvalidArgumentException for invalid schemes.
      * @throws \InvalidArgumentException for unsupported schemes.
      */
-    public function withScheme ( $scheme )
+    public function withScheme( $scheme )
     {
         if ( in_array( $scheme, [ 'http', 'https' ] ) ) {
             $uri = clone $this;
@@ -599,7 +599,7 @@ class Uri implements UriInterface
      *
      * @return static|\O2System\Framework\Http\Message\Uri A new instance with the specified user information.
      */
-    public function withUserInfo ( $user, $password = null )
+    public function withUserInfo( $user, $password = null )
     {
         $userInfo = clone $this;
         $userInfo->username = $user;
@@ -624,7 +624,7 @@ class Uri implements UriInterface
      * @return static|\O2System\Framework\Http\Message\Uri A new instance with the specified host.
      * @throws \InvalidArgumentException for invalid hostnames.
      */
-    public function withHost ( $host )
+    public function withHost( $host )
     {
         $uri = clone $this;
         $uri->host = $host;
@@ -654,7 +654,7 @@ class Uri implements UriInterface
      * @return static|\O2System\Framework\Http\Message\Uri A new instance with the specified port.
      * @throws \InvalidArgumentException for invalid ports.
      */
-    public function withPort ( $port )
+    public function withPort( $port )
     {
         $uri = clone $this;
         $uri->port = $port;
@@ -689,7 +689,7 @@ class Uri implements UriInterface
      * @return static|\O2System\Framework\Http\Message\Uri A new instance with the specified path.
      * @throws \InvalidArgumentException for invalid paths.
      */
-    public function withPath ( $path )
+    public function withPath( $path )
     {
         $uri = clone $this;
         $uri->path = ltrim( $path, '/' );
@@ -717,7 +717,7 @@ class Uri implements UriInterface
      * @return static|\O2System\Framework\Http\Message\Uri A new instance with the specified query string.
      * @throws \InvalidArgumentException for invalid query strings.
      */
-    public function withQuery ( $query )
+    public function withQuery( $query )
     {
         $uri = clone $this;
         $uri->query = $query;
@@ -744,7 +744,7 @@ class Uri implements UriInterface
      *
      * @return static|\O2System\Framework\Http\Message\Uri A new instance with the specified fragment.
      */
-    public function withFragment ( $fragment )
+    public function withFragment( $fragment )
     {
         $uri = clone $this;
         $uri->fragment = $fragment;
@@ -779,7 +779,7 @@ class Uri implements UriInterface
      * @see http://tools.ietf.org/html/rfc3986#section-4.1
      * @return string
      */
-    public function __toString ()
+    public function __toString()
     {
         $uriString = $this->scheme . '://';
 

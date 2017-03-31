@@ -18,7 +18,7 @@ if ( ! function_exists( 'kernel' ) ) {
      *
      * @return O2System\Kernel
      */
-    function kernel ()
+    function kernel()
     {
         if ( class_exists( 'O2System\Framework', false ) ) {
             return O2System\Framework::getInstance();
@@ -38,7 +38,7 @@ if ( ! function_exists( 'filesystem' ) ) {
      *
      * @return O2System\Kernel\Services\Filesystem
      */
-    function filesystem ()
+    function filesystem()
     {
         return kernel()->getService( 'filesystem' );
     }
@@ -54,7 +54,7 @@ if ( ! function_exists( 'profiler' ) ) {
      *
      * @return O2System\Gear\Profiler
      */
-    function profiler ()
+    function profiler()
     {
         return kernel()->getService( 'profiler' );
     }
@@ -70,7 +70,7 @@ if ( ! function_exists( 'language' ) ) {
      *
      * @return O2System\Kernel\Services\Language|O2System\Framework\Services\Language
      */
-    function language ()
+    function language()
     {
         return kernel()->getService( 'language' );
     }
@@ -86,7 +86,7 @@ if ( ! function_exists( 'logger' ) ) {
      *
      * @return O2System\Kernel\Services\Logger
      */
-    function logger ()
+    function logger()
     {
         $args = func_get_args();
 
@@ -110,7 +110,7 @@ if ( ! function_exists( 'shutdown' ) ) {
      *
      * @return O2System\Kernel\Services\Shutdown
      */
-    function shutdown ()
+    function shutdown()
     {
         return kernel()->getService( 'shutdown' );
     }
@@ -126,7 +126,7 @@ if ( ! function_exists( 'input' ) ) {
      *
      * @return O2System\Kernel\Http\Input|O2System\Kernel\Cli\Input
      */
-    function input ()
+    function input()
     {
         return kernel()->getService( 'input' );
     }
@@ -142,7 +142,7 @@ if ( ! function_exists( 'output' ) ) {
      *
      * @return O2System\Kernel\Http\Output|O2System\Kernel\Cli\Output
      */
-    function output ()
+    function output()
     {
         return kernel()->getService( 'output' );
     }

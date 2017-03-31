@@ -17,24 +17,24 @@ use O2System\Psr\Http\TransportInterface;
 
 class Transport implements TransportInterface
 {
-    public function __construct ()
+    public function __construct()
     {
         if ( ! function_exists( 'curl_init' ) ) {
 
         }
     }
 
-    public function getHandle ()
+    public function getHandle()
     {
         // TODO: Implement getHandle() method.
     }
 
-    public function getOptions ()
+    public function getOptions()
     {
         return $this->options;
     }
 
-    public function withOption ( $name, $value )
+    public function withOption( $name, $value )
     {
         $this->options[ $name ] = $value;
     }

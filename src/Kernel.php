@@ -48,7 +48,7 @@ class Kernel extends Psr\Patterns\AbstractSingletonPattern
     /**
      * Kernel::__construct
      */
-    protected function __construct ()
+    protected function __construct()
     {
         parent::__construct();
 
@@ -59,18 +59,18 @@ class Kernel extends Psr\Patterns\AbstractSingletonPattern
         foreach ( [ 'Language', 'Logger', 'Shutdown' ] as $serviceClassName ) {
             if ( class_exists( 'O2System\Framework', false ) ) {
                 if ( class_exists( 'App\Kernel\Services\\' . $serviceClassName ) ) {
-                    $this->addService( new Kernel\Registries\Service( 'App\Kernel\Services\\' . $serviceClassName ) );
+                    $this->addService( new Kernel\Datastructures\Service( 'App\Kernel\Services\\' . $serviceClassName ) );
                 } elseif ( class_exists( 'O2System\Framework\Services\\' . $serviceClassName ) ) {
                     $this->addService(
-                        new Kernel\Registries\Service( 'O2System\Framework\Services\\' . $serviceClassName )
+                        new Kernel\Datastructures\Service( 'O2System\Framework\Services\\' . $serviceClassName )
                     );
                 } elseif ( class_exists( 'O2System\Kernel\Services\\' . $serviceClassName ) ) {
                     $this->addService(
-                        new Kernel\Registries\Service( 'O2System\Kernel\Services\\' . $serviceClassName )
+                        new Kernel\Datastructures\Service( 'O2System\Kernel\Services\\' . $serviceClassName )
                     );
                 }
             } elseif ( class_exists( 'O2System\Kernel\Services\\' . $serviceClassName ) ) {
-                $this->addService( new Kernel\Registries\Service( 'O2System\Kernel\Services\\' . $serviceClassName ) );
+                $this->addService( new Kernel\Datastructures\Service( 'O2System\Kernel\Services\\' . $serviceClassName ) );
             }
         }
 
@@ -91,11 +91,11 @@ class Kernel extends Psr\Patterns\AbstractSingletonPattern
      * @param object|string $service
      * @param string|null   $offset
      */
-    public function addService ( $service, $offset = null )
+    public function addService( $service, $offset = null )
     {
         if ( is_object( $service ) ) {
-            if ( ! $service instanceof Kernel\Registries\Service ) {
-                $service = new Kernel\Registries\Service( $service );
+            if ( ! $service instanceof Kernel\Datastructures\Service ) {
+                $service = new Kernel\Datastructures\Service( $service );
             }
         } elseif ( is_string( $service ) ) {
             if ( strpos( $service, 'O2System\Framework\\' ) !== false ) {
@@ -107,11 +107,11 @@ class Kernel extends Psr\Patterns\AbstractSingletonPattern
             }
 
             if ( class_exists( $service ) ) {
-                $service = new Kernel\Registries\Service( $service );
+                $service = new Kernel\Datastructures\Service( $service );
             }
         }
 
-        if ( $service instanceof Kernel\Registries\Service ) {
+        if ( $service instanceof Kernel\Datastructures\Service ) {
             $offset = isset( $offset )
                 ? $offset
                 : $service->getClassParameter();
@@ -129,7 +129,7 @@ class Kernel extends Psr\Patterns\AbstractSingletonPattern
      *
      * @return mixed
      */
-    public function &getService ( $offset, $getInstance = true )
+    public function &getService( $offset, $getInstance = true )
     {
         $getService[ $offset ] = false;
 
@@ -153,9 +153,9 @@ class Kernel extends Psr\Patterns\AbstractSingletonPattern
      *
      * @return bool
      */
-    public function hasService ( $offset )
+    public function hasService( $offset )
     {
-        return (bool) array_key_exists( $offset, $this->services );
+        return (bool)array_key_exists( $offset, $this->services );
     }
 
     // ------------------------------------------------------------------------
@@ -164,7 +164,7 @@ class Kernel extends Psr\Patterns\AbstractSingletonPattern
      * Kernel::cliIO
      *
      */
-    private function cliIO ()
+    private function cliIO()
     {
         // Instantiate Kernel Cli Input
         $this->addService( new Kernel\Cli\Input() );
@@ -179,7 +179,7 @@ class Kernel extends Psr\Patterns\AbstractSingletonPattern
      * Kernel::httpIO
      *
      */
-    private function httpIO ()
+    private function httpIO()
     {
         // Instantiate Kernel Http Input
         $this->addService( new Kernel\Http\Input() );
@@ -196,10 +196,10 @@ class Kernel extends Psr\Patterns\AbstractSingletonPattern
      * @param string      $service
      * @param string|null $offset
      */
-    public function loadService ( $service, $offset = null )
+    public function loadService( $service, $offset = null )
     {
         if ( class_exists( $service ) ) {
-            $service = new Kernel\Registries\Service( $service );
+            $service = new Kernel\Datastructures\Service( $service );
             $offset = isset( $offset )
                 ? $offset
                 : $service->getClassParameter();

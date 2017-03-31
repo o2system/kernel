@@ -30,33 +30,33 @@ class ServerRequest extends Request implements ServerRequestInterface
      *
      * @var array
      */
-    protected $serverParams = [ ];
+    protected $serverParams = [];
 
     /**
      * Server Cookie
      *
      * @var array
      */
-    protected $cookieParams = [ ];
+    protected $cookieParams = [];
 
     /**
      * Server Query
      *
      * @var array
      */
-    protected $queryParams = [ ];
+    protected $queryParams = [];
 
     /**
      * Server Uploaded Files
      *
      * @var array
      */
-    protected $uploadedFiles = [ ];
+    protected $uploadedFiles = [];
 
     /**
      * ServerRequest::__construct
      */
-    public function __construct ()
+    public function __construct()
     {
         // Set Uri
         $this->uri = new Uri();
@@ -97,7 +97,7 @@ class ServerRequest extends Request implements ServerRequestInterface
         }
 
         // Populate file array
-        $uploadedFiles = [ ];
+        $uploadedFiles = [];
 
         foreach ( $_FILES as $key => $value ) {
             for ( $i = 0; $i < count( $value[ 'name' ] ); $i++ ) {
@@ -130,7 +130,7 @@ class ServerRequest extends Request implements ServerRequestInterface
      *
      * @return array
      */
-    public function getServerParams ()
+    public function getServerParams()
     {
         return $this->serverParams;
     }
@@ -149,7 +149,7 @@ class ServerRequest extends Request implements ServerRequestInterface
      *
      * @return array
      */
-    public function getCookieParams ()
+    public function getCookieParams()
     {
         return $this->cookieParams;
     }
@@ -176,7 +176,7 @@ class ServerRequest extends Request implements ServerRequestInterface
      *
      * @return static
      */
-    public function withCookieParams ( array $cookies )
+    public function withCookieParams( array $cookies )
     {
         $message = clone $this;
 
@@ -203,7 +203,7 @@ class ServerRequest extends Request implements ServerRequestInterface
      *
      * @return array
      */
-    public function getQueryParams ()
+    public function getQueryParams()
     {
         return $this->queryParams;
     }
@@ -235,7 +235,7 @@ class ServerRequest extends Request implements ServerRequestInterface
      *
      * @return static
      */
-    public function withQueryParams ( array $query )
+    public function withQueryParams( array $query )
     {
         $message = clone $this;
         $message->queryParams = $query;
@@ -260,9 +260,9 @@ class ServerRequest extends Request implements ServerRequestInterface
      * @return array An array tree of UploadedFileInterface instances; an empty
      *     array MUST be returned if no data is present.
      */
-    public function getUploadedFiles ()
+    public function getUploadedFiles()
     {
-        $response = [ ];
+        $response = [];
         foreach ( $this->uploadedFiles as $key => $uploadedFile ) {
             foreach ( $uploadedFile as $file ) {
                 $response[ $key ][] = new UploadFile( $file );
@@ -288,7 +288,7 @@ class ServerRequest extends Request implements ServerRequestInterface
      * @return static
      * @throws \InvalidArgumentException if an invalid structure is provided.
      */
-    public function withUploadedFiles ( array $uploadedFiles )
+    public function withUploadedFiles( array $uploadedFiles )
     {
         $message = clone $this;
 
@@ -321,7 +321,7 @@ class ServerRequest extends Request implements ServerRequestInterface
      * @return null|array|object The deserialized body parameters, if any.
      *     These will typically be an array or object.
      */
-    public function getParsedBody ()
+    public function getParsedBody()
     {
         if ( isset( $this->headers[ 'Content-Type' ] ) ) {
             if ( in_array(
@@ -371,7 +371,7 @@ class ServerRequest extends Request implements ServerRequestInterface
      * @throws \InvalidArgumentException if an unsupported argument type is
      *     provided.
      */
-    public function withParsedBody ( $data )
+    public function withParsedBody( $data )
     {
         $message = clone $this;
 
@@ -399,7 +399,7 @@ class ServerRequest extends Request implements ServerRequestInterface
      *
      * @return mixed[] Attributes derived from the request.
      */
-    public function getAttributes ()
+    public function getAttributes()
     {
         return array_keys( $this->serverParams );
     }
@@ -425,7 +425,7 @@ class ServerRequest extends Request implements ServerRequestInterface
      *
      * @return mixed
      */
-    public function getAttribute ( $name, $default = null )
+    public function getAttribute( $name, $default = null )
     {
         $name = str_replace( 'SERVER_', '', $name );
         $name = strtoupper( $name );
@@ -460,7 +460,7 @@ class ServerRequest extends Request implements ServerRequestInterface
      *
      * @return static
      */
-    public function withAttribute ( $name, $value )
+    public function withAttribute( $name, $value )
     {
         $name = str_replace( 'SERVER_', '', $name );
         $name = strtoupper( $name );
@@ -495,7 +495,7 @@ class ServerRequest extends Request implements ServerRequestInterface
      *
      * @return static
      */
-    public function withoutAttribute ( $name )
+    public function withoutAttribute( $name )
     {
         $name = str_replace( 'SERVER_', '', $name );
         $name = strtoupper( $name );

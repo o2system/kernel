@@ -62,7 +62,7 @@ class Request extends AbstractMessage implements
      *
      * @return string
      */
-    public function getRequestTarget ()
+    public function getRequestTarget()
     {
         $requestTarget = '/';
 
@@ -102,7 +102,7 @@ class Request extends AbstractMessage implements
      *
      * @return static
      */
-    public function withRequestTarget ( $requestTarget )
+    public function withRequestTarget( $requestTarget )
     {
         $requestTarget = trim( $requestTarget );
         $parseTarget = parse_url( $requestTarget );
@@ -131,7 +131,7 @@ class Request extends AbstractMessage implements
      *
      * @return string Returns the request method.
      */
-    public function getMethod ()
+    public function getMethod()
     {
         return $this->method;
     }
@@ -156,7 +156,7 @@ class Request extends AbstractMessage implements
      * @return static
      * @throws \InvalidArgumentException for invalid HTTP methods.
      */
-    public function withMethod ( $method )
+    public function withMethod( $method )
     {
         $method = strtoupper( $method );
 
@@ -195,7 +195,7 @@ class Request extends AbstractMessage implements
      * @return Uri|\O2System\Framework\Http\Message\Uri Returns a UriInterface instance
      *     representing the URI of the request.
      */
-    public function &getUri ()
+    public function &getUri()
     {
         if ( empty( $this->uri ) ) {
             $this->uri = new Uri();
@@ -240,7 +240,7 @@ class Request extends AbstractMessage implements
      *
      * @return static
      */
-    public function withUri ( UriInterface $uri, $preserveHost = false )
+    public function withUri( UriInterface $uri, $preserveHost = false )
     {
         $message = clone $this;
         $message->uri = $uri;

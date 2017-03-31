@@ -10,8 +10,6 @@
  */
 // ------------------------------------------------------------------------
 
-// ------------------------------------------------------------------------
-
 if ( ! function_exists( 'readable' ) ) {
     /**
      * readable
@@ -21,7 +19,7 @@ if ( ! function_exists( 'readable' ) ) {
      *
      * @return mixed|string
      */
-    function readable ( $string, $capitalize = false )
+    function readable( $string, $capitalize = false )
     {
         if ( ! empty( $string ) or $string != '' ) {
             $string = str_replace( '-', ' ', $string );
@@ -41,7 +39,7 @@ if ( ! function_exists( 'readable' ) ) {
 
 if ( ! function_exists( 'singular' ) ) {
     /**
-     * Singular
+     * singular
      *
      * Takes a plural word and makes it singular
      *
@@ -49,7 +47,7 @@ if ( ! function_exists( 'singular' ) ) {
      *
      * @return    string
      */
-    function singular ( $string )
+    function singular( $string )
     {
         $result = strval( $string );
 
@@ -102,7 +100,7 @@ if ( ! function_exists( 'singular' ) ) {
 
 if ( ! function_exists( 'plural' ) ) {
     /**
-     * Plural
+     * plural
      *
      * Takes a singular word and makes it plural
      *
@@ -110,7 +108,7 @@ if ( ! function_exists( 'plural' ) ) {
      *
      * @return    string
      */
-    function plural ( $string )
+    function plural( $string )
     {
         $result = strval( $string );
 
@@ -153,17 +151,19 @@ if ( ! function_exists( 'plural' ) ) {
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists( 'studlycapcase' ) ) {
+if ( ! function_exists( 'studlycase' ) ) {
     /**
+     * studlycase
+     *
      * Convert a value to studly caps case (StudlyCapCase).
      *
      * @param  string $string
      *
      * @return string
      */
-    function studlycapcase ( $string )
+    function studlycase( $string )
     {
-        $string = ucwords( str_replace( [ '-', '_' ], ' ', $string ) );
+        $string = ucwords( str_replace( [ '-', '_' ], ' ', underscore( $string ) ) );
 
         return str_replace( ' ', '', $string );
     }
@@ -173,7 +173,7 @@ if ( ! function_exists( 'studlycapcase' ) ) {
 
 if ( ! function_exists( 'camelcase' ) ) {
     /**
-     * Camelize
+     * camelcase
      *
      * Takes multiple words separated by spaces or underscores and camelizes them
      *
@@ -181,10 +181,10 @@ if ( ! function_exists( 'camelcase' ) ) {
      *
      * @return    string
      */
-    function camelcase ( $string )
+    function camelcase( $string )
     {
         if ( strtoupper( $string ) == $string ) {
-            return (string) $string;
+            return (string)$string;
         }
 
         return trim(
@@ -198,8 +198,17 @@ if ( ! function_exists( 'camelcase' ) ) {
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists( 'decamelcase' ) ) {
-    function decamelcase ( $string )
+if ( ! function_exists( 'snakecase' ) ) {
+    /**
+     * snakecase
+     *
+     * Convert camelCase into camel_case.
+     *
+     * @param $string
+     *
+     * @return string
+     */
+    function snakecase( $string )
     {
         $string = preg_replace( '/(?<=\\b)(?=[A-Z])/', "_$1", $string );
 
@@ -211,7 +220,7 @@ if ( ! function_exists( 'decamelcase' ) ) {
 
 if ( ! function_exists( 'underscore' ) ) {
     /**
-     * Underscore
+     * underscore
      *
      * Takes multiple words separated by spaces and underscores them
      *
@@ -219,7 +228,7 @@ if ( ! function_exists( 'underscore' ) ) {
      *
      * @return    string
      */
-    function underscore ( $string )
+    function underscore( $string )
     {
         $string = trim( $string );
         $string = preg_replace( "/[^A-Za-z0-9_ ]/", '_', $string );
@@ -241,7 +250,7 @@ if ( ! function_exists( 'underscore' ) ) {
 
 if ( ! function_exists( 'dash' ) ) {
     /**
-     * Dash
+     * dash
      *
      * Takes multiple words separated by spaces and dashes them
      *
@@ -250,7 +259,7 @@ if ( ! function_exists( 'dash' ) ) {
      * @access  public
      * @return  string
      */
-    function dash ( $string )
+    function dash( $string )
     {
         return str_replace( '_', '-', underscore( $string ) );
     }
@@ -261,6 +270,8 @@ if ( ! function_exists( 'dash' ) ) {
 
 if ( ! function_exists( 'is_countable' ) ) {
     /**
+     * is_countable
+     *
      * Checks if the given word has a plural version.
      *
      * @param    string $string Word to check
@@ -268,14 +279,56 @@ if ( ! function_exists( 'is_countable' ) ) {
      * @access  public
      * @return  bool
      */
-    function is_countable ( $string )
+    function is_countable( $string )
     {
         return ! in_array(
             strtolower( $string ),
             [
-                'equipment', 'information', 'rice', 'money',
-                'species', 'series', 'fish', 'meta',
+                'equipment',
+                'information',
+                'rice',
+                'money',
+                'species',
+                'series',
+                'fish',
+                'meta',
             ]
         );
+    }
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists( 'ordinal' ) ) {
+    /**
+     * ordinal
+     *
+     * Turns a number into an ordinal string used
+     * to denote the position in an ordered sequence
+     * such as 1st, 2nd, 3rd, 4th.
+     *
+     * @param    int $integer The integer to ordinalize
+     *
+     * @return    string
+     */
+    function ordinal( $integer )
+    {
+        $suffixes =
+            [
+                'th',
+                'st',
+                'nd',
+                'rd',
+                'th',
+                'th',
+                'th',
+                'th',
+                'th',
+                'th',
+            ];
+
+        return $integer . ( $integer % 100 >= 11 && $integer % 100 <= 13
+                ? 'th'
+                : $suffixes[ $integer % 10 ] );
     }
 }

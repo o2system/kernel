@@ -14,7 +14,7 @@ namespace O2System\Kernel\Services;
 
 // ------------------------------------------------------------------------
 
-use O2System\Kernel\Registries\Config;
+use O2System\Kernel\Datastructures\Config;
 use O2System\Psr\Log\LoggerInterface;
 
 /**
@@ -29,7 +29,7 @@ class Logger implements LoggerInterface
      *
      * @var array
      */
-    protected $threshold = [ ];
+    protected $threshold = [];
 
     /**
      * Logger Path
@@ -43,7 +43,7 @@ class Logger implements LoggerInterface
      *
      * @var array
      */
-    protected $lines = [ ];
+    protected $lines = [];
 
     // ------------------------------------------------------------------------
 
@@ -54,7 +54,7 @@ class Logger implements LoggerInterface
      *
      * @return Logger
      */
-    public function __construct ( Config $config = null )
+    public function __construct( Config $config = null )
     {
         if ( isset( $config->path ) ) {
             $this->path = $config->path;
@@ -62,8 +62,8 @@ class Logger implements LoggerInterface
             $this->path = PATH_CACHE . 'logs' . DIRECTORY_SEPARATOR;
         } else {
             $this->path = dirname(
-                              $_SERVER[ 'SCRIPT_FILENAME' ]
-                          ) . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . 'logs' . DIRECTORY_SEPARATOR;
+                    $_SERVER[ 'SCRIPT_FILENAME' ]
+                ) . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . 'logs' . DIRECTORY_SEPARATOR;
         }
 
         if ( isset( $config->threshold ) ) {
@@ -77,7 +77,7 @@ class Logger implements LoggerInterface
 
     // ------------------------------------------------------------------------
 
-    public function getLines ()
+    public function getLines()
     {
         return $this->lines;
     }
@@ -89,7 +89,7 @@ class Logger implements LoggerInterface
      *
      * @param array $threshold
      */
-    public function setThreshold ( array $threshold )
+    public function setThreshold( array $threshold )
     {
         $this->threshold = $threshold;
     }
@@ -103,7 +103,7 @@ class Logger implements LoggerInterface
      *
      * @param string $threshold
      */
-    public function addThreshold ( $threshold )
+    public function addThreshold( $threshold )
     {
         array_push( $this->threshold, $threshold );
     }
@@ -115,7 +115,7 @@ class Logger implements LoggerInterface
      *
      * @param string $path
      */
-    public function setPath ( $path )
+    public function setPath( $path )
     {
         $this->path = $path;
     }
@@ -132,7 +132,7 @@ class Logger implements LoggerInterface
      *
      * @return void
      */
-    public function emergency ( $message, array $context = [ ] )
+    public function emergency( $message, array $context = [] )
     {
         $this->log( Logger::EMERGENCY, $message, $context );
     }
@@ -150,7 +150,7 @@ class Logger implements LoggerInterface
      *
      * @return bool
      */
-    public function log ( $level, $message, array $context = [ ] )
+    public function log( $level, $message, array $context = [] )
     {
         if ( ! in_array( $level, $this->threshold ) ) {
             return false;
@@ -197,7 +197,7 @@ class Logger implements LoggerInterface
             chmod( $filePath, 0664 );
         }
 
-        return (bool) is_int( $result );
+        return (bool)is_int( $result );
     }
 
     // ------------------------------------------------------------------------
@@ -215,7 +215,7 @@ class Logger implements LoggerInterface
      *
      * @return void
      */
-    public function alert ( $message, array $context = [ ] )
+    public function alert( $message, array $context = [] )
     {
         $this->log( Logger::ALERT, $message, $context );
     }
@@ -234,7 +234,7 @@ class Logger implements LoggerInterface
      *
      * @return void
      */
-    public function critical ( $message, array $context = [ ] )
+    public function critical( $message, array $context = [] )
     {
         $this->log( Logger::CRITICAL, $message, $context );
     }
@@ -252,7 +252,7 @@ class Logger implements LoggerInterface
      *
      * @return void
      */
-    public function error ( $message, array $context = [ ] )
+    public function error( $message, array $context = [] )
     {
         $this->log( Logger::ERROR, $message, $context );
     }
@@ -272,7 +272,7 @@ class Logger implements LoggerInterface
      *
      * @return void
      */
-    public function warning ( $message, array $context = [ ] )
+    public function warning( $message, array $context = [] )
     {
         $this->log( Logger::WARNING, $message, $context );
     }
@@ -289,7 +289,7 @@ class Logger implements LoggerInterface
      *
      * @return void
      */
-    public function notice ( $message, array $context = [ ] )
+    public function notice( $message, array $context = [] )
     {
         $this->log( Logger::NOTICE, $message, $context );
     }
@@ -308,7 +308,7 @@ class Logger implements LoggerInterface
      *
      * @return void
      */
-    public function info ( $message, array $context = [ ] )
+    public function info( $message, array $context = [] )
     {
         $this->log( Logger::INFO, $message, $context );
     }
@@ -325,7 +325,7 @@ class Logger implements LoggerInterface
      *
      * @return void
      */
-    public function debug ( $message, array $context = [ ] )
+    public function debug( $message, array $context = [] )
     {
         $this->log( Logger::DEBUG, $message, $context );
     }

@@ -27,5 +27,5 @@ return [
     204 => 'NO_CONTENT',
     400 => 'BAD_REQUEST',
     404 => 'NOT_FOUND',
-    405 => 'METHOD_NOT_ALLOWED'
+    405 => 'METHOD_NOT_ALLOWED',
 ];

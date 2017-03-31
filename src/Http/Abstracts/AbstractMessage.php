@@ -37,7 +37,7 @@ abstract class AbstractMessage implements MessageInterface
      *
      * @var  array
      */
-    protected $headers = [ ];
+    protected $headers = [];
 
     /**
      * Message Body
@@ -57,7 +57,7 @@ abstract class AbstractMessage implements MessageInterface
      *
      * @return string HTTP protocol version.
      */
-    public function getProtocolVersion ()
+    public function getProtocolVersion()
     {
         return $this->protocol;
     }
@@ -80,7 +80,7 @@ abstract class AbstractMessage implements MessageInterface
      *
      * @return static
      */
-    public function withProtocolVersion ( $version )
+    public function withProtocolVersion( $version )
     {
         if ( in_array( $version, [ '1.0', '1.1', '2' ] ) ) {
             $message = clone $this;
@@ -121,7 +121,7 @@ abstract class AbstractMessage implements MessageInterface
      *     Each key MUST be a header name, and each value MUST be an array of
      *     strings for that header.
      */
-    public function getHeaders ()
+    public function getHeaders()
     {
         return $this->headers;
     }
@@ -139,9 +139,9 @@ abstract class AbstractMessage implements MessageInterface
      *     name using a case-insensitive string comparison. Returns false if
      *     no matching header name is found in the message.
      */
-    public function hasHeader ( $name )
+    public function hasHeader( $name )
     {
-        return (bool) isset( $this->headers[ $name ] );
+        return (bool)isset( $this->headers[ $name ] );
     }
 
     // ------------------------------------------------------------------------
@@ -168,7 +168,7 @@ abstract class AbstractMessage implements MessageInterface
      *    concatenated together using a comma. If the header does not appear in
      *    the message, this method MUST return an empty string.
      */
-    public function getHeaderLine ( $name )
+    public function getHeaderLine( $name )
     {
         if ( isset( $this->headers[ $name ] ) ) {
             $this->headers[ $name ];
@@ -199,7 +199,7 @@ abstract class AbstractMessage implements MessageInterface
      * @throws \InvalidArgumentException for invalid header names.
      * @throws \InvalidArgumentException for invalid header values.
      */
-    public function withAddedHeader ( $name, $value )
+    public function withAddedHeader( $name, $value )
     {
         $lines = $this->getHeader( $name );
         $value = array_map( 'trim', explode( ',', $value ) );
@@ -228,9 +228,9 @@ abstract class AbstractMessage implements MessageInterface
      *    header. If the header does not appear in the message, this method MUST
      *    return an empty array.
      */
-    public function getHeader ( $name )
+    public function getHeader( $name )
     {
-        $lines = [ ];
+        $lines = [];
 
         if ( isset( $this->headers[ $name ] ) ) {
             $lines = array_map( 'trim', explode( ',', $this->headers[ $name ] ) );
@@ -259,7 +259,7 @@ abstract class AbstractMessage implements MessageInterface
      * @return static
      * @throws \InvalidArgumentException for invalid header names or values.
      */
-    public function withHeader ( $name, $value )
+    public function withHeader( $name, $value )
     {
         $message = clone $this;
         $message->headers[ $name ] = $value;
@@ -284,7 +284,7 @@ abstract class AbstractMessage implements MessageInterface
      *
      * @return static
      */
-    public function withoutHeader ( $name )
+    public function withoutHeader( $name )
     {
         $message = clone $this;
 
@@ -304,7 +304,7 @@ abstract class AbstractMessage implements MessageInterface
      *
      * @return StreamInterface Returns the body as a stream.
      */
-    public function &getBody ()
+    public function &getBody()
     {
         if ( empty( $this->body ) ) {
             $this->body = new Stream();
@@ -331,7 +331,7 @@ abstract class AbstractMessage implements MessageInterface
      * @return static
      * @throws \InvalidArgumentException When the body is not valid.
      */
-    public function withBody ( StreamInterface $body )
+    public function withBody( StreamInterface $body )
     {
         $message = clone $this;
         $message->body = $body;

@@ -10,7 +10,7 @@
  */
 // ------------------------------------------------------------------------
 
-namespace O2System\Kernel\Registries;
+namespace O2System\Kernel\Datastructures;
 
 // ------------------------------------------------------------------------
 
@@ -50,40 +50,42 @@ class Service extends \ReflectionClass
      * @param string|object $class     Class Name or Class Object.
      * @param array         $arguments Class Constructor Arguments
      */
-    public function __construct ( $class, array $arguments = [ ] )
+    public function __construct( $class, array $arguments = [] )
     {
         $this->arguments = $arguments;
 
         if ( is_object( $class ) ) {
             $this->instance =& $class;
             parent::__construct( $class );
-        } else if ( class_exists( 'O2System\Framework', false ) ) {
-            if ( strpos( $class, 'O2System\\' ) !== false ) {
-                $appClassName = str_replace( 'O2System\\', 'App\\', $class );
+        } else {
+            if ( class_exists( 'O2System\Framework', false ) ) {
+                if ( strpos( $class, 'O2System\\' ) !== false ) {
+                    $appClassName = str_replace( 'O2System\\', 'App\\', $class );
 
-                if ( class_exists( $appClassName ) ) {
-                    parent::__construct( $class );
+                    if ( class_exists( $appClassName ) ) {
+                        parent::__construct( $class );
+                    } elseif ( class_exists( $class ) ) {
+                        parent::__construct( $class );
+                    }
                 } elseif ( class_exists( $class ) ) {
                     parent::__construct( $class );
                 }
             } elseif ( class_exists( $class ) ) {
                 parent::__construct( $class );
+            } else {
+                throw new \BadMethodCallException( 'Class Not Found!' );
             }
-        } elseif ( class_exists( $class ) ) {
-            parent::__construct( $class );
-        } else {
-            throw new \BadMethodCallException( 'Class Not Found!' );
         }
     }
 
     // ------------------------------------------------------------------------
 
-    public function getClassParameter ()
+    public function getClassParameter()
     {
         return camelcase( $this->getClassName() );
     }
 
-    public function getClassName ()
+    public function getClassName()
     {
         return get_class_name( $this->name );
     }
@@ -93,12 +95,12 @@ class Service extends \ReflectionClass
      *
      * @return \O2System\Spl\Info\SplFileInfo
      */
-    public function getFileInfo ()
+    public function getFileInfo()
     {
         return new SplFileInfo( $this->getFileName() );
     }
 
-    public function &getInstance ()
+    public function &getInstance()
     {
         if ( empty( $this->instance ) ) {
             if ( empty( $this->arguments ) ) {

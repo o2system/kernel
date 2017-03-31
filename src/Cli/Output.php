@@ -14,8 +14,10 @@ namespace O2System\Kernel\Cli;
 
 // ------------------------------------------------------------------------
 
-use O2System\Gear\Trace;
 use O2System\Kernel\Abstracts\AbstractException;
+use O2System\Kernel\Cli\Writers\Format;
+use O2System\Kernel\Cli\Writers\Line;
+use O2System\Kernel\Cli\Writers\Table;
 use O2System\Spl\Exceptions\ErrorException;
 use O2System\Spl\Traits\Collectors\FilePathCollectorTrait;
 
@@ -37,7 +39,7 @@ class Output
      *
      * @return Output
      */
-    public function __construct ()
+    public function __construct()
     {
         // Set Output Views Directory
         $this->setFileDirName( 'Views' );
@@ -59,7 +61,7 @@ class Output
      *
      * @return void
      */
-    public function register ()
+    public function register()
     {
         set_error_handler( [ &$this, 'errorHandler' ] );
         set_exception_handler( [ &$this, 'exceptionHandler' ] );
@@ -75,16 +77,16 @@ class Output
      *
      * @return void
      */
-    public function shutdownHandler ()
+    public function shutdownHandler()
     {
         $lastError = error_get_last();
 
         if ( is_array( $lastError ) ) {
             $this->errorHandler(
-                $lastError['type'],
-                $lastError['message'],
-                $lastError['file'],
-                $lastError['line']
+                $lastError[ 'type' ],
+                $lastError[ 'message' ],
+                $lastError[ 'file' ],
+                $lastError[ 'line' ]
             );
         }
 
@@ -113,7 +115,7 @@ class Output
      * @return bool If the function returns FALSE then the normal error handler continues.
      * @throws ErrorException
      */
-    public function errorHandler ( $errno, $errstr, $errfile, $errline, array $errcontext = [ ] )
+    public function errorHandler( $errno, $errstr, $errfile, $errline, array $errcontext = [] )
     {
         $isFatalError = ( ( ( E_ERROR | E_COMPILE_ERROR | E_CORE_ERROR | E_USER_ERROR ) & $errno ) === $errno );
 
@@ -146,12 +148,45 @@ class Output
 
         // Should we display the error?
         if ( $errdisplay == 1 ) {
-            ob_start();
-            include PATH_KERNEL . 'Views/cli/error.php';
-            $buffer = ob_get_contents();
-            ob_end_clean();
+            output()->write(
+                ( new Format() )
+                    ->setContextualClass( Format::DANGER )
+                    ->setString( language()->getLine( 'E_CAUGHT_ERROR' ) )
+                    ->setNewLinesAfter( 1 )
+            );
 
-            echo $buffer;
+            output()->write(
+                ( new Format() )
+                    ->setContextualClass( Format::WARNING )
+                    ->setString( '[ ' . language()->getLine( $error->getStringSeverity() ) . ' ] ' . $error->getMessage() )
+                    ->setNewLinesAfter( 1 )
+            );
+
+            output()->write(
+                ( new Format() )
+                    ->setContextualClass( Format::INFO )
+                    ->setString( $error->getFile() . ':' . $error->getLine() )
+                    ->setNewLinesAfter( 1 )
+            );
+        }
+    }
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * Output::write
+     *
+     * Write text to console.
+     *
+     * @param string $text
+     * @param string $type
+     */
+    public function write( $text, $type = 'stdout' )
+    {
+        if ( in_array( $type, [ 'stdout', 'stderr' ] ) ) {
+            $f = fopen( 'php://' . $type, 'w' );
+            fwrite( $f, $text );
+            fclose( $f );
         }
     }
 
@@ -166,7 +201,7 @@ class Output
      *
      * @return void
      */
-    public function exceptionHandler ( $exception )
+    public function exceptionHandler( $exception )
     {
         // Standard PHP Libraries Error
         if ( $exception instanceof \Error ) {
@@ -177,110 +212,205 @@ class Output
                 $exception->getLine()
             );
 
-            ob_start();
-            include PATH_KERNEL . 'Views' . DIRECTORY_SEPARATOR . 'cli' . DIRECTORY_SEPARATOR . 'error.php';
-            $buffer = ob_get_contents();
-            ob_end_clean();
-            echo $buffer;
+            output()->write(
+                ( new Format() )
+                    ->setContextualClass( Format::DANGER )
+                    ->setString( language()->getLine( 'E_CAUGHT_ERROR' ) )
+                    ->setNewLinesAfter( 1 )
+            );
+
+            output()->write(
+                ( new Format() )
+                    ->setContextualClass( Format::WARNING )
+                    ->setString( '[ ' . language()->getLine( $error->getStringSeverity() ) . ' ] ' . $error->getMessage() )
+                    ->setNewLinesAfter( 1 )
+            );
+
+            output()->write(
+                ( new Format() )
+                    ->setContextualClass( Format::INFO )
+                    ->setString( $error->getFile() . ':' . $error->getLine() )
+                    ->setNewLinesAfter( 1 )
+            );
 
             exit( EXIT_ERROR );
         } elseif ( $exception instanceof AbstractException ) {
-            foreach ( $this->filePaths as $filePath ) {
-                $filePath .= 'cli' . DIRECTORY_SEPARATOR . 'exception.php';
 
-                if ( is_file( $filePath ) ) {
-                    ob_start();
-                    include $filePath;
-                    $buffer = ob_get_contents();
-                    ob_end_clean();
-                    echo $buffer;
+            output()->write(
+                ( new Format() )
+                    ->setContextualClass( Format::DANGER )
+                    ->setString( language()->getLine( $exception->getHeader() ) )
+                    ->setNewLinesAfter( 1 )
+            );
 
-                    exit( EXIT_ERROR );
+            output()->write(
+                ( new Format() )
+                    ->setContextualClass( Format::DANGER )
+                    ->setString( '[ ' . language()->getLine( $exception->getCode() ) . ' ] ' . language()->getLine( $exception->getDescription() ) )
+                    ->setNewLinesAfter( 1 )
+            );
 
-                    break;
-                }
+            output()->write(
+                ( new Format() )
+                    ->setContextualClass( Format::DANGER )
+                    ->setString( $exception->getMessage() )
+                    ->setNewLinesAfter( 1 )
+            );
+
+            output()->write(
+                ( new Format() )
+                    ->setString( $debugTitle = language()->getLine( 'E_DEBUG_BACKTRACE' ) . ':' )
+                    ->setContextualClass( Format::INFO )
+                    ->setNewLinesBefore( 1 )
+                    ->setNewLinesAfter( 1 )
+            );
+
+            output()->write( ( new Line( strlen( $debugTitle ) * 2 ) )
+                ->setContextualClass( Line::INFO )
+                ->setNewLinesAfter( 2 ) );
+
+            $table = new Table();
+            $table->isShowBorder = false;
+
+            $i = 1;
+            foreach ( $exception->getChronology() as $chronology ) {
+                $table
+                    ->addRow()
+                    ->addColumn( $i . '. ' . $chronology->call )
+                    ->addRow()
+                    ->addColumn( $chronology->file . ':' . $chronology->line )
+                    ->addRow()
+                    ->addColumn( '' );
+
+                $i++;
             }
+
+            output()->write(
+                ( new Format() )
+                    ->setContextualClass( Format::INFO )
+                    ->setString( $table->render() )
+                    ->setNewLinesAfter( 2 )
+            );
         } // Standard PHP Libraries Exception
         elseif ( $exception instanceof \Exception ) {
-            foreach ( $this->filePaths as $filePath ) {
-                $filePath .= 'cli' . DIRECTORY_SEPARATOR . 'exception-spl.php';
+            output()->write(
+                ( new Format() )
+                    ->setContextualClass( Format::DANGER )
+                    ->setString( '[ ' . language()->getLine( $exception->getCode() ) . ' ] ' . language()->getLine( $exception->getDescription() ) )
+                    ->setNewLinesAfter( 1 )
+            );
 
-                if ( is_file( $filePath ) ) {
-                    $exceptionClassName = get_class_name( $exception );
-                    $header = language()->getLine( 'E_HEADER_' . $exceptionClassName );
-                    $description = language()->getLine( 'E_DESCRIPTION_' . $exceptionClassName );
+            output()->write(
+                ( new Format() )
+                    ->setContextualClass( Format::DANGER )
+                    ->setString( $exception->getMessage() )
+                    ->setNewLinesAfter( 1 )
+            );
 
-                    $trace = new Trace( $exception->getTrace() );
+            output()->write(
+                ( new Format() )
+                    ->setString( $debugTitle = language()->getLine( 'E_DEBUG_BACKTRACE' ) . ':' )
+                    ->setContextualClass( Format::INFO )
+                    ->setNewLinesBefore( 1 )
+                    ->setNewLinesAfter( 1 )
+            );
 
-                    ob_start();
-                    include $filePath;
-                    $buffer = ob_get_contents();
-                    ob_end_clean();
-                    echo $buffer;
+            output()->write( ( new Line( strlen( $debugTitle ) * 2 ) )
+                ->setContextualClass( Line::INFO )
+                ->setNewLinesAfter( 2 ) );
 
-                    exit( EXIT_ERROR );
+            $table = new Table();
+            $table->isShowBorder = false;
 
-                    break;
-                }
+            $i = 1;
+            foreach ( $exception->getChronology() as $chronology ) {
+                $table
+                    ->addRow()
+                    ->addColumn( $i . '. ' . $chronology->call )
+                    ->addRow()
+                    ->addColumn( $chronology->file . ':' . $chronology->line )
+                    ->addRow()
+                    ->addColumn( '' );
+
+                $i++;
             }
+
+            output()->write(
+                ( new Format() )
+                    ->setContextualClass( Format::INFO )
+                    ->setString( $table->render() )
+                    ->setNewLinesAfter( 2 )
+            );
         }
     }
 
     // ------------------------------------------------------------------------
 
-    public function showError ( $code = 204, $header = 'NO_CONTENT', $description = 'NO_CONTENT', $message = '' )
+    /**
+     * Output::sendError
+     *
+     * @param int               $code
+     * @param null|array|string $vars
+     */
+    public function sendError( $code = 204, $vars = null )
     {
-        $langHeader = language()->getLine( $langHeaderLine = $code . '_' . $header . '_HEADER' );
-        $langDescription = language()->getLine( $langDescriptionLine = $code . '_' . $description . '_DESCRIPTION' );
+        static $errors = [];
 
-        if ( $langHeader !== $langHeaderLine ) {
-            $header = $langHeader;
-        } else {
-            $header = readable( str_replace( '_HEADER', '', $header ) );
+        if ( empty( $errors ) ) {
+            $errors = require( str_replace( 'Cli', 'Config', __DIR__ ) . DIRECTORY_SEPARATOR . 'Errors.php' );
         }
 
-        if ( $langDescription !== $langDescriptionLine ) {
-            $description = $langDescriptionLine;
-        } else {
-            $description = readable( str_replace( '_DESCRIPTION', '', $description ) );
+        if ( isset( $errors[ $code ] ) ) {
+            $languageKey = $errors[ $code ];
         }
 
-        ob_start();
-        include PATH_KERNEL . 'Views' . DIRECTORY_SEPARATOR . 'cli' . DIRECTORY_SEPARATOR . 'error-code.php';
-        $buffer = ob_get_contents();
-        ob_end_clean();
-        echo $buffer;
+        $languageKey = strtoupper( $code . '_' . $languageKey );
+
+        $error = [
+            'code'    => $code,
+            'title'   => language()->getLine( $languageKey . '_TITLE' ),
+            'message' => language()->getLine( $languageKey . '_MESSAGE' ),
+        ];
+
+        $this->statusCode = $code;
+        $this->reasonPhrase = $error[ 'title' ];
+
+        if ( is_string( $vars ) ) {
+            $error[ 'message' ] = $vars;
+        } elseif ( is_array( $vars ) ) {
+            $error = array_merge( $error, $vars );
+        }
+
+        $this->write(
+            ( new Format() )
+                ->setContextualClass( Format::DANGER )
+                ->setString( $error[ 'code' ] . ' - ' . $error[ 'title' ] )
+                ->setNewLinesAfter( 1 )
+        );
+
+        $this->write(
+            ( new Format() )
+                ->setString( $error[ 'message' ] )
+                ->setNewLinesAfter( 1 )
+        );
 
         exit( EXIT_ERROR );
     }
 
-    /**
-     * Text::write
-     *
-     * Write text to console.
-     *
-     * @param string $text
-     * @param string $type
-     */
-    public function write ( $text, $type = 'stdout' )
-    {
-        if ( in_array( $type, [ 'stdout', 'stderr' ] ) ) {
-            $f = fopen( 'php://' . $type, 'w' );
-            fwrite( $f, $text );
-            fclose( $f );
-        }
-    }
+    // ------------------------------------------------------------------------
 
     /**
-     * Text::writeln
+     * Output::verbose
      *
-     * Write text to console followed by line break.
+     * Write verbose text to console.
      *
      * @param string $text
      * @param string $type
      */
-    public function writeln ( $text = '', $type = 'stdout' )
+    public function verbose( $text, $type = 'stdout' )
     {
-        $this->write( "$text\n", $type );
+        if ( isset( $_ENV[ 'VERBOSE' ] ) and $_ENV[ 'VERBOSE' ] === true ) {
+            $this->write( $text, $type );
+        }
     }
 }

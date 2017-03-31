@@ -14,6 +14,7 @@ namespace O2System\Kernel\Cli\Abstracts;
 
 // ------------------------------------------------------------------------
 
+use O2System\Kernel\Cli\Writers\Format;
 use O2System\Kernel\Cli\Writers\Formatter;
 use O2System\Kernel\Cli\Writers\Table;
 
@@ -24,16 +25,14 @@ use O2System\Kernel\Cli\Writers\Table;
  */
 abstract class AbstractCommand
 {
-    protected $version;
-
     /**
-     * AbstractCommand::$command
+     * AbstractCommand::$version
      *
-     * Command name.
+     * Command version.
      *
      * @var string
      */
-    protected $caller;
+    protected $version;
 
     /**
      * AbstractCommand::$description
@@ -51,14 +50,16 @@ abstract class AbstractCommand
      *
      * @var array
      */
-    protected $options          = [ ];
+    protected $options = [];
 
-    protected $optionsShortcuts = [ ];
+    protected $optionsShortcuts = [];
 
-    protected $verbose          = false;
+    protected $verbose = false;
 
-    final public function __construct ()
+    final public function __construct()
     {
+        language()->loadFile( 'cli' );
+
         foreach ( $this->options as $optionCaller => $optionProps ) {
             $shortcut = empty( $optionProps[ 'shortcut' ] )
                 ? '-' . substr( $optionCaller, 0, 1 )
@@ -74,41 +75,24 @@ abstract class AbstractCommand
         }
     }
 
-    public function setCaller ( $caller )
-    {
-        $this->caller = underscore( trim( $caller ) );
-    }
-
-    /**
-     * AbstractCommand::getCaller
-     *
-     * Returns command name.
-     *
-     * @return string
-     */
-    public function getCaller ()
-    {
-        return $this->caller;
-    }
-
-    public function setDescription ( $description )
-    {
-        $this->description = trim( $description );
-    }
-
-    public function getDescription ()
+    public function getDescription()
     {
         return $this->description;
     }
 
-    public function setOptions ( array $options )
+    public function setDescription( $description )
+    {
+        $this->description = trim( $description );
+    }
+
+    public function setOptions( array $options )
     {
         foreach ( $options as $caller => $props ) {
             call_user_func_array( [ &$this, 'addOption' ], $props );
         }
     }
 
-    public function addOption ( $caller, $description, $shortcut = null )
+    public function addOption( $caller, $description, $shortcut = null )
     {
         $shortcut = empty( $shortcut )
             ? '-' . substr( $caller, 0, 1 )
@@ -120,7 +104,7 @@ abstract class AbstractCommand
         ];
     }
 
-    final public function optionVersion ()
+    final public function optionVersion()
     {
         if ( property_exists( $this, 'version' ) ) {
             if ( ! empty( $this->version ) ) {
@@ -130,63 +114,20 @@ abstract class AbstractCommand
         }
     }
 
-    final public function optionVerbose ()
+    final public function optionVerbose()
     {
         $this->verbose = true;
     }
 
-    final public function optionHelp ()
-    {
-        $formatter = new Formatter();
-
-        // Show Commands
-        output()->writeln( PHP_EOL . language()->getLine( 'CLI_COMMAND' ) . ':' );
-
-        $table = new Table();
-        $table->hideBorder();
-
-        $table
-            ->addRow()
-            ->addColumn( $this->caller )
-            ->addColumn( $this->description );
-
-        output()->write(
-            $formatter
-                ->setIndent( 1 )
-                ->format( $table->render() . PHP_EOL )
-        );
-
-        // Show Options
-        output()->writeln( language()->getLine( 'CLI_OPTIONS' ) . ':' );
-
-        $table = new Table();
-        $table->hideBorder();
-
-        foreach ( $this->options as $optionCaller => $optionProps ) {
-            $table
-                ->addRow()
-                ->addColumn( '--' . $optionCaller )
-                ->addColumn( $optionProps[ 'shortcut' ] )
-                ->addColumn( $optionProps[ 'description' ] );
-        }
-
-        output()->writeln(
-            $formatter
-                ->setIndent( 1 )
-                ->format( $table->render() )
-        );
-    }
-
-    final public function callOptions ( array $options )
+    final public function callExecute()
     {
         $command = new \ReflectionClass( $this );
 
-        foreach ( $options as $method => $arguments ) {
+        foreach ( $_GET as $method => $arguments ) {
 
-            $method = 'option' . studlycapcase( $method );
+            $method = camelcase( 'option-' . $method );
 
             if ( $command->hasMethod( $method ) ) {
-                $option = $command->getMethod( $method );
 
                 if ( is_bool( $arguments ) ) {
                     call_user_func_array( [ &$this, $method ], [ $arguments ] );
@@ -207,5 +148,41 @@ abstract class AbstractCommand
         $this->execute();
     }
 
-    abstract protected function execute ();
+    public function execute()
+    {
+        $this->optionHelp();
+    }
+
+    final public function optionHelp()
+    {
+        print_out( language() );
+        // Show Commands
+        output()->writeln( PHP_EOL . language()->getLine( 'CLI_COMMAND' ) . ':' );
+
+        $table = new Table();
+        $table->isShowBorder = false;
+
+        $table
+            ->addRow()
+            ->addColumn( $this->caller )
+            ->addColumn( $this->description );
+
+        output()->write( ( new Format() )->setString( $table->render() ) );
+
+        // Show Options
+        output()->writeln( language()->getLine( 'CLI_OPTIONS' ) . ':' );
+
+        $table = new Table();
+        $table->isShowBorder = false;
+
+        foreach ( $this->options as $optionCaller => $optionProps ) {
+            $table
+                ->addRow()
+                ->addColumn( '--' . $optionCaller )
+                ->addColumn( $optionProps[ 'shortcut' ] )
+                ->addColumn( $optionProps[ 'description' ] );
+        }
+
+        output()->write( ( new Format() )->setString( $table->render() ) );
+    }
 }

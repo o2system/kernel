@@ -14,9 +14,9 @@
 namespace O2System\Kernel\Http\Message;
 
 
-use O2System\Spl\Exceptions\Logic\BadFunctionCall\BadPhpExtensionCallException;
 use O2System\Psr\Http\Message\StreamInterface;
 use O2System\Psr\Http\Message\UploadedFileInterface;
+use O2System\Spl\Exceptions\Logic\BadFunctionCall\BadPhpExtensionCallException;
 
 class UploadFile implements UploadedFileInterface
 {
@@ -46,7 +46,7 @@ class UploadFile implements UploadedFileInterface
      *
      * @param array $uploadedFile
      */
-    public function __construct ( array $uploadedFile )
+    public function __construct( array $uploadedFile )
     {
         if ( ! class_exists( 'finfo' ) ) {
             throw new BadPhpExtensionCallException( 'E_HEADER_BADPHPEXTENSIONCALLEXCEPTION', 1 );
@@ -79,7 +79,7 @@ class UploadFile implements UploadedFileInterface
      * @throws \RuntimeException in cases when no stream is available.
      * @throws \RuntimeException in cases when no stream can be created.
      */
-    public function getStream ()
+    public function getStream()
     {
         if ( $this->isMoved ) {
             throw new \RuntimeException( 'File Has Been Already Moved' );
@@ -136,7 +136,7 @@ class UploadFile implements UploadedFileInterface
      * @throws \RuntimeException on any errors during the move operation.
      * @throws \RuntimeException on the second or subsequent call to the method.
      */
-    public function moveTo ( $targetPath )
+    public function moveTo( $targetPath )
     {
         if ( $this->isMoved ) {
             throw new \RuntimeException( 'Uploaded File Has Been Moved' );
@@ -185,7 +185,7 @@ class UploadFile implements UploadedFileInterface
      *
      * @return int|null The file size in bytes or null if unknown.
      */
-    public function getSize ()
+    public function getSize()
     {
         return $this->size;
     }
@@ -208,7 +208,7 @@ class UploadFile implements UploadedFileInterface
      * @see http://php.net/manual/en/features.file-upload.error.php
      * @return int One of PHP's UPLOAD_ERR_XXX constants.
      */
-    public function getError ()
+    public function getError()
     {
         return $this->error;
     }
@@ -230,7 +230,7 @@ class UploadFile implements UploadedFileInterface
      * @return string|null The filename sent by the client or null if none
      *     was provided.
      */
-    public function getClientFilename ()
+    public function getClientFilename()
     {
         return $this->name;
     }
@@ -252,7 +252,7 @@ class UploadFile implements UploadedFileInterface
      * @return string|null The media type sent by the client or null if none
      *     was provided.
      */
-    public function getClientMediaType ()
+    public function getClientMediaType()
     {
         return $this->type;
     }
@@ -264,7 +264,7 @@ class UploadFile implements UploadedFileInterface
      *
      * @return string
      */
-    public function getFileMime ()
+    public function getFileMime()
     {
         $finfo = new finfo;
         $mime = $finfo->file( $this->tmpName, FILEINFO_MIME );
@@ -279,7 +279,7 @@ class UploadFile implements UploadedFileInterface
      *
      * @return string
      */
-    public function getExtension ()
+    public function getExtension()
     {
         return pathinfo( $this->name, PATHINFO_EXTENSION );
     }

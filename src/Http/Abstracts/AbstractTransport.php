@@ -23,7 +23,7 @@ abstract class AbstractTransport implements TransportInterface
      *
      * @var  array
      */
-    protected $options = [ ];
+    protected $options = [];
 
     /**
      * Constructor.
@@ -32,7 +32,7 @@ abstract class AbstractTransport implements TransportInterface
      *
      * @since   2.1
      */
-    public function __construct ( $options = [ ] )
+    public function __construct( $options = [] )
     {
 
     }
@@ -45,7 +45,7 @@ abstract class AbstractTransport implements TransportInterface
      *
      * @return  mixed  The found value or default value.
      */
-    public function getOption ( $name, $default = null )
+    public function getOption( $name, $default = null )
     {
         if ( ! isset( $this->options[ $name ] ) ) {
             return $default;
@@ -62,7 +62,7 @@ abstract class AbstractTransport implements TransportInterface
      *
      * @return  static  Return self to support chaining.
      */
-    public function setOption ( $name, $value )
+    public function setOption( $name, $value )
     {
         $this->options[ $name ] = $value;
 
@@ -74,7 +74,7 @@ abstract class AbstractTransport implements TransportInterface
      *
      * @return  array
      */
-    public function getOptions ()
+    public function getOptions()
     {
         return $this->options;
     }

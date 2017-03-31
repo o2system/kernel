@@ -30,7 +30,7 @@ use O2System\Spl\Datastructures\SplArrayObject;
 class Input
 {
     /**
-     * Input::argv
+     * Input::get
      *
      * Fetch input from GET data.
      *
@@ -43,202 +43,9 @@ class Input
      *
      * @return mixed
      */
-    final public function argv ( $offset = null, $filter = null )
+    final public function get( $offset = null, $filter = null )
     {
-        $arguments = $_SERVER[ 'argv' ];
-        $numArguments = $_SERVER[ 'argc' ];
-
-        $argv = [ ];
-        for ( $i = 1; $i < $numArguments; $i++ ) {
-            $optionCommand = trim( $arguments[ $i ] );
-            $optionValue = true;
-
-            if ( empty( $optionCommand ) ) {
-                continue;
-            }
-
-            if ( strpos( $optionCommand, '=' ) !== false ) {
-                $xOptionCommand = explode( '=', $optionCommand );
-                $xOptionCommand = array_map( 'trim', $xOptionCommand );
-
-                $optionCommand = str_replace( [ '-', '--' ], '', $xOptionCommand[ 0 ] );
-                $optionValue = $xOptionCommand[ 1 ];
-
-                $argv[ $optionCommand ] = $optionValue;
-                continue;
-            }
-
-            if ( strpos( $optionCommand, '--' ) !== false
-                 || strpos( $optionCommand, '-' ) !== false
-            ) {
-                $optionCommand = str_replace( [ '-', '--' ], '', $optionCommand );
-
-                if ( isset( $arguments[ $i + 1 ] ) ) {
-                    $nextOptionCommand = $arguments[ $i + 1 ];
-
-                    if ( strpos( $nextOptionCommand, '--' ) === false
-                         || strpos( $nextOptionCommand, '-' ) === false
-                    ) {
-                        $optionValue = $nextOptionCommand;
-                        $arguments[ $i + 1 ] = null;
-                    }
-                }
-            }
-
-            if ( isset( $filter ) ) {
-                $optionValue = filter_var( $optionValue, $filter );
-            } else {
-                $optionValue = filter_var( $optionValue, FILTER_DEFAULT );
-            }
-
-            $argv[ $optionCommand ] = $optionValue;
-        }
-
-        if ( empty( $offset ) ) {
-            return $argv;
-        } elseif ( isset( $argv[ $offset ] ) ) {
-            return $argv[ $offset ];
-        }
-    }
-
-    // ------------------------------------------------------------------------
-
-    public function getCommand ()
-    {
-        return isset( $_SERVER[ 'argv' ][ 1 ] )
-            ? $_SERVER[ 'argv' ][ 1 ]
-            : false;
-    }
-
-    public function getOptions ( $offset = null, $filter = null )
-    {
-        $arguments = $_SERVER[ 'argv' ];
-        $numArguments = $_SERVER[ 'argc' ];
-
-        $argv = [ ];
-
-        for ( $i = 2; $i < $numArguments; $i++ ) {
-            $optionCommand = trim( $arguments[ $i ] );
-            $optionValue = true;
-
-            if ( empty( $optionCommand ) ) {
-                continue;
-            }
-
-            if ( strpos( $optionCommand, '=' ) !== false ) {
-                $xOptionCommand = explode( '=', $optionCommand );
-                $xOptionCommand = array_map( 'trim', $xOptionCommand );
-
-                $optionCommand = str_replace( [ '-', '--' ], '', $xOptionCommand[ 0 ] );
-                $optionValue = $xOptionCommand[ 1 ];
-
-                $argv[ $optionCommand ] = $optionValue;
-                continue;
-            }
-
-            if ( strpos( $optionCommand, '--' ) !== false
-                 || strpos( $optionCommand, '-' ) !== false
-            ) {
-                $optionCommand = str_replace( [ '-', '--' ], '', $optionCommand );
-
-                if ( isset( $arguments[ $i + 1 ] ) ) {
-                    $nextOptionCommand = $arguments[ $i + 1 ];
-
-                    if ( strpos( $nextOptionCommand, '--' ) === false
-                         || strpos( $nextOptionCommand, '-' ) === false
-                    ) {
-                        $optionValue = $nextOptionCommand;
-                        $arguments[ $i + 1 ] = null;
-                    }
-                }
-            }
-
-            if ( isset( $filter ) ) {
-                $optionValue = filter_var( $optionValue, $filter );
-            } else {
-                $optionValue = filter_var( $optionValue, FILTER_DEFAULT );
-            }
-
-            $argv[ $optionCommand ] = $optionValue;
-        }
-
-        if ( empty( $offset ) ) {
-            return $argv;
-        } elseif ( isset( $argv[ $offset ] ) ) {
-            return $argv[ $offset ];
-        }
-    }
-
-    public function getAnswer ( $question, $required = false )
-    {
-        fwrite( STDOUT, $question . ' ' );
-        $answer = trim( fgets( STDIN ) );
-
-        if ( $required === true and empty( $answer ) ) {
-            $requiredText = "\033[0;31m[ required ] \033[0m";
-
-            return $this->getAnswer( $requiredText . str_replace( $requiredText, '', $question ), $required );
-        }
-
-        return $answer;
-    }
-
-    public function getConfirm ( $question, $required = false )
-    {
-        fwrite( STDOUT, rtrim( $question, '?' ) . ' (Y/N)? ' );
-        $answer = strtoupper( trim( fgets( STDIN ) ) );
-
-        if ( $required === true and ! in_array( $answer, [ 'Y', 'N' ] ) ) {
-            $requiredText = "\033[0;31m[ required ] \033[0m";
-
-            return $this->getConfirm( $requiredText . str_replace( $requiredText, '', $question ), $required );
-        }
-
-        return (bool) ( $answer === 'Y' );
-    }
-
-    public function getChoice ( $question, array $choices, $required = false )
-    {
-        fwrite( STDOUT, $question . PHP_EOL );
-
-        foreach ( $choices as $option => $value ) {
-            fwrite( STDOUT, ' ' . $option . ': ' . $value . PHP_EOL );
-        }
-
-        fwrite( STDOUT, 'choice: ' );
-
-        $choice = trim( fgets( STDIN ) );
-        $requiredText = "\033[0;31m [ required ] \033[0m";
-        $invalidText = "\033[1;31m [ invalid ] \033[0m";
-
-        $question = str_replace( [ $requiredText, $invalidText ], '', $question );
-
-        if ( $required === true and empty( $choice ) ) {
-            return $this->getChoice( $question . $requiredText, $choices, $required );
-        } elseif ( ! array_key_exists( $choice, $choices ) ) {
-            return $this->getChoice( $question . $invalidText, $choices, $required );
-        }
-
-        return $choice;
-    }
-
-    /**
-     * Input::env
-     *
-     * Fetch input from ENV data.
-     *
-     * @param string|null $offset The offset of $_ENV variable to fetch.
-     *                            When set null will returns filtered $_ENV variable.
-     * @param int         $filter The ID of the filter to apply.
-     *                            The Types of filters manual page lists the available filters.
-     *                            If omitted, FILTER_DEFAULT will be used, which is equivalent to FILTER_UNSAFE_RAW.
-     *                            This will result in no filtering taking place by default.
-     *
-     * @return mixed
-     */
-    final public function env ( $offset = null, $filter = null )
-    {
-        return $this->filter( INPUT_ENV, $offset, $filter );
+        return $this->filter( INPUT_GET, $offset, $filter );
     }
 
     // ------------------------------------------------------------------------
@@ -259,13 +66,19 @@ class Input
      *
      * @return mixed|\O2System\Spl\Datastructures\SplArrayObject
      */
-    protected function filter ( $type, $offset = null, $filter = FILTER_DEFAULT )
+    protected function filter( $type, $offset = null, $filter = FILTER_DEFAULT )
     {
         // If $offset is null, it means that the whole input type array is requested
         if ( is_null( $offset ) ) {
-            $loopThrough = [ ];
+            $loopThrough = [];
 
             switch ( $type ) {
+                case INPUT_GET    :
+                    $loopThrough = $_GET;
+                    break;
+                case INPUT_POST   :
+                    $loopThrough = $_POST;
+                    break;
                 case INPUT_SERVER :
                     $loopThrough = $_SERVER;
                     break;
@@ -289,7 +102,7 @@ class Input
             return new SplArrayObject( $loopThrough );
         } // allow fetching multiple keys at once
         elseif ( is_array( $offset ) ) {
-            $loopThrough = [ ];
+            $loopThrough = [];
 
             foreach ( $offset as $key ) {
                 $loopThrough[ $key ] = $this->filter( $type, $key, $filter );
@@ -392,7 +205,7 @@ class Input
      *
      * @return mixed
      */
-    protected function filterRecursive ( array $data, $filter = FILTER_DEFAULT )
+    protected function filterRecursive( array $data, $filter = FILTER_DEFAULT )
     {
         foreach ( $data as $key => $value ) {
             if ( is_array( $value ) AND is_array( $filter ) ) {
@@ -407,6 +220,206 @@ class Input
         }
 
         return $data;
+    }
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * Input::post
+     *
+     * Fetch input from POST data.
+     *
+     * @param string|null $offset The offset of $_POST variable to fetch.
+     *                            When set null will returns filtered $_POST variable.
+     * @param int         $filter The ID of the filter to apply.
+     *                            The Types of filters manual page lists the available filters.
+     *                            If omitted, FILTER_DEFAULT will be used, which is equivalent to FILTER_UNSAFE_RAW.
+     *                            This will result in no filtering taking place by default.
+     *
+     * @return mixed
+     */
+    final public function post( $offset = null, $filter = null )
+    {
+        return $this->filter( INPUT_POST, $offset, $filter );
+    }
+
+    /**
+     * Input::argv
+     *
+     * Fetch input from GET data.
+     *
+     * @param string|null $offset The offset of $_GET variable to fetch.
+     *                            When set null will returns filtered $_GET variable.
+     * @param int         $filter The ID of the filter to apply.
+     *                            The Types of filters manual page lists the available filters.
+     *                            If omitted, FILTER_DEFAULT will be used, which is equivalent to FILTER_UNSAFE_RAW.
+     *                            This will result in no filtering taking place by default.
+     *
+     * @return mixed
+     */
+    final public function argv( $offset = null, $filter = null )
+    {
+        $arguments = $_SERVER[ 'argv' ];
+        $numArguments = $_SERVER[ 'argc' ];
+
+        $argv = [];
+        for ( $i = 1; $i < $numArguments; $i++ ) {
+            $optionCommand = trim( $arguments[ $i ] );
+            $optionValue = true;
+
+            if ( empty( $optionCommand ) ) {
+                continue;
+            }
+
+            if ( strpos( $optionCommand, '=' ) !== false ) {
+                $xOptionCommand = explode( '=', $optionCommand );
+                $xOptionCommand = array_map( 'trim', $xOptionCommand );
+
+                $optionCommand = str_replace( [ '-', '--' ], '', $xOptionCommand[ 0 ] );
+                $optionValue = $xOptionCommand[ 1 ];
+
+                $argv[ $optionCommand ] = $optionValue;
+                continue;
+            }
+
+            if ( strpos( $optionCommand, '--' ) !== false
+                || strpos( $optionCommand, '-' ) !== false
+            ) {
+                $optionCommand = str_replace( [ '-', '--' ], '', $optionCommand );
+
+                if ( isset( $arguments[ $i + 1 ] ) ) {
+                    $nextOptionCommand = $arguments[ $i + 1 ];
+
+                    if ( strpos( $nextOptionCommand, '--' ) === false
+                        || strpos( $nextOptionCommand, '-' ) === false
+                    ) {
+                        $optionValue = $nextOptionCommand;
+                        $arguments[ $i + 1 ] = null;
+                    }
+                }
+            }
+
+            if ( isset( $filter ) ) {
+                $optionValue = filter_var( $optionValue, $filter );
+            } else {
+                $optionValue = filter_var( $optionValue, FILTER_DEFAULT );
+            }
+
+            $argv[ $optionCommand ] = $optionValue;
+        }
+
+        if ( empty( $offset ) ) {
+            return $argv;
+        } elseif ( isset( $argv[ $offset ] ) ) {
+            return $argv[ $offset ];
+        }
+    }
+
+    // ------------------------------------------------------------------------
+
+    public function standard()
+    {
+        return trim( fgets( STDIN ) );
+    }
+
+    // ------------------------------------------------------------------------
+
+    public function getApp()
+    {
+        return isset( $_SERVER[ 'argv' ][ 0 ] )
+            ? $_SERVER[ 'argv' ][ 0 ]
+            : false;
+    }
+
+    // ------------------------------------------------------------------------
+
+    public function getCommand()
+    {
+        return isset( $_SERVER[ 'argv' ][ 1 ] )
+            ? $_SERVER[ 'argv' ][ 1 ]
+            : false;
+    }
+
+    // ------------------------------------------------------------------------
+
+    public function getOptions( $offset = null, $filter = null )
+    {
+        $arguments = $_SERVER[ 'argv' ];
+        $numArguments = $_SERVER[ 'argc' ];
+
+        $argv = [];
+
+        for ( $i = 2; $i < $numArguments; $i++ ) {
+            $optionCommand = trim( $arguments[ $i ] );
+            $optionValue = true;
+
+            if ( empty( $optionCommand ) ) {
+                continue;
+            }
+
+            if ( strpos( $optionCommand, '=' ) !== false ) {
+                $xOptionCommand = explode( '=', $optionCommand );
+                $xOptionCommand = array_map( 'trim', $xOptionCommand );
+
+                $optionCommand = str_replace( [ '-', '--' ], '', $xOptionCommand[ 0 ] );
+                $optionValue = $xOptionCommand[ 1 ];
+
+                $argv[ $optionCommand ] = $optionValue;
+                continue;
+            }
+
+            if ( strpos( $optionCommand, '--' ) !== false
+                || strpos( $optionCommand, '-' ) !== false
+            ) {
+                $optionCommand = str_replace( [ '-', '--' ], '', $optionCommand );
+
+                if ( isset( $arguments[ $i + 1 ] ) ) {
+                    $nextOptionCommand = $arguments[ $i + 1 ];
+
+                    if ( strpos( $nextOptionCommand, '--' ) === false
+                        || strpos( $nextOptionCommand, '-' ) === false
+                    ) {
+                        $optionValue = $nextOptionCommand;
+                        $arguments[ $i + 1 ] = null;
+                    }
+                }
+            }
+
+            if ( isset( $filter ) ) {
+                $optionValue = filter_var( $optionValue, $filter );
+            } else {
+                $optionValue = filter_var( $optionValue, FILTER_DEFAULT );
+            }
+
+            $argv[ $optionCommand ] = $optionValue;
+        }
+
+        if ( empty( $offset ) ) {
+            return $argv;
+        } elseif ( isset( $argv[ $offset ] ) ) {
+            return $argv[ $offset ];
+        }
+    }
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * Input::env
+     *
+     * Fetch input from ENV data.
+     *
+     * @param string|null $offset The offset of $_ENV variable to fetch.
+     *                            When set null will returns filtered $_ENV variable.
+     * @param int         $filter The ID of the filter to apply.
+     *                            The Types of filters manual page lists the available filters.
+     *                            If omitted, FILTER_DEFAULT will be used, which is equivalent to FILTER_UNSAFE_RAW.
+     *                            This will result in no filtering taking place by default.
+     *
+     * @return mixed
+     */
+    final public function env( $offset = null, $filter = null )
+    {
+        return $this->filter( INPUT_ENV, $offset, $filter );
     }
 
     //--------------------------------------------------------------------
@@ -425,7 +438,7 @@ class Input
      *
      * @return mixed
      */
-    final public function cookie ( $offset = null, $filter = null )
+    final public function cookie( $offset = null, $filter = null )
     {
         return $this->filter( INPUT_COOKIE, $offset, $filter );
     }
@@ -446,7 +459,7 @@ class Input
      *
      * @return mixed
      */
-    final public function server ( $offset = null, $filter = null )
+    final public function server( $offset = null, $filter = null )
     {
         return $this->filter( INPUT_SERVER, $offset, $filter );
     }
@@ -467,7 +480,7 @@ class Input
      *
      * @return mixed
      */
-    final public function request ( $offset = null, $filter = null )
+    final public function request( $offset = null, $filter = null )
     {
         return $this->filter( INPUT_REQUEST, $offset, $filter );
     }

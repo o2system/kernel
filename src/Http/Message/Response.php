@@ -41,7 +41,7 @@ class Response extends AbstractMessage implements
 
     // ------------------------------------------------------------------------
 
-    public function __construct ()
+    public function __construct()
     {
         $this->body = new Stream();
     }
@@ -56,7 +56,7 @@ class Response extends AbstractMessage implements
      *
      * @return int Status code.
      */
-    public function getStatusCode ()
+    public function getStatusCode()
     {
         return $this->statusCode;
     }
@@ -87,7 +87,7 @@ class Response extends AbstractMessage implements
      * @return static
      * @throws \InvalidArgumentException For invalid status code arguments.
      */
-    public function withStatus ( $code, $reasonPhrase = '' )
+    public function withStatus( $code, $reasonPhrase = '' )
     {
         $message = clone $this;
         $message->statusCode = $code;
@@ -113,7 +113,7 @@ class Response extends AbstractMessage implements
      * @see http://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml
      * @return string Reason phrase; must return an empty string if none present.
      */
-    public function getReasonPhrase ()
+    public function getReasonPhrase()
     {
         return $this->reasonPhrase;
     }

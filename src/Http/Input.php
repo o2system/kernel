@@ -48,7 +48,7 @@ class Input
      *
      * @return mixed
      */
-    final public function getPost ( $offset, $filter = null )
+    final public function getPost( $offset, $filter = null )
     {
         // Use $_GET directly here, since filter_has_var only
         // checks the initial GET data, not anything that might
@@ -74,7 +74,7 @@ class Input
      *
      * @return mixed
      */
-    final public function get ( $offset = null, $filter = null )
+    final public function get( $offset = null, $filter = null )
     {
         return $this->filter( INPUT_GET, $offset, $filter );
     }
@@ -97,11 +97,11 @@ class Input
      *
      * @return mixed|\O2System\Spl\Datastructures\SplArrayObject
      */
-    protected function filter ( $type, $offset = null, $filter = FILTER_DEFAULT )
+    protected function filter( $type, $offset = null, $filter = FILTER_DEFAULT )
     {
         // If $offset is null, it means that the whole input type array is requested
         if ( is_null( $offset ) ) {
-            $loopThrough = [ ];
+            $loopThrough = [];
 
             switch ( $type ) {
                 case INPUT_GET    :
@@ -136,7 +136,7 @@ class Input
             return new SplArrayObject( $loopThrough );
         } // allow fetching multiple keys at once
         elseif ( is_array( $offset ) ) {
-            $loopThrough = [ ];
+            $loopThrough = [];
 
             foreach ( $offset as $key ) {
                 $loopThrough[ $key ] = $this->filter( $type, $key, $filter );
@@ -239,7 +239,7 @@ class Input
      *
      * @return mixed
      */
-    protected function filterRecursive ( array $data, $filter = FILTER_DEFAULT )
+    protected function filterRecursive( array $data, $filter = FILTER_DEFAULT )
     {
         foreach ( $data as $key => $value ) {
             if ( is_array( $value ) AND is_array( $filter ) ) {
@@ -272,7 +272,7 @@ class Input
      *
      * @return mixed
      */
-    final public function post ( $offset = null, $filter = null )
+    final public function post( $offset = null, $filter = null )
     {
         return $this->filter( INPUT_POST, $offset, $filter );
     }
@@ -293,7 +293,7 @@ class Input
      *
      * @return mixed
      */
-    final public function postGet ( $offset, $filter = null )
+    final public function postGet( $offset, $filter = null )
     {
         // Use $_POST directly here, since filter_has_var only
         // checks the initial POST data, not anything that might
@@ -316,7 +316,7 @@ class Input
      *
      * @return array|UploadedFileInterface
      */
-    final public function files ( $offset = null )
+    final public function files( $offset = null )
     {
         static $serverRequest;
 
@@ -351,7 +351,7 @@ class Input
      *
      * @return mixed
      */
-    final public function env ( $offset = null, $filter = null )
+    final public function env( $offset = null, $filter = null )
     {
         return $this->filter( INPUT_ENV, $offset, $filter );
     }
@@ -372,30 +372,9 @@ class Input
      *
      * @return mixed
      */
-    final public function cookie ( $offset = null, $filter = null )
+    final public function cookie( $offset = null, $filter = null )
     {
         return $this->filter( INPUT_COOKIE, $offset, $filter );
-    }
-
-    //--------------------------------------------------------------------
-
-    /**
-     * Input::server
-     *
-     * Fetch input from SERVER data.
-     *
-     * @param string|null $offset The offset of $_SERVER variable to fetch.
-     *                            When set null will returns filtered $_SERVER variable.
-     * @param int         $filter The ID of the filter to apply.
-     *                            The Types of filters manual page lists the available filters.
-     *                            If omitted, FILTER_DEFAULT will be used, which is equivalent to FILTER_UNSAFE_RAW.
-     *                            This will result in no filtering taking place by default.
-     *
-     * @return mixed
-     */
-    final public function server ( $offset = null, $filter = null )
-    {
-        return $this->filter( INPUT_SERVER, $offset, $filter );
     }
 
     //--------------------------------------------------------------------
@@ -414,7 +393,7 @@ class Input
      *
      * @return mixed
      */
-    final public function request ( $offset = null, $filter = null )
+    final public function request( $offset = null, $filter = null )
     {
         return $this->filter( INPUT_REQUEST, $offset, $filter );
     }
@@ -435,7 +414,7 @@ class Input
      *
      * @return mixed
      */
-    final public function session ( $offset = null, $filter = null )
+    final public function session( $offset = null, $filter = null )
     {
         return $this->filter( INPUT_SESSION, $offset, $filter );
     }
@@ -452,7 +431,7 @@ class Input
      *
      * @return string
      */
-    public function ipAddress ( $proxyIps = null )
+    public function ipAddress( $proxyIps = null )
     {
         if ( ! empty( $proxyIps ) && ! is_array( $proxyIps ) ) {
             $proxyIps = explode( ',', str_replace( ' ', '', $proxyIps ) );
@@ -464,11 +443,11 @@ class Input
                       'HTTP_X_FORWARDED_FOR',
                       'HTTP_X_CLIENT_IP',
                       'HTTP_X_CLUSTER_CLIENT_IP',
-                      'REMOTE_ADDR'
+                      'REMOTE_ADDR',
                   ] as $header ) {
             if ( null !== ( $ipAddress = $this->server( $header ) ) ) {
                 if ( filter_var( $ipAddress, FILTER_VALIDATE_IP ) ) {
-                    if( ! in_array( $ipAddress, $proxyIps ) ) {
+                    if ( ! in_array( $ipAddress, $proxyIps ) ) {
                         break;
                     }
                 }
@@ -476,5 +455,26 @@ class Input
         }
 
         return ( empty( $ipAddress ) ? '0.0.0.0' : $ipAddress );
+    }
+
+    //--------------------------------------------------------------------
+
+    /**
+     * Input::server
+     *
+     * Fetch input from SERVER data.
+     *
+     * @param string|null $offset The offset of $_SERVER variable to fetch.
+     *                            When set null will returns filtered $_SERVER variable.
+     * @param int         $filter The ID of the filter to apply.
+     *                            The Types of filters manual page lists the available filters.
+     *                            If omitted, FILTER_DEFAULT will be used, which is equivalent to FILTER_UNSAFE_RAW.
+     *                            This will result in no filtering taking place by default.
+     *
+     * @return mixed
+     */
+    final public function server( $offset = null, $filter = null )
+    {
+        return $this->filter( INPUT_SERVER, $offset, $filter );
     }
 }

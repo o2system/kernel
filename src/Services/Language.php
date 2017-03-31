@@ -33,7 +33,7 @@ class Language implements \IteratorAggregate
      *
      * @var array
      */
-    protected $packages = [ ];
+    protected $packages = [];
 
     /**
      * Active Locale
@@ -56,14 +56,14 @@ class Language implements \IteratorAggregate
      *
      * @var array
      */
-    protected $isLoaded = [ ];
+    protected $isLoaded = [];
 
     /**
      * Languages Lines
      *
      * @var array
      */
-    protected $lines = [ ];
+    protected $lines = [];
 
     // ------------------------------------------------------------------------
 
@@ -72,7 +72,7 @@ class Language implements \IteratorAggregate
      *
      * @access  public
      */
-    public function __construct ()
+    public function __construct()
     {
         $this->setFileDirName( 'Languages' );
         $this->addFilePath( PATH_KERNEL );
@@ -80,7 +80,7 @@ class Language implements \IteratorAggregate
 
     // ------------------------------------------------------------------------
 
-    public function setDefault ( $default )
+    public function setDefault( $default )
     {
         $xDefault = explode( '-', $default );
 
@@ -97,7 +97,7 @@ class Language implements \IteratorAggregate
 
     // ------------------------------------------------------------------------
 
-    public function getDefaultLocale ()
+    public function getDefaultLocale()
     {
         return $this->defaultLocale;
     }
@@ -114,7 +114,7 @@ class Language implements \IteratorAggregate
      * @access  public
      * @return  Language
      */
-    public function setDefaultLocale ( $defaultLocale )
+    public function setDefaultLocale( $defaultLocale )
     {
         $this->defaultLocale = strtolower( $defaultLocale );
         $this->defaultIdeom = strtoupper( $defaultLocale );
@@ -124,7 +124,7 @@ class Language implements \IteratorAggregate
 
     // ------------------------------------------------------------------------
 
-    public function getDefaultIdeom ()
+    public function getDefaultIdeom()
     {
         return $this->defaultIdeom;
     }
@@ -141,7 +141,7 @@ class Language implements \IteratorAggregate
      * @access  public
      * @return  Language
      */
-    public function setDefaultIdeom ( $defaultIdeom )
+    public function setDefaultIdeom( $defaultIdeom )
     {
         $this->defaultIdeom = strtoupper( $defaultIdeom );
 
@@ -159,7 +159,7 @@ class Language implements \IteratorAggregate
      *
      * @return $this
      */
-    public function loadFile ( $filename )
+    public function loadFile( $filename )
     {
         $filename = is_string( $filename ) ? [ $filename ] : $filename;
         $default = $this->getDefault();
@@ -193,7 +193,7 @@ class Language implements \IteratorAggregate
 
     // ------------------------------------------------------------------------
 
-    public function getDefault ()
+    public function getDefault()
     {
         return implode( '-', [ $this->defaultLocale, $this->defaultIdeom ] );
     }
@@ -207,7 +207,7 @@ class Language implements \IteratorAggregate
      *
      * @param string $filePath Language INI filePath
      */
-    protected function parseFile ( $filePath )
+    protected function parseFile( $filePath )
     {
         $lines = parse_ini_file( $filePath, true, INI_SCANNER_RAW );
 
@@ -230,23 +230,25 @@ class Language implements \IteratorAggregate
      *
      * @return mixed|null
      */
-    public function getLine ( $line, array $context = [ ] )
+    public function getLine( $line, array $context = [] )
     {
         $lineOffset = strtoupper( $line );
 
         if ( empty( $context ) ) {
-            return isset( $this->lines[ $lineOffset ] ) ? $this->lines[ $lineOffset ] : $line;
+            $lineContent = isset( $this->lines[ $lineOffset ] ) ? $this->lines[ $lineOffset ] : $line;
         } else {
             $line = isset( $this->lines[ $lineOffset ] ) ? $this->lines[ $lineOffset ] : $line;
             array_unshift( $context, $line );
 
-            return @call_user_func_array( 'sprintf', $context );
+            $lineContent = @call_user_func_array( 'sprintf', $context );
         }
+
+        return str_replace( [ 'PHP_EOL', 'PHP_EOL ' ], PHP_EOL, $lineContent );
     }
 
     // ------------------------------------------------------------------------
 
-    public function isExists ( $localeIdeom )
+    public function isExists( $localeIdeom )
     {
         return false;
     }
@@ -261,7 +263,7 @@ class Language implements \IteratorAggregate
      *        <b>Traversable</b>
      * @since 5.0.0
      */
-    public function getIterator ()
+    public function getIterator()
     {
         return new \ArrayIterator( $this->lines );
     }

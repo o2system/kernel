@@ -33,16 +33,6 @@ class Table
      * @var int
      */
     const HEADER_INDEX = -1;
-
-    /**
-     * Table::$rows
-     *
-     * Array of table rows.
-     *
-     * @var array
-     */
-    protected $data = [ ];
-
     /**
      * Table::$isShowBorder
      *
@@ -51,7 +41,14 @@ class Table
      * @var bool
      */
     public $isShowBorder = true;
-
+    /**
+     * Table::$rows
+     *
+     * Array of table rows.
+     *
+     * @var array
+     */
+    protected $rows = [];
     /**
      * Table::$padding
      *
@@ -86,7 +83,7 @@ class Table
      *
      * @var array
      */
-    private $columnWidths = [ ];
+    private $columnWidths = [];
 
     // ------------------------------------------------------------------------
 
@@ -99,9 +96,9 @@ class Table
      *
      * @return static
      */
-    public function setHeaders ( array $headers )
+    public function setHeaders( array $headers )
     {
-        $this->data[ self::HEADER_INDEX ] = $headers;
+        $this->rows[ self::HEADER_INDEX ] = $headers;
 
         return $this;
     }
@@ -117,9 +114,9 @@ class Table
      *
      * @return static
      */
-    public function addHeader ( $content = '' )
+    public function addHeader( $content = '' )
     {
-        $this->data[ self::HEADER_INDEX ][] = $content;
+        $this->rows[ self::HEADER_INDEX ][] = $content;
 
         return $this;
     }
@@ -133,10 +130,10 @@ class Table
      *
      * @return mixed
      */
-    public function getHeaders ()
+    public function getHeaders()
     {
-        return isset( $this->data[ self::HEADER_INDEX ] )
-            ? $this->data[ self::HEADER_INDEX ]
+        return isset( $this->rows[ self::HEADER_INDEX ] )
+            ? $this->rows[ self::HEADER_INDEX ]
             : null;
     }
 
@@ -151,12 +148,12 @@ class Table
      *
      * @return static
      */
-    public function addRow ( $data = null )
+    public function addRow( $data = null )
     {
         $this->rowIndex++;
         if ( is_array( $data ) ) {
             foreach ( $data as $column => $content ) {
-                $this->data[ $this->rowIndex ][ $column ] = $content;
+                $this->rows[ $this->rowIndex ][ $column ] = $content;
             }
         }
 
@@ -174,17 +171,17 @@ class Table
      *
      * @return static
      */
-    public function addColumn ( $content, $columnIndex = null, $rowIndex = null )
+    public function addColumn( $content, $columnIndex = null, $rowIndex = null )
     {
         $rowIndex = $rowIndex === null
             ? $this->rowIndex
             : $rowIndex;
         if ( $columnIndex === null ) {
-            $columnIndex = isset( $this->data[ $rowIndex ] )
-                ? count( $this->data[ $rowIndex ] )
+            $columnIndex = isset( $this->rows[ $rowIndex ] )
+                ? count( $this->rows[ $rowIndex ] )
                 : 0;
         }
-        $this->data[ $rowIndex ][ $columnIndex ] = $content;
+        $this->rows[ $rowIndex ][ $columnIndex ] = $content;
 
         return $this;
     }
@@ -200,7 +197,7 @@ class Table
      *
      * @return static
      */
-    public function setPadding ( $numbers = 1 )
+    public function setPadding( $numbers = 1 )
     {
         $this->padding = $numbers;
 
@@ -218,7 +215,7 @@ class Table
      *
      * @return static
      */
-    public function setLeftMargin ( $numbers = 0 )
+    public function setLeftMargin( $numbers = 0 )
     {
         $this->leftMargin = $numbers;
 
@@ -230,17 +227,32 @@ class Table
     /**
      * Table::__toString
      *
+     * Implementation __toString magic method so that when the class is converted to a string
+     * automatically performs the rendering process.
+     *
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->render();
+    }
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * Table::render
+     *
      * Render the table.
      *
      * @return string
      */
-    public function render ()
+    public function render()
     {
         $this->calculateColumnWidth();
         $output = $this->isShowBorder
             ? $this->renderBorder()
             : '';
-        foreach ( $this->data as $rowIndex => $row ) {
+        foreach ( $this->rows as $rowIndex => $row ) {
             foreach ( $row as $cellIndex => $cell ) {
                 $output .= $this->renderCell( $cellIndex, $row );
             }
@@ -265,9 +277,9 @@ class Table
      *
      * @return array
      */
-    private function calculateColumnWidth ()
+    private function calculateColumnWidth()
     {
-        foreach ( $this->data as $rowIndex => $row ) {
+        foreach ( $this->rows as $rowIndex => $row ) {
             foreach ( $row as $columnIndex => $column ) {
                 if ( ! isset( $this->columnWidths[ $columnIndex ] ) ) {
                     $this->columnWidths[ $columnIndex ] = strlen( $column );
@@ -291,10 +303,10 @@ class Table
      *
      * @return string
      */
-    private function renderBorder ()
+    private function renderBorder()
     {
         $output = '';
-        $columnCount = count( $this->data[ 0 ] );
+        $columnCount = count( $this->rows[ 0 ] );
         for ( $col = 0; $col < $columnCount; $col++ ) {
             $output .= $this->renderCell( $col );
         }
@@ -318,7 +330,7 @@ class Table
      *
      * @return string
      */
-    private function renderCell ( $index, $row = null )
+    private function renderCell( $index, $row = null )
     {
         $cell = $row
             ? $row[ $index ]

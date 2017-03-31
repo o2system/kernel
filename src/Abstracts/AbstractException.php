@@ -54,7 +54,7 @@ abstract class AbstractException extends \Exception
      * @param array           $context
      * @param \Exception|NULL $previous
      */
-    public function __construct ( $message, $code = 0, array $context = [ ], \Exception $previous = null )
+    public function __construct( $message, $code = 0, array $context = [], \Exception $previous = null )
     {
         $className = get_called_class();
         $xClassName = explode( '\\', $className );
@@ -76,22 +76,22 @@ abstract class AbstractException extends \Exception
         parent::__construct( $message, $code, $previous );
     }
 
-    public function getHeader ()
+    public function getHeader()
     {
         return $this->header;
     }
 
-    public function getDescription ()
+    public function getDescription()
     {
         return $this->description;
     }
 
-    public function getChronology ()
+    public function getChronology()
     {
-        return ( new Trace( $this->getTrace() ) )->chronology();
+        return ( new Trace( $this->getTrace() ) )->getChronology();
     }
 
-    public function getAssetsUrl ( $path = '', $dirname = null )
+    public function getAssetsUrl( $path = '', $dirname = null )
     {
         $path = is_array( $path ) ? implode( '/', $path ) : $path;
 
@@ -108,13 +108,13 @@ abstract class AbstractException extends \Exception
         }
 
         return '//' . $_SERVER[ 'HTTP_HOST' ] . $scriptName . str_replace(
-            $scriptFilename,
-            '',
-            $assetsDirectory
-        ) . '/assets/' . trim( $path, '/' );
+                $scriptFilename,
+                '',
+                $assetsDirectory
+            ) . '/assets/' . trim( $path, '/' );
     }
 
-    public function getView ()
+    public function getView()
     {
         return $this->view;
     }

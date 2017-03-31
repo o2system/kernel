@@ -30,7 +30,7 @@ class Output extends Message\Response
 
     protected $mimeType = 'text/html';
 
-    protected $charset  = 'utf8';
+    protected $charset = 'utf8';
 
     // ------------------------------------------------------------------------
 
@@ -41,7 +41,7 @@ class Output extends Message\Response
      *
      * @return Output
      */
-    public function __construct ()
+    public function __construct()
     {
         parent::__construct();
 
@@ -58,52 +58,6 @@ class Output extends Message\Response
 
     // ------------------------------------------------------------------------
 
-    public function addHeader ( $name, $value )
-    {
-        $this->headers[ $name ] = $value;
-
-        return $this;
-    }
-
-    /**
-     * Output::setContentType
-     *
-     * @param string $mimeType
-     * @param string $charset
-     *
-     * @return $this
-     */
-    public function setContentType ( $mimeType, $charset = null )
-    {
-        static $mimes = [];
-
-        if ( empty( $mimes ) ) {
-            $mimes = require( str_replace( 'Http', 'Config', __DIR__ ) . DIRECTORY_SEPARATOR . 'Mimes.php' );
-        }
-
-        if ( strpos( $mimeType, '/' ) === false ) {
-            $extension = ltrim( $mimeType, '.' );
-            // Is this extension supported?
-            if ( isset( $mimes[ $extension ] ) ) {
-                $mimeType =& $mimes[ $extension ];
-                if ( is_array( $mimeType ) ) {
-                    $mimeType = current( $mimeType );
-                }
-            }
-        }
-
-        $this->mimeType = $mimeType;
-
-        $this->addHeader(
-            'Content-Type',
-            $mimeType
-            . ( empty( $charset ) ? '' : '; charset=' . $charset )
-        );
-
-        return $this;
-    }
-    // --------------------------------------------------------------------
-
     /**
      * Output::register
      *
@@ -111,14 +65,12 @@ class Output extends Message\Response
      *
      * @return void
      */
-    public function register ()
+    public function register()
     {
         set_error_handler( [ &$this, 'errorHandler' ] );
         set_exception_handler( [ &$this, 'exceptionHandler' ] );
         register_shutdown_function( [ &$this, 'shutdownHandler' ] );
     }
-
-    // ------------------------------------------------------------------------
 
     /**
      * Output::shutdownHandler
@@ -127,7 +79,7 @@ class Output extends Message\Response
      *
      * @return void
      */
-    public function shutdownHandler ()
+    public function shutdownHandler()
     {
         $lastError = error_get_last();
 
@@ -143,29 +95,28 @@ class Output extends Message\Response
         // Execute Kernel Shutdown Service
         shutdown()->execute();
     }
-
-    // ------------------------------------------------------------------------
+    // --------------------------------------------------------------------
 
     /**
      * Output::errorHandler
      *
      * Kernel defined error handler function.
      *
-     * @param int    $errorSeverity      The first parameter, errno, contains the level of the error raised, as an integer.
-     * @param string $errorMessage     The second parameter, errstr, contains the error message, as a string.
-     * @param string $errorFile    The third parameter is optional, errfile, which contains the filename that the error
-     *                           was raised in, as a string.
-     * @param string $errorLine    The fourth parameter is optional, errline, which contains the line number the error
-     *                           was raised at, as an integer.
-     * @param array  $errorContext The fifth parameter is optional, errcontext, which is an array that points to the
-     *                           active symbol table at the point the error occurred. In other words, errcontext will
-     *                           contain an array of every variable that existed in the scope the error was triggered
-     *                           in. User error handler must not modify error context.
+     * @param int    $errorSeverity The first parameter, errno, contains the level of the error raised, as an integer.
+     * @param string $errorMessage  The second parameter, errstr, contains the error message, as a string.
+     * @param string $errorFile     The third parameter is optional, errfile, which contains the filename that the error
+     *                              was raised in, as a string.
+     * @param string $errorLine     The fourth parameter is optional, errline, which contains the line number the error
+     *                              was raised at, as an integer.
+     * @param array  $errorContext  The fifth parameter is optional, errcontext, which is an array that points to the
+     *                              active symbol table at the point the error occurred. In other words, errcontext will
+     *                              contain an array of every variable that existed in the scope the error was triggered
+     *                              in. User error handler must not modify error context.
      *
      * @return bool If the function returns FALSE then the normal error handler continues.
      * @throws ErrorException
      */
-    public function errorHandler ($errorSeverity, $errorMessage, $errorFile, $errorLine, array $errorContext = [] )
+    public function errorHandler( $errorSeverity, $errorMessage, $errorFile, $errorLine, array $errorContext = [] )
     {
         $isFatalError = ( ( ( E_ERROR | E_COMPILE_ERROR | E_CORE_ERROR | E_USER_ERROR ) & $errorSeverity ) === $errorSeverity );
 
@@ -212,8 +163,16 @@ class Output extends Message\Response
                     ]
                 ) );
             } else {
+
+                foreach ( array_reverse( $this->filePaths ) as $filePath ) {
+                    if ( is_file( $filePath . 'error.phtml' ) ) {
+                        $filePath .= 'error.phtml';
+                        break;
+                    }
+                }
+
                 ob_start();
-                include PATH_KERNEL . 'Views/http/error.phtml';
+                include $filePath;
                 $buffer = ob_get_contents();
                 ob_end_clean();
 
@@ -225,26 +184,75 @@ class Output extends Message\Response
     // ------------------------------------------------------------------------
 
     /**
+     * Output::setContentType
+     *
+     * @param string $mimeType
+     * @param string $charset
+     *
+     * @return $this
+     */
+    public function setContentType( $mimeType, $charset = null )
+    {
+        static $mimes = [];
+
+        if ( empty( $mimes ) ) {
+            $mimes = require( str_replace( 'Http', 'Config', __DIR__ ) . DIRECTORY_SEPARATOR . 'Mimes.php' );
+        }
+
+        if ( strpos( $mimeType, '/' ) === false ) {
+            $extension = ltrim( $mimeType, '.' );
+            // Is this extension supported?
+            if ( isset( $mimes[ $extension ] ) ) {
+                $mimeType =& $mimes[ $extension ];
+                if ( is_array( $mimeType ) ) {
+                    $mimeType = current( $mimeType );
+                }
+            }
+        }
+
+        $this->mimeType = $mimeType;
+
+        $this->addHeader(
+            'Content-Type',
+            $mimeType
+            . ( empty( $charset ) ? '' : '; charset=' . $charset )
+        );
+
+        return $this;
+    }
+
+    // ------------------------------------------------------------------------
+
+    public function addHeader( $name, $value )
+    {
+        $this->headers[ $name ] = $value;
+
+        return $this;
+    }
+
+    // ------------------------------------------------------------------------
+
+    /**
      * Output::send
      *
-     * @param $data
+     * @param       $data
      * @param array $headers
      */
-    public function send ($data = null, array $headers = [] )
+    public function send( $data = null, array $headers = [] )
     {
         $statusCode = $this->statusCode;
         $reasonPhrase = $this->reasonPhrase;
 
-        if( is_ajax() ) {
-            $contentType = isset( $_SERVER['HTTP_X_REQUESTED_CONTENT_TYPE'] ) ? $_SERVER['HTTP_X_REQUESTED_CONTENT_TYPE'] : 'application/json';
+        if ( is_ajax() ) {
+            $contentType = isset( $_SERVER[ 'HTTP_X_REQUESTED_CONTENT_TYPE' ] ) ? $_SERVER[ 'HTTP_X_REQUESTED_CONTENT_TYPE' ] : 'application/json';
             $this->setContentType( $contentType );
         }
 
-        $this->sendHeaders($headers);
+        $this->sendHeaders( $headers );
 
         if ( is_array( $data ) OR is_object( $data ) ) {
             $response = [
-                'status' => (int) $statusCode,
+                'status' => (int)$statusCode,
                 'reason' => $reasonPhrase,
             ];
 
@@ -269,7 +277,7 @@ class Output extends Message\Response
                     $xml->addAttribute( $item, $value );
                 }
 
-                function array_to_xml ( $data, \SimpleXMLElement &$xml )
+                function array_to_xml( $data, \SimpleXMLElement &$xml )
                 {
                     foreach ( $data as $key => $value ) {
                         if ( is_numeric( $key ) ) {
@@ -293,22 +301,22 @@ class Output extends Message\Response
 
         } elseif ( $this->mimeType === 'application/json' ) {
             $response = [
-                'status' => (int) $statusCode,
+                'status' => (int)$statusCode,
                 'reason' => $reasonPhrase,
             ];
 
-            if( ! empty( $data ) ) {
+            if ( ! empty( $data ) ) {
                 $response[ 'message' ] = $data;
             }
 
             echo json_encode( $response, JSON_PRETTY_PRINT );
         } elseif ( $this->mimeType === 'application/xml' ) {
             $xml = new \SimpleXMLElement( '<response/>' );
-            $xml->addAttribute('status', $statusCode);
-            $xml->addAttribute('reason', $reasonPhrase);
+            $xml->addAttribute( 'status', $statusCode );
+            $xml->addAttribute( 'reason', $reasonPhrase );
 
-            if( ! empty( $data ) ) {
-                $xml->addChild('message', $data);
+            if ( ! empty( $data ) ) {
+                $xml->addChild( 'message', $data );
             }
             echo $xml->asXML();
         } else {
@@ -317,6 +325,36 @@ class Output extends Message\Response
 
         exit( EXIT_SUCCESS );
     }
+
+    protected function sendHeaders( array $headers = [] )
+    {
+        ini_set( 'expose_php', 0 );
+
+        // collect headers that already sent
+        foreach ( headers_list() as $header ) {
+            $headerParts = explode( ':', $header );
+            $headerParts = array_map( 'trim', $headerParts );
+            $headers[ $headerParts[ 0 ] ] = $headerParts[ 1 ];
+            header_remove( $header[ 0 ] );
+        }
+
+        if ( count( $headers ) ) {
+            $this->headers = array_merge( $this->headers, $headers );
+        }
+
+        if ( $this->statusCode === 204 ) {
+            $this->statusCode = 200;
+            $this->reasonPhrase = 'OK';
+        }
+
+        header( 'HTTP/' . $this->protocol . ' ' . $this->statusCode . ' ' . $this->reasonPhrase );
+
+        foreach ( $this->headers as $name => $value ) {
+            header( $name . ': ' . trim( $value ) );
+        }
+    }
+
+    // ------------------------------------------------------------------------
 
     /**
      * Output::exceptionHandler
@@ -327,9 +365,9 @@ class Output extends Message\Response
      *
      * @return void
      */
-    public function exceptionHandler ( $exception )
+    public function exceptionHandler( $exception )
     {
-        if( is_ajax() ) {
+        if ( is_ajax() ) {
             $this->statusCode = 500;
             $this->reasonPhrase = 'Internal Server Error';
 
@@ -349,16 +387,23 @@ class Output extends Message\Response
                 $exception->getLine()
             );
 
+            foreach ( array_reverse( $this->filePaths ) as $filePath ) {
+                if ( is_file( $filePath . 'error.phtml' ) ) {
+                    $filePath .= 'error.phtml';
+                    break;
+                }
+            }
+
             ob_start();
-            include PATH_KERNEL . 'Views' . DIRECTORY_SEPARATOR . 'http' . DIRECTORY_SEPARATOR . 'error.phtml';
+            include $filePath;
             $buffer = ob_get_contents();
             ob_end_clean();
             echo $buffer;
 
             exit( EXIT_ERROR );
         } elseif ( $exception instanceof AbstractException ) {
-            foreach ( $this->filePaths as $filePath ) {
-                $filePath .= 'http' . DIRECTORY_SEPARATOR . 'exception.phtml';
+            foreach ( array_reverse( $this->filePaths ) as $filePath ) {
+                $filePath .= 'exception.phtml';
 
                 if ( is_file( $filePath ) ) {
                     ob_start();
@@ -373,8 +418,8 @@ class Output extends Message\Response
                 }
             }
         } elseif ( $exception instanceof \Exception ) {
-            foreach ( $this->filePaths as $filePath ) {
-                $filePath .= 'http' . DIRECTORY_SEPARATOR . 'exception-spl.phtml';
+            foreach ( array_reverse( $this->filePaths ) as $filePath ) {
+                $filePath .= 'exception-spl.phtml';
 
                 if ( is_file( $filePath ) ) {
                     $exceptionClassName = get_class_name( $exception );
@@ -397,87 +442,54 @@ class Output extends Message\Response
         }
     }
 
-    // ------------------------------------------------------------------------
-
     /**
      * Output::sendError
      *
-     * @param int $code
+     * @param int               $code
      * @param null|array|string $vars
-     * @param array $headers
+     * @param array             $headers
      */
-    public function sendError ($code = 204, $vars = null, $headers = [] )
+    public function sendError( $code = 204, $vars = null, $headers = [] )
     {
-        static $errors = [];
-
-        if ( empty( $errors ) ) {
-            $errors = require( str_replace( 'Http', 'Config', __DIR__ ) . DIRECTORY_SEPARATOR . 'Errors.php' );
-        }
-
-        if ( isset( $errors[ $code ] ) ) {
-            $languageKey = $errors[ $code ];
-        }
-
-        $languageKey = strtoupper( $code . '_' . $languageKey );
+        $languageKey = $code . '_' . error_code_string( $code );
 
         $error = [
-            'code' => $code,
-            'title' => language()->getLine( $languageKey . '_TITLE' ),
-            'message' => language()->getLine( $languageKey . '_MESSAGE' )
+            'code'    => $code,
+            'title'   => language()->getLine( $languageKey . '_TITLE' ),
+            'message' => language()->getLine( $languageKey . '_MESSAGE' ),
         ];
 
         $this->statusCode = $code;
-        $this->reasonPhrase = $error['title'];
+        $this->reasonPhrase = $error[ 'title' ];
 
         if ( is_string( $vars ) ) {
             $error[ 'message' ] = $vars;
-        } elseif( is_array( $vars ) ) {
+        } elseif ( is_array( $vars ) ) {
             $error = array_merge( $error, $vars );
         }
 
-        if( is_ajax() or $this->mimeType !== 'text/html' ) {
+        if ( is_ajax() or $this->mimeType !== 'text/html' ) {
             $this->statusCode = $code;
-            $this->reasonPhrase = $error['title'];
+            $this->reasonPhrase = $error[ 'title' ];
             $this->send();
         } else {
-            $this->sendHeaders($headers);
+            $this->sendHeaders( $headers );
             extract( $error );
 
+            foreach ( array_reverse( $this->filePaths ) as $filePath ) {
+                if ( is_file( $filePath . 'error-code.phtml' ) ) {
+                    $filePath .= 'error-code.phtml';
+                    break;
+                }
+            }
+
             ob_start();
-            include PATH_KERNEL . 'Views' . DIRECTORY_SEPARATOR . 'http' . DIRECTORY_SEPARATOR . 'error-code.phtml';
+            include $filePath;
             $buffer = ob_get_contents();
             ob_end_clean();
             echo $buffer;
         }
 
         exit( EXIT_ERROR );
-    }
-
-    protected function sendHeaders( array $headers = [] )
-    {
-        ini_set('expose_php', 0);
-
-        // collect headers that already sent
-        foreach(headers_list() as $header) {
-            $headerParts = explode(':', $header);
-            $headerParts = array_map('trim', $headerParts);
-            $headers[ $headerParts[0] ] = $headerParts[1];
-            header_remove($header[0]);
-        }
-
-        if ( count( $headers ) ) {
-            $this->headers = array_merge( $this->headers, $headers );
-        }
-
-        if( $this->statusCode === 204 ) {
-            $this->statusCode = 200;
-            $this->reasonPhrase = 'OK';
-        }
-
-        header( 'HTTP/' . $this->protocol . ' ' . $this->statusCode . ' ' . $this->reasonPhrase );
-
-        foreach ( $this->headers as $name => $value ) {
-            header( $name . ': ' . trim( $value ) );
-        }
     }
 }

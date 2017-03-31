@@ -14,7 +14,7 @@ use O2System\Spl\Containers\SplClosureContainer;
 
 class Shutdown extends SplClosureContainer
 {
-    public function execute ()
+    public function execute()
     {
         foreach ( $this as $offset => $closure ) {
             call_user_func( $closure );
