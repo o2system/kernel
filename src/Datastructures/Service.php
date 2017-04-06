@@ -19,7 +19,7 @@ use O2System\Spl\Info\SplFileInfo;
 /**
  * Class Service
  *
- * @package O2System\Kernel\Registries
+ * @package O2System\Kernel\Datastructures
  */
 class Service extends \ReflectionClass
 {
