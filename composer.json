@@ -1,6 +1,6 @@
 {
-  "name": "o2system/core",
-  "description": "O2System Core Framework",
+  "name": "o2system/kernel",
+  "description": "O2System Framework Kernel",
   "license": "MIT",
   "type": "php-libraries",
   "keywords": [
@@ -35,15 +35,20 @@
     "github-wiki": "http://github.com/o2system/core/wiki"
   },
   "require": {
-    "php": ">=5.4.0",
-    "o2system/psr": "~1.0",
-    "o2system/spl": "~1.0",
-    "o2system/gears": "~2.0"
+    "php": ">=5.6.0",
+    "o2system/psr": "dev",
+    "o2system/spl": "dev",
+    "o2system/gear": "dev"
   },
   "autoload": {
     "psr-4": {
-      "O2System\\Core\\": "src"
-    }
+      "O2System\\Kernel\\": "src"
+    },
+    "files": [
+      "src/Helper/Common.php",
+      "src/Helper/Inflector.php",
+      "src/Kernel.php"
+    ]
   },
   "minimum-stability": "dev"
 }
