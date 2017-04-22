@@ -12,6 +12,8 @@
 
 if ( ! function_exists( 'is_php' ) ) {
     /**
+     * is_php
+     *
      * Determines if the current version of PHP is equal to or greater than the supplied value
      *
      * @param    string
@@ -35,6 +37,8 @@ if ( ! function_exists( 'is_php' ) ) {
 
 if ( ! function_exists( 'is_really_writable' ) ) {
     /**
+     * is_really_writable
+     *
      * Tests for file writability
      *
      * is_writable() returns TRUE on Windows servers when you really can't write to
@@ -82,7 +86,7 @@ if ( ! function_exists( 'is_really_writable' ) ) {
 
 if ( ! function_exists( 'is_https' ) ) {
     /**
-     * Is HTTPS?
+     * is_https
      *
      * Determines if the application is accessed via an encrypted
      * (HTTPS) connection.
@@ -110,7 +114,7 @@ if ( ! function_exists( 'is_https' ) ) {
 
 if ( ! function_exists( 'is_cli' ) ) {
     /**
-     * Is CLI?
+     * is_cli
      *
      * Test to see if a request was made from the command line.
      *
@@ -126,7 +130,7 @@ if ( ! function_exists( 'is_cli' ) ) {
 
 if ( ! function_exists( 'is_ajax' ) ) {
     /**
-     * Is AJAX?
+     * is_ajax
      *
      * Test to see if a request an ajax request.
      *
@@ -144,7 +148,7 @@ if ( ! function_exists( 'is_ajax' ) ) {
 
 if ( ! function_exists( 'remove_invisible_characters' ) ) {
     /**
-     * Remove Invisible Characters
+     * remove_invisible_characters
      *
      * This prevents sandwiching null characters
      * between ascii characters, like Java\0script.
@@ -179,6 +183,8 @@ if ( ! function_exists( 'remove_invisible_characters' ) ) {
 
 if ( ! function_exists( 'html_escape' ) ) {
     /**
+     * html_escape
+     *
      * Returns HTML escaped variable.
      *
      * @param    mixed $var           The input string or array of strings to be escaped.
@@ -200,6 +206,8 @@ if ( ! function_exists( 'html_escape' ) ) {
 
 if ( ! function_exists( 'stringify_attributes' ) ) {
     /**
+     * stringify_attributes
+     *
      * Stringify attributes for use in HTML tags.
      *
      * Helper function used to convert a string, array, or object
@@ -238,7 +246,7 @@ if ( ! function_exists( 'stringify_attributes' ) ) {
 
 if ( ! function_exists( 'function_usable' ) ) {
     /**
-     * Function usable
+     * function_usable
      *
      * Executes a function_exists() check, and if the Suhosin PHP
      * extension is loaded - checks whether the function that is
@@ -497,6 +505,8 @@ if ( ! function_exists( 'http_parse_headers' ) ) {
 
 if ( ! function_exists( 'stripslashes_recursive' ) ) {
     /**
+     * stripslashes_recursive
+     *
      * Recursive Strip Slashes
      *
      * Un-quotes a quoted string
@@ -522,9 +532,12 @@ if ( ! function_exists( 'stripslashes_recursive' ) ) {
     }
 }
 
+// ------------------------------------------------------------------------
 
 if ( ! function_exists( 'is_html' ) ) {
     /**
+     * is_html
+     *
      * Determine if string is HTML
      *
      * @param $string
@@ -533,14 +546,15 @@ if ( ! function_exists( 'is_html' ) ) {
      */
     function is_html( $string )
     {
-        return $string != strip_tags( $string ) ? true : false;
+        return (bool) ( $string !== strip_tags( $string ) ? true : false );
     }
 }
 
+// ------------------------------------------------------------------------
 
 if ( ! function_exists( 'is_serialized' ) ) {
     /**
-     * Is Serialized
+     * is_serialized
      *
      * Check is the string is serialized array
      *
@@ -573,7 +587,7 @@ if ( ! function_exists( 'is_serialized' ) ) {
 
 if ( ! function_exists( 'is_json' ) ) {
     /**
-     * Is JSON
+     * is_json
      *
      * Check is the string is json array or object
      *
@@ -614,9 +628,11 @@ if ( ! function_exists( 'is_json' ) ) {
     }
 }
 
+// ------------------------------------------------------------------------
+
 if ( ! function_exists( 'is_parse_string' ) ) {
     /**
-     * Is Parse String
+     * is_parse_string
      *
      * @return string
      *
@@ -636,7 +652,7 @@ if ( ! function_exists( 'is_parse_string' ) ) {
 
 if ( ! function_exists( 'is_multidimensional_array' ) ) {
     /**
-     * array_is_multidimensional
+     * is_multidimensional_array
      *
      * Checks if the given array is multidimensional.
      *
@@ -658,7 +674,7 @@ if ( ! function_exists( 'is_multidimensional_array' ) ) {
 
 if ( ! function_exists( 'is_associative_array' ) ) {
     /**
-     * array_is_associative
+     * is_associative_array
      *
      * Check if the given array is associative.
      *
@@ -683,9 +699,12 @@ if ( ! function_exists( 'is_associative_array' ) ) {
         return false;
     }
 }
+
+// ------------------------------------------------------------------------
+
 if ( ! function_exists( 'is_indexed_array' ) ) {
     /**
-     * array_is_indexed
+     * is_indexed_array
      *
      * Check if an array has a numeric index.
      *
@@ -702,6 +721,8 @@ if ( ! function_exists( 'is_indexed_array' ) ) {
         return ! is_associative_array( $array );
     }
 }
+
+// ------------------------------------------------------------------------
 
 if ( ! function_exists( 'error_code_string' ) ) {
     /**
