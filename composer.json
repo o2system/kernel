@@ -49,6 +49,5 @@
       "src/Helper/Inflector.php",
       "src/Kernel.php"
     ]
-  },
-  "minimum-stability": "dev"
+  }
 }
