@@ -36,9 +36,9 @@
   },
   "require": {
     "php": ">=5.6.0",
-    "o2system/psr": "*",
-    "o2system/spl": "*",
-    "o2system/gear": "*"
+    "o2system/psr": "@dev",
+    "o2system/spl": "@dev",
+    "o2system/gear": "@dev"
   },
   "autoload": {
     "psr-4": {
