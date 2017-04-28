@@ -2,8 +2,7 @@
   "name": "o2system/kernel",
   "description": "O2System Framework Kernel",
   "license": "MIT",
-  "version": "1.0.0.-dev",
-  "type": "php-libraries",
+  "type": "package",
   "keywords": [
     "singleton",
     "php",
@@ -51,10 +50,5 @@
       "src/Kernel.php"
     ]
   },
-  "minimum-stability": "dev",
-  "extra": {
-    "branch-alias": {
-      "dev-master": "1.0.x-dev"
-    }
-  }
+  "minimum-stability": "dev"
 }
