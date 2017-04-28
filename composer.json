@@ -2,6 +2,7 @@
   "name": "o2system/kernel",
   "description": "O2System Framework Kernel",
   "license": "MIT",
+  "version": "1.0.0.-dev",
   "type": "php-libraries",
   "keywords": [
     "singleton",
