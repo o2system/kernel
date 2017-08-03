@@ -7,6 +7,8 @@
     margin-bottom: 20px;
     border: 1px solid transparent;
     border-radius: 0px;
+    z-index: 10000;
+    position: relative;
 }
 .alert-danger {
     color: #a94442;

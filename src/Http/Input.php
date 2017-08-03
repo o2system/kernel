@@ -27,7 +27,7 @@ use O2System\Spl\Datastructures\SplArrayObject;
  * - The values represented in $_SERVER, $_ENV, $_REQUEST and $_SESSION.
  * - Any cookies provided (generally via $_COOKIE)
  * - Query string arguments (generally via $_GET, or as parsed via parse_str())
- * - Upload files, if any (as represented by $_FILES)
+ * - Uploader files, if any (as represented by $_FILES)
  * - Deserialized body binds (generally from $_POST)
  *
  * @package O2System\Kernel\Http

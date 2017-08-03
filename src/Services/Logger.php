@@ -157,7 +157,7 @@ class Logger implements LoggerInterface
         }
 
         // Try to get language message
-        $langMessage = Core::getInstance()->language->getLine( $message, $context );
+        $langMessage = language()->getLine( $message, $context );
 
         // Re-Define message
         $message = empty( $langMessage ) ? $message : $langMessage;
@@ -165,6 +165,12 @@ class Logger implements LoggerInterface
         if ( ! is_dir( $this->path ) ) {
             mkdir( $this->path, true, 0775 );
         }
+
+        $this->lines[] = new \ArrayObject([
+            'level' => strtoupper( $level ),
+            'time' => date( 'r' ),
+            'message' => $message
+        ], \ArrayObject::ARRAY_AS_PROPS );
 
         $isNewFile = false;
         $filePath = $this->path . 'log-' . date( 'd-m-Y' ) . '.log';

@@ -20,7 +20,7 @@ use O2System\Spl\Exceptions\ErrorException;
 use O2System\Spl\Traits\Collectors\FilePathCollectorTrait;
 
 /**
- * Class Output
+ * Class Browser
  *
  * @package O2System\Kernel\Http
  */
@@ -35,9 +35,9 @@ class Output extends Message\Response
     // ------------------------------------------------------------------------
 
     /**
-     * Output::__construct
+     * Browser::__construct
      *
-     * Constructs the Kernel Output.
+     * Constructs the Kernel Browser.
      *
      * @return Output
      */
@@ -45,7 +45,7 @@ class Output extends Message\Response
     {
         parent::__construct();
 
-        // Set Output Views Directory
+        // Set Browser Views Directory
         $this->setFileDirName( 'Views' );
         $this->addFilePath( PATH_KERNEL );
 
@@ -59,7 +59,7 @@ class Output extends Message\Response
     // ------------------------------------------------------------------------
 
     /**
-     * Output::register
+     * Browser::register
      *
      * Register Kernel defined error, exception and shutdown handler.
      *
@@ -73,7 +73,7 @@ class Output extends Message\Response
     }
 
     /**
-     * Output::shutdownHandler
+     * Browser::shutdownHandler
      *
      * Kernel defined shutdown handler function.
      *
@@ -98,7 +98,7 @@ class Output extends Message\Response
     // --------------------------------------------------------------------
 
     /**
-     * Output::errorHandler
+     * Browser::errorHandler
      *
      * Kernel defined error handler function.
      *
@@ -184,7 +184,7 @@ class Output extends Message\Response
     // ------------------------------------------------------------------------
 
     /**
-     * Output::setContentType
+     * Browser::setContentType
      *
      * @param string $mimeType
      * @param string $charset
@@ -233,7 +233,7 @@ class Output extends Message\Response
     // ------------------------------------------------------------------------
 
     /**
-     * Output::send
+     * Browser::send
      *
      * @param       $data
      * @param array $headers
@@ -347,17 +347,31 @@ class Output extends Message\Response
             $this->reasonPhrase = 'OK';
         }
 
-        header( 'HTTP/' . $this->protocol . ' ' . $this->statusCode . ' ' . $this->reasonPhrase );
+        $this->sendHeaderStatus( $this->statusCode, $this->reasonPhrase, $this->protocol );
 
         foreach ( $this->headers as $name => $value ) {
-            header( $name . ': ' . trim( $value ) );
+            $this->sendHeader( $name, $value );
         }
+    }
+
+    public function sendHeaderStatus( $statusCode, $reasonPhrase, $protocol = '1.1' )
+    {
+        @header( 'HTTP/' . $protocol . ' ' . $statusCode . ' ' . $reasonPhrase, true );
+
+        return $this;
+    }
+
+    public function sendHeader( $name, $value, $replace = true )
+    {
+        @header( $name . ': ' . trim( $value ), $replace );
+
+        return $this;
     }
 
     // ------------------------------------------------------------------------
 
     /**
-     * Output::exceptionHandler
+     * Browser::exceptionHandler
      *
      * Kernel defined exception handler function.
      *
@@ -443,7 +457,7 @@ class Output extends Message\Response
     }
 
     /**
-     * Output::sendError
+     * Browser::sendError
      *
      * @param int               $code
      * @param null|array|string $vars

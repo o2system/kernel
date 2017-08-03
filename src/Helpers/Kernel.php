@@ -30,22 +30,6 @@ if ( ! function_exists( 'kernel' ) ) {
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists( 'filesystem' ) ) {
-    /**
-     * filesystem
-     *
-     * Convenient shortcut for O2System Kernel Filesystem service.
-     *
-     * @return O2System\Kernel\Services\Filesystem
-     */
-    function filesystem()
-    {
-        return kernel()->getService( 'filesystem' );
-    }
-}
-
-// ------------------------------------------------------------------------
-
 if ( ! function_exists( 'profiler' ) ) {
     /**
      * profiler
@@ -138,7 +122,7 @@ if ( ! function_exists( 'output' ) ) {
     /**
      * output
      *
-     * Convenient shortcut for O2System Kernel Output Instance
+     * Convenient shortcut for O2System Kernel Browser Instance
      *
      * @return O2System\Kernel\Http\Output|O2System\Kernel\Cli\Output
      */

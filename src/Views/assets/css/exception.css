@@ -75,7 +75,6 @@ h2.exception-description {
 }
 
 p.exception-message {
-    text-transform: capitalize;
     color: #444444;
     font-weight: normal;
     margin: 20px 0px;

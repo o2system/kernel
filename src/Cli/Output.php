@@ -33,9 +33,9 @@ class Output
     // ------------------------------------------------------------------------
 
     /**
-     * Output::__construct
+     * Browser::__construct
      *
-     * Constructs the Kernel Output.
+     * Constructs the Kernel Browser.
      *
      * @return Output
      */

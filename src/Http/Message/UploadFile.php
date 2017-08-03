@@ -33,7 +33,7 @@ class UploadFile implements UploadedFileInterface
     protected $isMoved = false;
 
     /**
-     * Upload File Stream
+     * Uploader File Stream
      *
      * @var Stream
      */

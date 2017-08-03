@@ -21,14 +21,11 @@ if ( ! function_exists( 'readable' ) ) {
      */
     function readable( $string, $capitalize = false )
     {
-        if ( ! empty( $string ) or $string != '' ) {
-            $string = str_replace( '-', ' ', $string );
-            $string = str_replace( '_', ' ', $string );
-            if ( $capitalize == true ) {
-                return ucwords( $string );
-            }
+        $string = trim( $string );
+        $string = str_replace(['-','_'], ' ', $string );
 
-            return $string;
+        if ( $capitalize == true ) {
+            return ucwords( $string );
         }
 
         return $string;
@@ -43,9 +40,9 @@ if ( ! function_exists( 'singular' ) ) {
      *
      * Takes a plural word and makes it singular
      *
-     * @param    string $string Input string
+     * @param   string $string Input string
      *
-     * @return    string
+     * @return  string
      */
     function singular( $string )
     {
@@ -55,7 +52,7 @@ if ( ! function_exists( 'singular' ) ) {
             return $result;
         }
 
-        $singular_rules = [
+        $rules = [
             '/(matr)ices$/'                                                   => '\1ix',
             '/(vert|ind)ices$/'                                               => '\1ex',
             '/^(ox)en/'                                                       => '\1',
@@ -85,7 +82,7 @@ if ( ! function_exists( 'singular' ) ) {
             '/([^us])s$/'                                                     => '\1',
         ];
 
-        foreach ( $singular_rules as $rule => $replacement ) {
+        foreach ( $rules as $rule => $replacement ) {
             if ( preg_match( $rule, $result ) ) {
                 $result = preg_replace( $rule, $replacement, $result );
                 break;
@@ -116,7 +113,7 @@ if ( ! function_exists( 'plural' ) ) {
             return $result;
         }
 
-        $plural_rules = [
+        $rules = [
             '/^(ox)$/'                => '\1\2en',     // ox
             '/([m|l])ouse$/'          => '\1ice',      // mouse, louse
             '/(matr|vert|ind)ix|ex$/' => '\1ices',     // matrix, vertex, index
@@ -138,7 +135,7 @@ if ( ! function_exists( 'plural' ) ) {
             '/$/'                     => 's',
         ];
 
-        foreach ( $plural_rules as $rule => $replacement ) {
+        foreach ( $rules as $rule => $replacement ) {
             if ( preg_match( $rule, $result ) ) {
                 $result = preg_replace( $rule, $replacement, $result );
                 break;
@@ -163,9 +160,7 @@ if ( ! function_exists( 'studlycase' ) ) {
      */
     function studlycase( $string )
     {
-        $string = ucwords( str_replace( [ '-', '_' ], ' ', underscore( $string ) ) );
-
-        return str_replace( ' ', '', $string );
+        return ucfirst( camelcase( $string ) );
     }
 }
 
@@ -175,7 +170,7 @@ if ( ! function_exists( 'camelcase' ) ) {
     /**
      * camelcase
      *
-     * Takes multiple words separated by spaces or underscores and camelizes them
+     * Takes multiple words separated by spaces, underscores or dashes and camelizes them.
      *
      * @param    string $string Input string
      *
@@ -183,16 +178,13 @@ if ( ! function_exists( 'camelcase' ) ) {
      */
     function camelcase( $string )
     {
-        if ( strtoupper( $string ) == $string ) {
+        $string = trim( $string );
+
+        if ( strtoupper( $string ) === $string ) {
             return (string)$string;
         }
 
-        return trim(
-            strtolower( $string[ 0 ] ) . substr(
-                str_replace( ' ', '', ucwords( preg_replace( '/[\s_-]+/', ' ', $string ) ) ),
-                1
-            )
-        );
+        return lcfirst( str_replace( ' ', '', ucwords( preg_replace( '/[\s_-]+/', ' ', $string ) ) ) );
     }
 }
 
@@ -210,6 +202,7 @@ if ( ! function_exists( 'snakecase' ) ) {
      */
     function snakecase( $string )
     {
+        $string = trim( $string );
         $string = preg_replace( '/(?<=\\b)(?=[A-Z])/', "_$1", $string );
 
         return trim( strtolower( $string ), '_' );
@@ -231,17 +224,8 @@ if ( ! function_exists( 'underscore' ) ) {
     function underscore( $string )
     {
         $string = trim( $string );
-        $string = preg_replace( "/[^A-Za-z0-9_ ]/", '_', $string );
-        $string = preg_replace( '/[ -]+/', '_', $string );
 
-        preg_match_all( '!([A-Z][A-Z0-9]*(?=$|[A-Z][a-z0-9])|[A-Za-z][a-z0-9]+)!', $string, $matches );
-        $x_string = $matches[ 0 ];
-
-        foreach ( $x_string as &$match ) {
-            $match = $match == strtoupper( $match ) ? strtolower( $match ) : lcfirst( $match );
-        }
-
-        return implode( '_', $x_string );
+        return strtolower( preg_replace( '/[\s]+/', '_', $string ) );
     }
 }
 
@@ -294,41 +278,5 @@ if ( ! function_exists( 'is_countable' ) ) {
                 'meta',
             ]
         );
-    }
-}
-
-// ------------------------------------------------------------------------
-
-if ( ! function_exists( 'ordinal' ) ) {
-    /**
-     * ordinal
-     *
-     * Turns a number into an ordinal string used
-     * to denote the position in an ordered sequence
-     * such as 1st, 2nd, 3rd, 4th.
-     *
-     * @param    int $integer The integer to ordinalize
-     *
-     * @return    string
-     */
-    function ordinal( $integer )
-    {
-        $suffixes =
-            [
-                'th',
-                'st',
-                'nd',
-                'rd',
-                'th',
-                'th',
-                'th',
-                'th',
-                'th',
-                'th',
-            ];
-
-        return $integer . ( $integer % 100 >= 11 && $integer % 100 <= 13
-                ? 'th'
-                : $suffixes[ $integer % 10 ] );
     }
 }

@@ -568,16 +568,13 @@ class Uri implements UriInterface
      */
     public function withScheme( $scheme )
     {
+        $uri = clone $this;
+
         if ( in_array( $scheme, [ 'http', 'https' ] ) ) {
-            $uri = clone $this;
-            $this->scheme = $scheme;
-
-            // $uri->port = $scheme;
-
-            return $uri;
+            $uri->scheme = $scheme;
         }
 
-        throw new InvalidArgumentException( 'Invalid Schemes' );
+        return $uri;
     }
 
     // ------------------------------------------------------------------------
@@ -720,7 +717,7 @@ class Uri implements UriInterface
     public function withQuery( $query )
     {
         $uri = clone $this;
-        $uri->query = $query;
+        $uri->query = is_array( $query ) ? http_build_query( $query, PHP_QUERY_RFC3986 ) : $query;
 
         return $uri;
     }

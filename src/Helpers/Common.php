@@ -35,6 +35,42 @@ if ( ! function_exists( 'is_php' ) ) {
 
 // ------------------------------------------------------------------------
 
+if ( ! function_exists( 'is_true' ) ) {
+    /**
+     * is_true
+     *
+     * Helper function to test boolean TRUE.
+     *
+     * @param    mixed $test
+     *
+     * @return    bool
+     */
+    function is_true( $test )
+    {
+        return (bool)( $test === true );
+    }
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists( 'is_false' ) ) {
+    /**
+     * is_false
+     *
+     * Helper function to test boolean FALSE.
+     *
+     * @param    mixed $test
+     *
+     * @return    bool
+     */
+    function is_false( $test )
+    {
+        return (bool)( $test === false );
+    }
+}
+
+// ------------------------------------------------------------------------
+
 if ( ! function_exists( 'is_really_writable' ) ) {
     /**
      * is_really_writable
@@ -181,69 +217,6 @@ if ( ! function_exists( 'remove_invisible_characters' ) ) {
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists( 'html_escape' ) ) {
-    /**
-     * html_escape
-     *
-     * Returns HTML escaped variable.
-     *
-     * @param    mixed $var           The input string or array of strings to be escaped.
-     * @param    bool  $double_encode $double_encode set to FALSE prevents escaping twice.
-     *
-     * @return    mixed            The escaped string or array of strings as a result.
-     */
-    function html_escape( $var, $encoding = 'UTF-8', $double_encode = true )
-    {
-        if ( is_array( $var ) ) {
-            return array_map( 'html_escape', $var, array_fill( 0, count( $var ), $double_encode ) );
-        }
-
-        return htmlspecialchars( $var, ENT_QUOTES, $encoding, $double_encode );
-    }
-}
-
-// ------------------------------------------------------------------------
-
-if ( ! function_exists( 'stringify_attributes' ) ) {
-    /**
-     * stringify_attributes
-     *
-     * Stringify attributes for use in HTML tags.
-     *
-     * Helper function used to convert a string, array, or object
-     * of attributes to a string.
-     *
-     * @param    mixed    string, array, object
-     * @param    bool
-     *
-     * @return    string
-     */
-    function stringify_attributes( $attributes, $js = false )
-    {
-        $attribute = null;
-
-        if ( empty( $attributes ) ) {
-            return $attribute;
-        }
-
-        if ( is_string( $attributes ) ) {
-            return ' ' . $attributes;
-        }
-
-        $attributes = (array)$attributes;
-
-        foreach ( $attributes as $key => $value ) {
-            $attribute .= ( $js ) ? $key . '=' . $value . ',' : ' ' . $key . '="' . $value . '"';
-
-        }
-
-
-        return rtrim( $attribute, ',' );
-    }
-}
-
-// ------------------------------------------------------------------------
-
 if ( ! function_exists( 'function_usable' ) ) {
     /**
      * function_usable
@@ -311,6 +284,14 @@ if ( ! function_exists( 'path_to_url' ) ) {
     {
         $path = str_replace( [ '/', '\\' ], DIRECTORY_SEPARATOR, $path );
 
+        $root_dir = $_SERVER[ 'DOCUMENT_ROOT' ] . DIRECTORY_SEPARATOR;
+        $base_dir = dirname( $_SERVER[ 'SCRIPT_FILENAME' ] ) . DIRECTORY_SEPARATOR;
+
+        if ( is_dir( DIRECTORY_SEPARATOR . 'private' . $base_dir ) ) {
+            $root_dir = DIRECTORY_SEPARATOR . 'private' . $root_dir;
+            $base_dir = DIRECTORY_SEPARATOR . 'private' . $base_dir;
+        }
+
         $base_url = is_https() ? 'https' : 'http';
         $base_url .= '://' . ( isset( $_SERVER[ 'HTTP_HOST' ] ) ? $_SERVER[ 'HTTP_HOST' ] : $_SERVER[ 'SERVER_NAME' ] );
 
@@ -318,22 +299,17 @@ if ( ! function_exists( 'path_to_url' ) ) {
         $base_url .= $_SERVER[ 'SERVER_PORT' ] !== '80' ? ':' . $_SERVER[ 'SERVER_PORT' ] : '';
 
         // Add base path
-        $base_url .= dirname( $_SERVER[ 'SCRIPT_NAME' ] );
+        $base_url .= str_replace( $root_dir, '', $base_dir );
         $base_url = str_replace( DIRECTORY_SEPARATOR, '/', $base_url );
         $base_url = trim( $base_url, '/' ) . '/';
 
-        // Vendor directory
-        $base_dir = explode( 'vendor' . DIRECTORY_SEPARATOR . 'o2system', __DIR__ );
-        $base_dir = str_replace( [ 'o2system', '/' ], [ '', DIRECTORY_SEPARATOR ], $base_dir[ 0 ] );
-        $base_dir = trim( $base_dir, DIRECTORY_SEPARATOR );
+        if ( defined( 'PATH_PUBLIC' ) ) {
+            $path_url = str_replace( PATH_PUBLIC, '', $path );
+        } else {
+            $path_url = str_replace( $base_dir, '', $path );
+        }
 
-        $path = str_replace( [ $base_dir, DIRECTORY_SEPARATOR ], [ '', '/' ], $path );
-        $path = trim( $path, '/' );
-
-        $path = str_replace( DIRECTORY_SEPARATOR, '/', $path );
-        $path = str_replace( '//', '/', $path );
-
-        return trim( $base_url . $path, '/' );
+        return $base_url . str_replace( DIRECTORY_SEPARATOR, '/', $path_url );
     }
 }
 
@@ -503,37 +479,6 @@ if ( ! function_exists( 'http_parse_headers' ) ) {
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists( 'stripslashes_recursive' ) ) {
-    /**
-     * stripslashes_recursive
-     *
-     * Recursive Strip Slashes
-     *
-     * Un-quotes a quoted string
-     *
-     * @link  http://php.net/manual/en/function.stripslashes.php
-     *
-     * @param string $string <p>
-     *                       The input string.
-     *                       </p>
-     *
-     * @return string a string with backslashes stripped off.
-     * (\' becomes ' and so on.)
-     * Double backslashes (\\) are made into a single
-     * backslash (\).
-     * @since 4.0
-     * @since 5.0
-     */
-    function stripslashes_recursive( $string )
-    {
-        $string = is_array( $string ) ? array_map( 'stripslashes_recursive', $string ) : stripslashes( $string );
-
-        return $string;
-    }
-}
-
-// ------------------------------------------------------------------------
-
 if ( ! function_exists( 'is_html' ) ) {
     /**
      * is_html
@@ -546,7 +491,7 @@ if ( ! function_exists( 'is_html' ) ) {
      */
     function is_html( $string )
     {
-        return (bool) ( $string !== strip_tags( $string ) ? true : false );
+        return (bool)( $string !== strip_tags( $string ) ? true : false );
     }
 }
 

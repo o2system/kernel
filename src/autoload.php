@@ -13,6 +13,7 @@
 // Load Kernel Helper Manually
 require __DIR__ . DIRECTORY_SEPARATOR . 'Helpers/Common.php';
 require __DIR__ . DIRECTORY_SEPARATOR . 'Helpers/Inflector.php';
+require __DIR__ . DIRECTORY_SEPARATOR . 'Helpers/Cookie.php';
 require __DIR__ . DIRECTORY_SEPARATOR . 'Kernel.php';
 
 /**

@@ -134,7 +134,7 @@ class Kernel extends Psr\Patterns\AbstractSingletonPattern
         $getService[ $offset ] = false;
 
         if ( $this->hasService( $offset ) ) {
-            if ( $getInstance ) {
+            if ( $getInstance === true ) {
                 return $this->services[ $offset ]->getInstance();
             }
 
@@ -169,7 +169,7 @@ class Kernel extends Psr\Patterns\AbstractSingletonPattern
         // Instantiate Kernel Cli Input
         $this->addService( new Kernel\Cli\Input() );
 
-        // Instantiate Kernel Cli Output
+        // Instantiate Kernel Cli Browser
         $this->addService( new Kernel\Cli\Output() );
     }
 
@@ -184,7 +184,7 @@ class Kernel extends Psr\Patterns\AbstractSingletonPattern
         // Instantiate Kernel Http Input
         $this->addService( new Kernel\Http\Input() );
 
-        // Instantiate Kernel Http Output
+        // Instantiate Kernel Http Browser
         $this->addService( new Kernel\Http\Output() );
     }
 
