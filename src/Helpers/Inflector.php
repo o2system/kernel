@@ -22,7 +22,7 @@ if ( ! function_exists( 'readable' ) ) {
     function readable( $string, $capitalize = false )
     {
         $string = trim( $string );
-        $string = str_replace(['-','_'], ' ', $string );
+        $string = str_replace( [ '-', '_' ], ' ', $string );
 
         if ( $capitalize == true ) {
             return ucwords( $string );
@@ -224,8 +224,15 @@ if ( ! function_exists( 'underscore' ) ) {
     function underscore( $string )
     {
         $string = trim( $string );
+        $string = str_replace( [ '/', '\\' ], '-', $string );
 
-        return strtolower( preg_replace( '/[\s]+/', '_', $string ) );
+        $string = strtolower( preg_replace(
+            [ '#[\\s-]+#', '#[^A-Za-z0-9\. -]+#' ],
+            [ '-', '' ],
+            $string
+        ) );
+
+        return str_replace( '-', '_', $string );
     }
 }
 
