@@ -36,9 +36,9 @@
   },
   "require": {
     "php": ">=5.6.0",
-    "o2system/psr": "1.*",
-    "o2system/spl": "1.*",
-    "o2system/gear": "1.*"
+    "o2system/psr": "dev-master",
+    "o2system/spl": "dev-master",
+    "o2system/gear": "dev-master"
   },
   "autoload": {
     "psr-4": {
@@ -49,6 +49,5 @@
       "src/Helper/Inflector.php",
       "src/Kernel.php"
     ]
-  },
-  "minimum-stability": "dev"
+  }
 }
