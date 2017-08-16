@@ -45,8 +45,8 @@
       "O2System\\Kernel\\": "src"
     },
     "files": [
-      "src/Helper/Common.php",
-      "src/Helper/Inflector.php",
+      "src/Helpers/Common.php",
+      "src/Helpers/Inflector.php",
       "src/Kernel.php"
     ]
   }
