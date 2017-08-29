@@ -266,7 +266,7 @@ class UploadFile implements UploadedFileInterface
      */
     public function getFileMime()
     {
-        $finfo = new finfo;
+        $finfo = new \finfo;
         $mime = $finfo->file( $this->tmpName, FILEINFO_MIME );
 
         return $mime;
@@ -282,6 +282,11 @@ class UploadFile implements UploadedFileInterface
     public function getExtension()
     {
         return pathinfo( $this->name, PATHINFO_EXTENSION );
+    }
+
+    public function getFileTemp()
+    {
+        return $this->tmpName;
     }
 
 }

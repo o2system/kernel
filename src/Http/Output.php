@@ -116,7 +116,7 @@ class Output extends Message\Response
      * @return bool If the function returns FALSE then the normal error handler continues.
      * @throws ErrorException
      */
-    public function errorHandler( $errorSeverity, $errorMessage, $errorFile, $errorLine, array $errorContext = [] )
+    public function errorHandler( $errorSeverity, $errorMessage, $errorFile, $errorLine, $errorContext = [] )
     {
         $isFatalError = ( ( ( E_ERROR | E_COMPILE_ERROR | E_CORE_ERROR | E_USER_ERROR ) & $errorSeverity ) === $errorSeverity );
 
