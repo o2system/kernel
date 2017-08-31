@@ -375,7 +375,7 @@ class Output extends Message\Response
      *
      * Kernel defined exception handler function.
      *
-     * @param \Exception|\Error|\O2System\Kernel\Abstracts\AbstractException $exception Throwable exception.
+     * @param \Exception|\Error|\O2System\Spl\Exceptions\Abstracts\AbstractException $exception Throwable exception.
      *
      * @return void
      */

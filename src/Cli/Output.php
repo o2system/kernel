@@ -14,7 +14,7 @@ namespace O2System\Kernel\Cli;
 
 // ------------------------------------------------------------------------
 
-use O2System\Kernel\Abstracts\AbstractException;
+use O2System\Spl\Exceptions\Abstracts\AbstractException;
 use O2System\Kernel\Cli\Writers\Format;
 use O2System\Kernel\Cli\Writers\Line;
 use O2System\Kernel\Cli\Writers\Table;
@@ -197,7 +197,7 @@ class Output
      *
      * Kernel defined exception handler function.
      *
-     * @param \Exception|\Error|\O2System\Kernel\Abstracts\AbstractException $exception Throwable exception.
+     * @param \Exception|\Error|\O2System\Spl\Exceptions\Abstracts\AbstractException $exception Throwable exception.
      *
      * @return void
      */

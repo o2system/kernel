@@ -1,10 +1,17 @@
 # O2System Kernel
 O2System Kernel is a set of PHP classes that is the core of O2System Framework. It is the first classes loaded on start-up. It handles the start-up process as well as input/output requests from client side either it is a browser requests or command line requests, translating them into router for the framework. It handles registries and services like modules, language, config, and etc. The kernel design pattern is based on Hybrid (or modular) kernels and the kernel bootstrap class it is based on Singleton Design Pattern and has a dependency on 3 major set of PHP classes: O2System\Spl (O2System Standard PHP Library), O2System\Psr (O2System PHP Standard Recommendations) and O2System\Gear (O2System PHP Debugger).
 
+### Features
+- HTTP Request Input-Output Handler
+- Cli Request Input-Output Handler
+- Language Service
+- Logger Service
+- Shutdown Service
+
 ### Composer Installation
 The best way to install O2System Kernel is to use [Composer](https://getcomposer.org)
 ```
-composer require o2system/kernel --prefer-dist dev-master
+composer require o2system/kernel
 ```
 > Packagist: [https://packagist.org/packages/o2system/kernel](https://packagist.org/packages/o2system/kernel)
 
