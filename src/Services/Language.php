@@ -157,7 +157,7 @@ class Language implements \IteratorAggregate
      *
      * @param string $filename
      *
-     * @return $this
+     * @return static
      */
     public function loadFile( $filename )
     {
