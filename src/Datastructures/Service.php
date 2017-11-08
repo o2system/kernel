@@ -73,7 +73,7 @@ class Service extends \ReflectionClass
             } elseif ( class_exists( $class ) ) {
                 parent::__construct( $class );
             } else {
-                throw new \BadMethodCallException( 'Class Not Found!' );
+                throw new \BadMethodCallException( 'Class not found!' );
             }
         }
     }

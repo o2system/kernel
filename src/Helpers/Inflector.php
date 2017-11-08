@@ -224,7 +224,7 @@ if ( ! function_exists( 'underscore' ) ) {
     function underscore( $string )
     {
         $string = trim( $string );
-        $string = str_replace( [ '/', '\\' ], '-', $string );
+        $string = str_replace( [ '/', '\\' ], '-', snakecase( $string ) );
 
         $string = strtolower( preg_replace(
             [ '#[\\s-]+#', '#[^A-Za-z0-9\. -]+#' ],
@@ -252,7 +252,16 @@ if ( ! function_exists( 'dash' ) ) {
      */
     function dash( $string )
     {
-        return str_replace( '_', '-', underscore( $string ) );
+        $string = trim( $string );
+        $string = str_replace( [ '/', '\\' ], '-', snakecase( $string ) );
+
+        $string = strtolower( preg_replace(
+            [ '#[\\s_-]+#', '#[^A-Za-z0-9\. _-]+#' ],
+            [ '_', '' ],
+            $string
+        ) );
+
+        return str_replace( '_', '-', $string );
     }
 }
 

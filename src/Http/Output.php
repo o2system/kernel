@@ -8,6 +8,7 @@
  * @author         Steeve Andrian Salim
  * @copyright      Copyright (c) Steeve Andrian Salim
  */
+
 // ------------------------------------------------------------------------
 
 namespace O2System\Kernel\Http;
@@ -164,8 +165,10 @@ class Output extends Message\Response
                 ) );
             } else {
 
-                if( class_exists( 'O2System\Framework' ) ) {
-                    presenter()->initialize();
+                if ( class_exists( 'O2System\Framework' ) ) {
+                    if ( o2system()->hasService( 'presenter' ) ) {
+                        presenter()->initialize();
+                    }
                 }
 
                 foreach ( array_reverse( $this->filePaths ) as $filePath ) {
@@ -180,11 +183,15 @@ class Output extends Message\Response
                 $htmlOutput = ob_get_contents();
                 ob_end_clean();
 
-                if( class_exists( 'O2System\Framework' ) ) {
-                    parser()->loadVars( presenter()->initialize()->getArrayCopy() );
-                    parser()->loadString( $htmlOutput );
-                    $htmlOutput = parser()->parse( [ 'error' => $error ] );
-                    echo presenter()->assets->parseSourceCode( $htmlOutput );
+                if ( class_exists( 'O2System\Framework' ) ) {
+                    if ( o2system()->hasService( 'presenter' ) ) {
+                        parser()->loadVars( presenter()->initialize()->getArrayCopy() );
+                        parser()->loadString( $htmlOutput );
+                        $htmlOutput = parser()->parse( [ 'error' => $error ] );
+                        echo presenter()->assets->parseSourceCode( $htmlOutput );
+                    } else {
+                        echo $htmlOutput;
+                    }
                 } else {
                     echo $htmlOutput;
                 }
@@ -261,15 +268,30 @@ class Output extends Message\Response
 
         $this->sendHeaders( $headers );
 
-        if ( is_array( $data ) OR is_object( $data ) ) {
+        if ( is_array( $data ) or is_object( $data ) ) {
+
             $response = [
-                'status' => (int)$statusCode,
+                'status' => (int) $statusCode,
                 'reason' => $reasonPhrase,
             ];
 
             if ( array_key_exists( 'message', $data ) ) {
                 $response[ 'message' ] = $data[ 'message' ];
                 unset( $data[ 'message' ] );
+            }
+
+            if ( array_key_exists( 'timestamp', $data ) ) {
+                $response[ 'timestamp' ] = $data[ 'timestamp' ];
+                unset( $data[ 'timestamp' ] );
+            }
+
+            if ( array_key_exists( 'metadata', $data ) ) {
+                $response[ 'metadata' ] = $data[ 'metadata' ];
+                unset( $data[ 'metadata' ] );
+            }
+
+            if ( array_key_exists( 'data', $data ) ) {
+                $data = $data[ 'data' ];
             }
 
             if ( count( $data ) ) {
@@ -312,7 +334,7 @@ class Output extends Message\Response
 
         } elseif ( $this->mimeType === 'application/json' ) {
             $response = [
-                'status' => (int)$statusCode,
+                'status' => (int) $statusCode,
                 'reason' => $reasonPhrase,
             ];
 
@@ -412,8 +434,8 @@ class Output extends Message\Response
                 $exception->getLine()
             );
 
-            if( class_exists( 'O2System\Framework' ) ) {
-                if( o2system()->hasService( 'presenter' ) ) {
+            if ( class_exists( 'O2System\Framework' ) ) {
+                if ( o2system()->hasService( 'presenter' ) ) {
                     presenter()->initialize();
                 }
             }
@@ -430,14 +452,16 @@ class Output extends Message\Response
             $htmlOutput = ob_get_contents();
             ob_end_clean();
 
-            if( class_exists( 'O2System\Framework' ) ) {
-                if( o2system()->hasService( 'parser' ) ) {
-                    parser()->loadVars( presenter()->initialize()->getArrayCopy() );
+            if ( class_exists( 'O2System\Framework' ) ) {
+                if ( o2system()->hasService( 'parser' ) ) {
+                    if ( o2system()->hasService( 'presenter' ) ) {
+                        parser()->loadVars( presenter()->initialize()->getArrayCopy() );
+                    }
                     parser()->loadString( $htmlOutput );
-                    $htmlOutput = parser()->parse( ['error' => $error ] );
+                    $htmlOutput = parser()->parse( [ 'error' => $error ] );
                 }
 
-                if( o2system()->hasService( 'presenter' ) ) {
+                if ( o2system()->hasService( 'presenter' ) ) {
                     echo presenter()->assets->parseSourceCode( $htmlOutput );
                 } else {
                     echo $htmlOutput;
@@ -448,8 +472,9 @@ class Output extends Message\Response
 
             exit( EXIT_ERROR );
         } elseif ( $exception instanceof AbstractException ) {
-            if( class_exists( 'O2System\Framework' ) ) {
-                if( o2system()->hasService( 'presenter' ) ) {
+
+            if ( class_exists( 'O2System\Framework' ) && $exception->getCode() !== 105 ) {
+                if ( o2system()->hasService( 'presenter' ) ) {
                     presenter()->initialize();
                 }
             }
@@ -466,14 +491,14 @@ class Output extends Message\Response
             $htmlOutput = ob_get_contents();
             ob_end_clean();
 
-            if( class_exists( 'O2System\Framework' ) ) {
-                if( o2system()->hasService( 'parser' ) ) {
+            if ( class_exists( 'O2System\Framework' ) && $exception->getCode() !== 105 ) {
+                if ( o2system()->hasService( 'parser' ) ) {
                     parser()->loadVars( presenter()->getArrayCopy() );
                     parser()->loadString( $htmlOutput );
                     $htmlOutput = parser()->parse();
                 }
 
-                if( o2system()->hasService( 'presenter' ) ) {
+                if ( o2system()->hasService( 'presenter' ) ) {
                     echo presenter()->assets->parseSourceCode( $htmlOutput );
                 } else {
                     echo $htmlOutput;
@@ -484,9 +509,8 @@ class Output extends Message\Response
 
             exit( EXIT_ERROR );
         } elseif ( $exception instanceof \Exception ) {
-
-            if( class_exists( 'O2System\Framework' ) ) {
-                if( o2system()->hasService( 'presenter' ) ) {
+            if ( class_exists( 'O2System\Framework' ) ) {
+                if ( o2system()->hasService( 'presenter' ) ) {
                     presenter()->initialize();
                 }
             }
@@ -510,18 +534,18 @@ class Output extends Message\Response
             $htmlOutput = ob_get_contents();
             ob_end_clean();
 
-            if( class_exists( 'O2System\Framework' ) ) {
-                if( o2system()->hasService( 'parser' ) ) {
+            if ( class_exists( 'O2System\Framework' ) ) {
+                if ( o2system()->hasService( 'parser' ) ) {
                     parser()->loadVars( presenter()->getArrayCopy() );
                     parser()->loadString( $htmlOutput );
                     $htmlOutput = parser()->parse( [
-                        'header' => language()->getLine( 'E_HEADER_' . $exceptionClassName ),
+                        'header'      => language()->getLine( 'E_HEADER_' . $exceptionClassName ),
                         'description' => language()->getLine( 'E_DESCRIPTION_' . $exceptionClassName ),
-                        'trace' => new Trace( $exception->getTrace() )
+                        'trace'       => new Trace( $exception->getTrace() ),
                     ] );
                 }
 
-                if( o2system()->hasService( 'presenter' ) ) {
+                if ( o2system()->hasService( 'presenter' ) ) {
                     echo presenter()->assets->parseSourceCode( $htmlOutput );
                 } else {
                     echo $htmlOutput;
@@ -567,8 +591,10 @@ class Output extends Message\Response
         } else {
             $this->sendHeaders( $headers );
 
-            if( class_exists( 'O2System\Framework' ) ) {
-                presenter()->initialize();
+            if ( class_exists( 'O2System\Framework' ) ) {
+                if ( o2system()->hasService( 'presenter' ) ) {
+                    presenter()->initialize();
+                }
             }
 
             foreach ( array_reverse( $this->filePaths ) as $filePath ) {
@@ -585,11 +611,15 @@ class Output extends Message\Response
             $htmlOutput = ob_get_contents();
             ob_end_clean();
 
-            if( class_exists( 'O2System\Framework' ) ) {
-                parser()->loadVars( presenter()->getArrayCopy() );
-                parser()->loadString( $htmlOutput );
-                $htmlOutput = parser()->parse();
-                echo presenter()->assets->parseSourceCode( $htmlOutput );
+            if ( class_exists( 'O2System\Framework' ) ) {
+                if ( o2system()->hasService( 'presenter' ) ) {
+                    parser()->loadVars( presenter()->getArrayCopy() );
+                    parser()->loadString( $htmlOutput );
+                    $htmlOutput = parser()->parse();
+                    echo presenter()->assets->parseSourceCode( $htmlOutput );
+                } else {
+                    echo $htmlOutput;
+                }
             } else {
                 echo $htmlOutput;
             }

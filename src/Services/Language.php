@@ -20,7 +20,7 @@ use Traversable;
 /**
  * O2System Language
  *
- * This class is a collection, loader and manager of default languages data from O2System and User Applications.
+ * This class is a collection, loader and manage of default languages data from O2System and User Applications.
  *
  * @package O2System\Kernel
  */

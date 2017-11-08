@@ -296,11 +296,18 @@ if ( ! function_exists( 'path_to_url' ) ) {
         $base_dir = str_replace( [ '/', '\\' ], DIRECTORY_SEPARATOR, $base_dir );
 
         $base_url = is_https() ? 'https' : 'http';
-        $base_url .= '://' . ( isset( $_SERVER[ 'HTTP_HOST' ] ) ? $_SERVER[ 'HTTP_HOST' ] : $_SERVER[ 'SERVER_NAME' ] );
 
-        // Add server port if needed
-        $base_url .= $_SERVER[ 'SERVER_PORT' ] !== '80' ? ':' . $_SERVER[ 'SERVER_PORT' ] : '';
+        if( isset( $_SERVER[ 'HTTP_HOST' ] ) ) {
+            $base_url .= '://' . $_SERVER[ 'HTTP_HOST' ];
+        } elseif( isset( $_SERVER[ 'SERVER_NAME' ] ) ) {
 
+            // Add server name
+            $base_url .= '://' . $_SERVER[ 'SERVER_NAME' ];
+
+            // Add server port if needed
+            $base_url .= $_SERVER[ 'SERVER_PORT' ] !== '80' ? ':' . $_SERVER[ 'SERVER_PORT' ] : '';
+        }
+        
         // Add base path
         $base_url .= '/' . str_replace( $root_dir, '', $base_dir );
         $base_url = str_replace( DIRECTORY_SEPARATOR, '/', $base_url );
@@ -311,8 +318,6 @@ if ( ! function_exists( 'path_to_url' ) ) {
         } else {
             $path_url = str_replace( $base_dir, '', $path );
         }
-
-
 
         return $base_url . str_replace( DIRECTORY_SEPARATOR, '/', $path_url );
     }
