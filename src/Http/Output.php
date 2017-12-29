@@ -275,6 +275,11 @@ class Output extends Message\Response
                 'reason' => $reasonPhrase,
             ];
 
+            if ( array_key_exists( 'success', $data ) ) {
+                $response[ 'success' ] = $data[ 'success' ];
+                unset( $data[ 'success' ] );
+            }
+
             if ( array_key_exists( 'message', $data ) ) {
                 $response[ 'message' ] = $data[ 'message' ];
                 unset( $data[ 'message' ] );

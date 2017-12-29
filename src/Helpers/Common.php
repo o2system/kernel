@@ -23,7 +23,7 @@ if ( ! function_exists( 'is_php' ) ) {
     function is_php( $version )
     {
         static $_is_php;
-        $version = (string)$version;
+        $version = (string) $version;
 
         if ( ! isset( $_is_php[ $version ] ) ) {
             $_is_php[ $version ] = version_compare( PHP_VERSION, $version, '>=' );
@@ -47,7 +47,7 @@ if ( ! function_exists( 'is_true' ) ) {
      */
     function is_true( $test )
     {
-        return (bool)( $test === true );
+        return (bool) ( $test === true );
     }
 }
 
@@ -65,7 +65,7 @@ if ( ! function_exists( 'is_false' ) ) {
      */
     function is_false( $test )
     {
-        return (bool)( $test === false );
+        return (bool) ( $test === false );
     }
 }
 
@@ -272,6 +272,33 @@ if ( ! function_exists( 'function_usable' ) ) {
 
 // ------------------------------------------------------------------------
 
+if ( ! function_exists( 'apache_request_headers' ) ) {
+    function apache_request_headers()
+    {
+        $headers = [];
+        $http_regex = '/\AHTTP_/';
+        foreach ( $_SERVER as $server_key => $server_value ) {
+            if ( preg_match( $http_regex, $server_key ) ) {
+                $header_key = preg_replace( $http_regex, '', $server_key );
+                $matches_regex = [];
+                // do some nasty string manipulations to restore the original letter case
+                // this should work in most cases
+                $matches_regex = explode( '_', $header_key );
+                if ( count( $matches_regex ) > 0 and strlen( $header_key ) > 2 ) {
+                    foreach ( $matches_regex as $match_key => $match_value ) {
+                        $matches_regex[ $match_key ] = ucfirst( $match_value );
+                    }
+                    $header_key = implode( '-', $matches_regex );
+                }
+                $headers[ $header_key ] = $server_value;
+            }
+        }
+
+        return ( $headers );
+    }
+}
+
+
 if ( ! function_exists( 'path_to_url' ) ) {
     /**
      * path_to_url
@@ -297,9 +324,9 @@ if ( ! function_exists( 'path_to_url' ) ) {
 
         $base_url = is_https() ? 'https' : 'http';
 
-        if( isset( $_SERVER[ 'HTTP_HOST' ] ) ) {
+        if ( isset( $_SERVER[ 'HTTP_HOST' ] ) ) {
             $base_url .= '://' . $_SERVER[ 'HTTP_HOST' ];
-        } elseif( isset( $_SERVER[ 'SERVER_NAME' ] ) ) {
+        } elseif ( isset( $_SERVER[ 'SERVER_NAME' ] ) ) {
 
             // Add server name
             $base_url .= '://' . $_SERVER[ 'SERVER_NAME' ];
@@ -307,7 +334,7 @@ if ( ! function_exists( 'path_to_url' ) ) {
             // Add server port if needed
             $base_url .= $_SERVER[ 'SERVER_PORT' ] !== '80' ? ':' . $_SERVER[ 'SERVER_PORT' ] : '';
         }
-        
+
         // Add base path
         $base_url .= '/' . str_replace( $root_dir, '', $base_dir );
         $base_url = str_replace( DIRECTORY_SEPARATOR, '/', $base_url );
@@ -501,7 +528,7 @@ if ( ! function_exists( 'is_html' ) ) {
      */
     function is_html( $string )
     {
-        return (bool)( $string !== strip_tags( $string ) ? true : false );
+        return (bool) ( $string !== strip_tags( $string ) ? true : false );
     }
 }
 

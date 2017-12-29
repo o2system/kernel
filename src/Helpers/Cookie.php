@@ -10,7 +10,7 @@
  */
 // ------------------------------------------------------------------------
 
-if ( ! function_exists( 'set_cookie' ) ) {
+if ( ! function_exists('set_cookie')) {
     /**
      * set_cookie
      *
@@ -28,7 +28,7 @@ if ( ! function_exists( 'set_cookie' ) ) {
      * @param   bool   $httpOnly  true makes the cookie accessible via
      *                            http(s) only (no javascript)
      *
-     * @return  void
+     * @return  bool
      */
     function set_cookie(
         $name,
@@ -40,63 +40,71 @@ if ( ! function_exists( 'set_cookie' ) ) {
         $secure = null,
         $httponly = null
     ) {
-        if ( is_array( $name ) ) {
+        if (is_array($name)) {
             // always leave 'name' in last place, as the loop will break otherwise, due to $$item
-            foreach ( [ 'value', 'expire', 'domain', 'path', 'prefix', 'secure', 'httponly', 'name' ] as $item ) {
-                if ( isset( $name[ $item ] ) ) {
+            foreach (['value', 'expire', 'domain', 'path', 'prefix', 'secure', 'httponly', 'name'] as $item) {
+                if (isset($name[ $item ])) {
                     $$item = $name[ $item ];
                 }
             }
         }
 
-        if ( $prefix === '' && function_exists( 'config' ) ) {
-            $prefix = config()->offsetGet( 'cookie' )[ 'prefix' ];
+        if ($prefix === '' && function_exists('config')) {
+            $prefix = config()->offsetGet('cookie')[ 'prefix' ];
         }
 
-        if ( $domain === '' && function_exists( 'config' ) ) {
-            $domain = config()->offsetGet( 'cookie' )[ 'domain' ];
+        if ($domain === '' && function_exists('config')) {
+            $domain = config()->offsetGet('cookie')[ 'domain' ];
         }
 
-        if ( $path === '' && function_exists( 'config' ) ) {
-            $path = config()->offsetGet( 'cookie' )[ 'path' ];
+        if ($path === '' && function_exists('config')) {
+            $path = config()->offsetGet('cookie')[ 'path' ];
         }
 
-        if ( $secure === null && function_exists( 'config' ) ) {
-            $secure = config()->offsetGet( 'cookie' )[ 'secure' ];
+        if ($secure === null && function_exists('config')) {
+            $secure = config()->offsetGet('cookie')[ 'secure' ];
         }
 
-        if ( $httponly === null && function_exists( 'config' ) ) {
-            $httponly = config()->offsetGet( 'cookie' )[ 'httpOnly' ];
+        if ($httponly === null && function_exists('config')) {
+            $httponly = config()->offsetGet('cookie')[ 'httpOnly' ];
         }
 
-        if ( ! is_numeric( $expire ) OR $expire < 0 ) {
-            $expire = 1;
+        if ( ! is_numeric($expire) OR $expire < 0) {
+            $expire = -1;
         } else {
-            $expire = ( $expire > 0 ) ? time() + $expire : 0;
+            $expire = ($expire > 0) ? time() + $expire : -1;
         }
 
-        setcookie( $prefix . $name, $value, $expire, $path, $domain, $secure, $httponly );
+        return setcookie(
+            $prefix . $name,
+            $value,
+            $expire,
+            $path,
+            $domain,
+            $secure,
+            $httponly
+        );
     }
 }
 //--------------------------------------------------------------------
-if ( ! function_exists( 'get_cookie' ) ) {
+if ( ! function_exists('get_cookie')) {
     /**
      * get_cookie
      *
      * Fetch an item from the COOKIE array
      *
-     * @param   string $index The cookie index name.
+     * @param   string $name The cookie index name.
      *
      * @return  mixed Returns FALSE if the cookie is not exists.
      */
-    function get_cookie( $index )
+    function get_cookie($name)
     {
-        if ( isset( $_COOKIE[ $index ] ) ) {
-            return $_COOKIE[ $index ];
-        } elseif ( function_exists( 'config' ) ) {
-            $prefix = config()->offsetGet( 'cookie' )[ 'prefix' ];
-            if ( isset( $_COOKIE[ $prefix . $index ] ) ) {
-                return $_COOKIE[ $prefix . $index ];
+        if (isset($_COOKIE[ $name ])) {
+            return $_COOKIE[ $name ];
+        } elseif (function_exists('config')) {
+            $prefix = config()->offsetGet('cookie')[ 'prefix' ];
+            if (isset($_COOKIE[ $prefix . $name ])) {
+                return $_COOKIE[ $prefix . $name ];
             }
         }
 
@@ -104,7 +112,7 @@ if ( ! function_exists( 'get_cookie' ) ) {
     }
 }
 //--------------------------------------------------------------------
-if ( ! function_exists( 'delete_cookie' ) ) {
+if ( ! function_exists('delete_cookie')) {
     /**
      * delete_cookie
      *
@@ -115,10 +123,18 @@ if ( ! function_exists( 'delete_cookie' ) ) {
      * @param   string $path   The cookie path
      * @param   string $prefix The cookie prefix
      *
-     * @return  void
+     * @return  bool
      */
-    function delete_cookie( $name, $domain = '', $path = '/', $prefix = '' )
+    function delete_cookie($name, $domain = '', $path = '/', $prefix = '')
     {
-        set_cookie( $name, '', '', $domain, $path, $prefix );
+        if ($prefix === '' && function_exists('config')) {
+            $prefix = config()->offsetGet('cookie')[ 'prefix' ];
+        }
+
+        if (isset($_COOKIE[ $prefix . $name ])) {
+            unset($_COOKIE[ $prefix . $name ]);
+        }
+
+        return set_cookie($name, '', -1, $domain, $path, $prefix);
     }
 }

@@ -459,6 +459,11 @@ class Input
 
     //--------------------------------------------------------------------
 
+    public function userAgent()
+    {
+        return $this->server('HTTP_USER_AGENT');
+    }
+
     /**
      * Input::server
      *

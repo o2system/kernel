@@ -8,6 +8,7 @@
  * @author         Steeve Andrian Salim
  * @copyright      Copyright (c) Steeve Andrian Salim
  */
+
 // ------------------------------------------------------------------------
 
 namespace O2System\Kernel\Services;
@@ -74,22 +75,22 @@ class Language implements \IteratorAggregate
      */
     public function __construct()
     {
-        $this->setFileDirName( 'Languages' );
-        $this->addFilePath( PATH_KERNEL );
+        $this->setFileDirName('Languages');
+        $this->addFilePath(PATH_KERNEL);
     }
 
     // ------------------------------------------------------------------------
 
-    public function setDefault( $default )
+    public function setDefault($default)
     {
-        $xDefault = explode( '-', $default );
+        $xDefault = explode('-', $default);
 
-        if ( count( $xDefault ) == 2 ) {
-            list( $locale, $ideom ) = $xDefault;
-            $this->setDefaultLocale( $locale );
-            $this->setDefaultIdeom( $ideom );
-        } elseif ( count( $xDefault ) == 1 ) {
-            $this->setDefaultLocale( reset( $xDefault ) );
+        if (count($xDefault) == 2) {
+            list($locale, $ideom) = $xDefault;
+            $this->setDefaultLocale($locale);
+            $this->setDefaultIdeom($ideom);
+        } elseif (count($xDefault) == 1) {
+            $this->setDefaultLocale(reset($xDefault));
         }
 
         return $this;
@@ -114,10 +115,10 @@ class Language implements \IteratorAggregate
      * @access  public
      * @return  Language
      */
-    public function setDefaultLocale( $defaultLocale )
+    public function setDefaultLocale($defaultLocale)
     {
-        $this->defaultLocale = strtolower( $defaultLocale );
-        $this->defaultIdeom = strtoupper( $defaultLocale );
+        $this->defaultLocale = strtolower($defaultLocale);
+        $this->defaultIdeom = strtoupper($defaultLocale);
 
         return $this;
     }
@@ -141,9 +142,9 @@ class Language implements \IteratorAggregate
      * @access  public
      * @return  Language
      */
-    public function setDefaultIdeom( $defaultIdeom )
+    public function setDefaultIdeom($defaultIdeom)
     {
-        $this->defaultIdeom = strtoupper( $defaultIdeom );
+        $this->defaultIdeom = strtoupper($defaultIdeom);
 
         return $this;
     }
@@ -159,18 +160,22 @@ class Language implements \IteratorAggregate
      *
      * @return static
      */
-    public function loadFile( $filename )
+    public function loadFile($filename)
     {
-        $filename = is_string( $filename ) ? [ $filename ] : $filename;
+        $filename = is_string($filename) ? [$filename] : $filename;
         $default = $this->getDefault();
 
-        foreach ( $filename as $file ) {
-            if ( is_file( $file ) ) {
-                $this->parseFile( $file );
-            } else {
-                $file = strtolower( $file );
+        if (empty($filename)) {
+            return $this;
+        }
 
-                foreach ( $this->filePaths as $filePath ) {
+        foreach ($filename as $file) {
+            if (is_file($file)) {
+                $this->parseFile($file);
+            } else {
+                $file = strtolower($file);
+
+                foreach ($this->filePaths as $filePath) {
                     $filePaths = [
                         $filePath . $default . DIRECTORY_SEPARATOR . $file . '.ini',
                         $filePath . $file . '_' . $default . '.ini',
@@ -178,9 +183,9 @@ class Language implements \IteratorAggregate
                         $filePath . $file . '.ini',
                     ];
 
-                    foreach ( $filePaths as $filePath ) {
-                        if ( is_file( $filePath ) AND ! in_array( $filePath, $this->isLoaded ) ) {
-                            $this->parseFile( $filePath );
+                    foreach ($filePaths as $filePath) {
+                        if (is_file($filePath) AND ! in_array($filePath, $this->isLoaded)) {
+                            $this->parseFile($filePath);
                             break;
                         }
                     }
@@ -195,7 +200,7 @@ class Language implements \IteratorAggregate
 
     public function getDefault()
     {
-        return implode( '-', [ $this->defaultLocale, $this->defaultIdeom ] );
+        return implode('-', [$this->defaultLocale, $this->defaultIdeom]);
     }
 
     // ------------------------------------------------------------------------
@@ -207,14 +212,14 @@ class Language implements \IteratorAggregate
      *
      * @param string $filePath Language INI filePath
      */
-    protected function parseFile( $filePath )
+    protected function parseFile($filePath)
     {
-        $lines = parse_ini_file( $filePath, true, INI_SCANNER_RAW );
+        $lines = parse_ini_file($filePath, true, INI_SCANNER_RAW);
 
-        if ( ! empty( $lines ) ) {
-            $this->isLoaded[ pathinfo( $filePath, PATHINFO_FILENAME ) ] = $filePath;
+        if ( ! empty($lines)) {
+            $this->isLoaded[ pathinfo($filePath, PATHINFO_FILENAME) ] = $filePath;
 
-            $this->lines = array_merge( $this->lines, $lines );
+            $this->lines = array_merge($this->lines, $lines);
         }
     }
 
@@ -230,25 +235,25 @@ class Language implements \IteratorAggregate
      *
      * @return mixed|null
      */
-    public function getLine( $line, array $context = [] )
+    public function getLine($line, array $context = [])
     {
-        $lineOffset = strtoupper( $line );
+        $lineOffset = strtoupper($line);
 
-        if ( empty( $context ) ) {
-            $lineContent = isset( $this->lines[ $lineOffset ] ) ? $this->lines[ $lineOffset ] : $line;
+        if (empty($context)) {
+            $lineContent = isset($this->lines[ $lineOffset ]) ? $this->lines[ $lineOffset ] : $line;
         } else {
-            $line = isset( $this->lines[ $lineOffset ] ) ? $this->lines[ $lineOffset ] : $line;
-            array_unshift( $context, $line );
+            $line = isset($this->lines[ $lineOffset ]) ? $this->lines[ $lineOffset ] : $line;
+            array_unshift($context, $line);
 
-            $lineContent = @call_user_func_array( 'sprintf', $context );
+            $lineContent = @call_user_func_array('sprintf', $context);
         }
 
-        return str_replace( [ 'PHP_EOL', 'PHP_EOL ' ], PHP_EOL, $lineContent );
+        return str_replace(['PHP_EOL', 'PHP_EOL '], PHP_EOL, $lineContent);
     }
 
     // ------------------------------------------------------------------------
 
-    public function isExists( $localeIdeom )
+    public function isExists($localeIdeom)
     {
         return false;
     }
@@ -265,6 +270,6 @@ class Language implements \IteratorAggregate
      */
     public function getIterator()
     {
-        return new \ArrayIterator( $this->lines );
+        return new \ArrayIterator($this->lines);
     }
 }
