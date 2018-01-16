@@ -173,7 +173,7 @@ class Language implements \IteratorAggregate
             if (is_file($file)) {
                 $this->parseFile($file);
             } else {
-                $file = strtolower($file);
+                $file = snakecase($file, '-');
 
                 foreach ($this->filePaths as $filePath) {
                     $filePaths = [
@@ -186,6 +186,7 @@ class Language implements \IteratorAggregate
                     foreach ($filePaths as $filePath) {
                         if (is_file($filePath) AND ! in_array($filePath, $this->isLoaded)) {
                             $this->parseFile($filePath);
+                            break;
                             break;
                         }
                     }

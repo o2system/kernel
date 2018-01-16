@@ -10,7 +10,7 @@
  */
 // ------------------------------------------------------------------------
 
-if ( ! function_exists( 'readable' ) ) {
+if ( ! function_exists('readable')) {
     /**
      * readable
      *
@@ -19,13 +19,13 @@ if ( ! function_exists( 'readable' ) ) {
      *
      * @return mixed|string
      */
-    function readable( $string, $capitalize = false )
+    function readable($string, $capitalize = false)
     {
-        $string = trim( $string );
-        $string = str_replace( [ '-', '_' ], ' ', $string );
+        $string = trim($string);
+        $string = str_replace(['-', '_'], ' ', $string);
 
-        if ( $capitalize == true ) {
-            return ucwords( $string );
+        if ($capitalize == true) {
+            return ucwords($string);
         }
 
         return $string;
@@ -34,7 +34,7 @@ if ( ! function_exists( 'readable' ) ) {
     // ------------------------------------------------------------------------
 }
 
-if ( ! function_exists( 'singular' ) ) {
+if ( ! function_exists('singular')) {
     /**
      * singular
      *
@@ -44,11 +44,11 @@ if ( ! function_exists( 'singular' ) ) {
      *
      * @return  string
      */
-    function singular( $string )
+    function singular($string)
     {
-        $result = strval( $string );
+        $result = strval($string);
 
-        if ( ! is_countable( $result ) ) {
+        if ( ! is_countable($result)) {
             return $result;
         }
 
@@ -82,9 +82,9 @@ if ( ! function_exists( 'singular' ) ) {
             '/([^us])s$/'                                                     => '\1',
         ];
 
-        foreach ( $rules as $rule => $replacement ) {
-            if ( preg_match( $rule, $result ) ) {
-                $result = preg_replace( $rule, $replacement, $result );
+        foreach ($rules as $rule => $replacement) {
+            if (preg_match($rule, $result)) {
+                $result = preg_replace($rule, $replacement, $result);
                 break;
             }
         }
@@ -95,7 +95,7 @@ if ( ! function_exists( 'singular' ) ) {
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists( 'plural' ) ) {
+if ( ! function_exists('plural')) {
     /**
      * plural
      *
@@ -105,11 +105,11 @@ if ( ! function_exists( 'plural' ) ) {
      *
      * @return    string
      */
-    function plural( $string )
+    function plural($string)
     {
-        $result = strval( $string );
+        $result = strval($string);
 
-        if ( ! is_countable( $result ) ) {
+        if ( ! is_countable($result)) {
             return $result;
         }
 
@@ -135,9 +135,9 @@ if ( ! function_exists( 'plural' ) ) {
             '/$/'                     => 's',
         ];
 
-        foreach ( $rules as $rule => $replacement ) {
-            if ( preg_match( $rule, $result ) ) {
-                $result = preg_replace( $rule, $replacement, $result );
+        foreach ($rules as $rule => $replacement) {
+            if (preg_match($rule, $result)) {
+                $result = preg_replace($rule, $replacement, $result);
                 break;
             }
         }
@@ -148,7 +148,7 @@ if ( ! function_exists( 'plural' ) ) {
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists( 'studlycase' ) ) {
+if ( ! function_exists('studlycase')) {
     /**
      * studlycase
      *
@@ -158,15 +158,15 @@ if ( ! function_exists( 'studlycase' ) ) {
      *
      * @return string
      */
-    function studlycase( $string )
+    function studlycase($string)
     {
-        return ucfirst( camelcase( $string ) );
+        return ucfirst(camelcase($string));
     }
 }
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists( 'camelcase' ) ) {
+if ( ! function_exists('camelcase')) {
     /**
      * camelcase
      *
@@ -176,21 +176,21 @@ if ( ! function_exists( 'camelcase' ) ) {
      *
      * @return    string
      */
-    function camelcase( $string )
+    function camelcase($string)
     {
-        $string = trim( $string );
+        $string = trim($string);
 
-        if ( strtoupper( $string ) === $string ) {
+        if (strtoupper($string) === $string) {
             return (string)$string;
         }
 
-        return lcfirst( str_replace( ' ', '', ucwords( preg_replace( '/[\s_-]+/', ' ', $string ) ) ) );
+        return lcfirst(str_replace(' ', '', ucwords(preg_replace('/[\s_-]+/', ' ', $string))));
     }
 }
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists( 'snakecase' ) ) {
+if ( ! function_exists('snakecase')) {
     /**
      * snakecase
      *
@@ -200,18 +200,22 @@ if ( ! function_exists( 'snakecase' ) ) {
      *
      * @return string
      */
-    function snakecase( $string )
+    function snakecase($string, $glue = '_')
     {
-        $string = trim( $string );
-        $string = preg_replace( '/(?<=\\b)(?=[A-Z])/', "_$1", $string );
+        preg_match_all('!([A-Z][A-Z0-9]*(?=$|[A-Z][a-z0-9])|[A-Za-z][a-z0-9]+)!', $string, $matches);
 
-        return trim( strtolower( $string ), '_' );
+        $matches = $matches[ 0 ];
+        foreach ($matches as &$match) {
+            $match = $match == strtoupper($match) ? strtolower($match) : lcfirst($match);
+        }
+
+        return implode($glue, $matches);
     }
 }
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists( 'underscore' ) ) {
+if ( ! function_exists('underscore')) {
     /**
      * underscore
      *
@@ -221,25 +225,25 @@ if ( ! function_exists( 'underscore' ) ) {
      *
      * @return    string
      */
-    function underscore( $string )
+    function underscore($string)
     {
-        $string = trim( $string );
-        $string = str_replace( [ '/', '\\' ], '-', snakecase( $string ) );
+        $string = trim($string);
+        $string = str_replace(['/', '\\'], '-', snakecase($string));
 
-        $string = strtolower( preg_replace(
-            [ '#[\\s-]+#', '#[^A-Za-z0-9\. -]+#' ],
-            [ '-', '' ],
+        $string = strtolower(preg_replace(
+            ['#[\\s-]+#', '#[^A-Za-z0-9\. -]+#'],
+            ['-', ''],
             $string
-        ) );
+        ));
 
-        return str_replace( '-', '_', $string );
+        return str_replace('-', '_', $string);
     }
 }
 
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists( 'dash' ) ) {
+if ( ! function_exists('dash')) {
     /**
      * dash
      *
@@ -250,25 +254,25 @@ if ( ! function_exists( 'dash' ) ) {
      * @access  public
      * @return  string
      */
-    function dash( $string )
+    function dash($string)
     {
-        $string = trim( $string );
-        $string = str_replace( [ '/', '\\' ], '-', snakecase( $string ) );
+        $string = trim($string);
+        $string = str_replace(['/', '\\'], '-', snakecase($string));
 
-        $string = strtolower( preg_replace(
-            [ '#[\\s_-]+#', '#[^A-Za-z0-9\. _-]+#' ],
-            [ '_', '' ],
+        $string = strtolower(preg_replace(
+            ['#[\\s_-]+#', '#[^A-Za-z0-9\. _-]+#'],
+            ['_', ''],
             $string
-        ) );
+        ));
 
-        return str_replace( '_', '-', $string );
+        return str_replace('_', '-', $string);
     }
 }
 
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists( 'is_countable' ) ) {
+if ( ! function_exists('is_countable')) {
     /**
      * is_countable
      *
@@ -279,10 +283,10 @@ if ( ! function_exists( 'is_countable' ) ) {
      * @access  public
      * @return  bool
      */
-    function is_countable( $string )
+    function is_countable($string)
     {
         return ! in_array(
-            strtolower( $string ),
+            strtolower($string),
             [
                 'equipment',
                 'information',
