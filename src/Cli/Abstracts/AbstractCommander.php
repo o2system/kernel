@@ -97,7 +97,9 @@ abstract class AbstractCommander
     {
         language()->loadFile( 'cli' );
 
-        $this->commandName = strtolower( get_class_name( $this ) );
+        $className = explode('Commanders\\', get_class($this));
+        $className = str_replace('\\','/', end($className));
+        $this->commandName = implode('/', array_map('strtolower', explode('/', $className)));
 
         foreach ( $this->commandOptions as $optionName => $optionConfig ) {
             $shortcut = empty( $optionConfig[ 'shortcut' ] )
@@ -264,16 +266,16 @@ abstract class AbstractCommander
                 ->setNewLinesAfter( 1 )
         );
 
-        output()->write(
-            ( new Format() )
-                ->setContextualClass( Format::INFO )
-                ->setString( $this->commandName . ':action --option=value' )
-        );
-
         // Show Actions
         $this->loadActions();
 
         if ( count( $this->actionsPool ) ) {
+            output()->write(
+                ( new Format() )
+                    ->setContextualClass( Format::INFO )
+                    ->setString( $this->commandName . '/action --option=value' )
+            );
+
             output()->write(
                 ( new Format() )
                     ->setString( language()->getLine( 'CLI_ACTIONS' ) . ':' )
@@ -297,6 +299,12 @@ abstract class AbstractCommander
             output()->write(
                 ( new Format() )
                     ->setString( $table->render() )
+            );
+        } else {
+            output()->write(
+                ( new Format() )
+                    ->setContextualClass( Format::INFO )
+                    ->setString( $this->commandName . ' --option=value' )
             );
         }
 

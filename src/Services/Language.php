@@ -173,8 +173,6 @@ class Language implements \IteratorAggregate
             if (is_file($file)) {
                 $this->parseFile($file);
             } else {
-                $file = snakecase($file, '-');
-
                 foreach ($this->filePaths as $filePath) {
                     $filePaths = [
                         $filePath . $default . DIRECTORY_SEPARATOR . $file . '.ini',

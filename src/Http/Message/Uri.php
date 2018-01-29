@@ -175,11 +175,8 @@ class Uri implements UriInterface
              * Define Uri Host
              */
             $this->host = isset( $_SERVER[ 'HTTP_HOST' ] )
-                ? ltrim( $_SERVER[ 'HTTP_HOST' ], 'www.' )
-                : ltrim(
-                    $_SERVER[ 'SERVER_NAME' ],
-                    'www.'
-                );
+                ? str_replace('www.', '',$_SERVER[ 'HTTP_HOST' ] )
+                : str_replace('www.','', $_SERVER[ 'SERVER_NAME' ]);
 
             /**
              * Define Uri Scheme
@@ -237,7 +234,7 @@ class Uri implements UriInterface
         if ( filter_var( $this->host, FILTER_VALIDATE_IP ) !== false OR strpos( $this->host, '.' ) === false ) {
             $xHost = [ $this->host ];
         } else {
-            $xHost = explode( '.', ltrim( $this->host, 'www.' ) );
+            $xHost = explode( '.', str_replace( 'www.', '', $this->host ) );
         }
 
         /**

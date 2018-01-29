@@ -14,6 +14,7 @@ namespace O2System\Kernel\Cli;
 
 // ------------------------------------------------------------------------
 
+use O2System\Gear\Trace;
 use O2System\Spl\Exceptions\Abstracts\AbstractException;
 use O2System\Kernel\Cli\Writers\Format;
 use O2System\Kernel\Cli\Writers\Line;
@@ -183,8 +184,13 @@ class Output
      */
     public function write( $text, $type = 'stdout' )
     {
-        if ( in_array( $type, [ 'stdout', 'stderr' ] ) ) {
+        if ( in_array( $type, [ 'stdout', 'stderr' ] ) && ! empty($text) ) {
             $f = fopen( 'php://' . $type, 'w' );
+
+            if(is_array($text) || is_object($text)) {
+                $text = json_encode($text);
+            }
+
             fwrite( $f, $text );
             fclose( $f );
         }
@@ -296,7 +302,7 @@ class Output
             output()->write(
                 ( new Format() )
                     ->setContextualClass( Format::DANGER )
-                    ->setString( '[ ' . language()->getLine( $exception->getCode() ) . ' ] ' . language()->getLine( $exception->getDescription() ) )
+                    ->setString( '[ ' . language()->getLine( $exception->getCode() ) . ' ] ' . language()->getLine( $exception->getMessage() ) )
                     ->setNewLinesAfter( 1 )
             );
 
@@ -322,8 +328,10 @@ class Output
             $table = new Table();
             $table->isShowBorder = false;
 
+            $trace = new Trace( $exception->getTrace() );
+
             $i = 1;
-            foreach ( $exception->getChronology() as $chronology ) {
+            foreach ( $trace->getChronology() as $chronology ) {
                 $table
                     ->addRow()
                     ->addColumn( $i . '. ' . $chronology->call )
