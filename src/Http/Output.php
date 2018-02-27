@@ -299,7 +299,11 @@ class Output extends Message\Response
                 $data = $data[ 'data' ];
             }
 
-            if ( count( $data ) ) {
+            if ( array_key_exists( 'errors', $data ) ) {
+                $response['errors'] = $data['errors'];
+            } elseif ( is_array($data) ) {
+                $response[ 'results' ] = $data;
+            } else {
                 $response[ 'result' ] = $data;
             }
 
@@ -334,7 +338,7 @@ class Output extends Message\Response
 
                 echo $xml->asXML();
             } else {
-                echo json_encode( $data, JSON_PRETTY_PRINT );
+                echo json_encode( $response, JSON_PRETTY_PRINT );
             }
 
         } elseif ( $this->mimeType === 'application/json' ) {
@@ -586,13 +590,13 @@ class Output extends Message\Response
         if ( is_string( $vars ) ) {
             $error[ 'message' ] = $vars;
         } elseif ( is_array( $vars ) ) {
-            $error = array_merge( $error, $vars );
+            $vars['message'] = $error['message'];
         }
 
         if ( is_ajax() or $this->mimeType !== 'text/html' ) {
             $this->statusCode = $code;
             $this->reasonPhrase = $error[ 'title' ];
-            $this->send();
+            $this->send($vars);
         } else {
             $this->sendHeaders( $headers );
 

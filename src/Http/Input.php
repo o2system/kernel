@@ -482,4 +482,9 @@ class Input
     {
         return $this->filter( INPUT_SERVER, $offset, $filter );
     }
+
+    final public function submit()
+    {
+        return (bool) isset($_POST['submit']);
+    }
 }

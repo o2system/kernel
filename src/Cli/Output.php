@@ -187,7 +187,7 @@ class Output
         if ( in_array( $type, [ 'stdout', 'stderr' ] ) && ! empty($text) ) {
             $f = fopen( 'php://' . $type, 'w' );
 
-            if(is_array($text) || is_object($text)) {
+            if( is_array($text) ) {
                 $text = json_encode($text);
             }
 
