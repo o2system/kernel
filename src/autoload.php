@@ -10,6 +10,9 @@
  */
 // ------------------------------------------------------------------------
 
+// Load Config Manually
+require __DIR__ . DIRECTORY_SEPARATOR . 'Config/Constants.php';
+
 // Load Kernel Helper Manually
 require __DIR__ . DIRECTORY_SEPARATOR . 'Helpers/Common.php';
 require __DIR__ . DIRECTORY_SEPARATOR . 'Helpers/Inflector.php';

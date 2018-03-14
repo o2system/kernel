@@ -45,6 +45,7 @@
       "O2System\\Kernel\\": "src"
     },
     "files": [
+      "src/Config/Constants.php",
       "src/Helpers/Common.php",
       "src/Helpers/Inflector.php",
       "src/Helpers/Cookie.php",

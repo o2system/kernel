@@ -706,7 +706,7 @@ class Uri implements UriInterface
      *
      * An empty query string value is equivalent to removing the query string.
      *
-     * @param string $query The query string to use with the new instance.
+     * @param string|array $query The query string to use with the new instance.
      *
      * @return static|\O2System\Framework\Http\Message\Uri A new instance with the specified query string.
      * @throws \InvalidArgumentException for invalid query strings.
@@ -714,7 +714,7 @@ class Uri implements UriInterface
     public function withQuery( $query )
     {
         $uri = clone $this;
-        $uri->query = is_array( $query ) ? http_build_query( $query, PHP_QUERY_RFC3986 ) : $query;
+        $uri->query = is_array( $query ) ? http_build_query( $query, null,null,PHP_QUERY_RFC3986 ) : $query;
 
         return $uri;
     }

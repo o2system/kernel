@@ -363,6 +363,8 @@ class Table
                 : '-'
         ); # cell content
         $output .= $padding; # right padding
+
+        $row = is_array($row) ? $row : [];
         if ( $index == count( $row ) - 1 && $this->isShowBorder ) {
             $output .= $row
                 ? '|'
