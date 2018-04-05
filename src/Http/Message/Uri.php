@@ -14,6 +14,7 @@ namespace O2System\Kernel\Http\Message;
 
 // ------------------------------------------------------------------------
 
+use O2System\Kernel\Http\Message\Uri\Segments;
 use O2System\Psr\Http\Message\UriInterface;
 
 /**
@@ -24,11 +25,25 @@ use O2System\Psr\Http\Message\UriInterface;
 class Uri implements UriInterface
 {
     /**
-     * Uri Scheme
+     * Uri::$scheme
      *
      * @var string
      */
     protected $scheme;
+
+    /**
+     * Uri::$segments
+     *
+     * @var \O2System\Kernel\Http\Message\Uri\Segments
+     */
+    protected $segments;
+
+    /**
+     * Uri::$suffix
+     *
+     * @var string
+     */
+    protected $suffix;
 
     /**
      * Uri Host
@@ -130,6 +145,7 @@ class Uri implements UriInterface
     public function __construct( $httpStringRequest = null )
     {
         if ( isset( $httpStringRequest ) ) {
+            $this->segments = new Segments( '' );
             $httpStringRequest = ltrim( $httpStringRequest, '//' );
 
             if ( strpos( $httpStringRequest, 'http://' ) === false ) {
@@ -171,6 +187,8 @@ class Uri implements UriInterface
             $this->port = isset( $parseUrl[ 'port' ] ) ? $parseUrl[ 'port' ] : 80;
             $this->fragment = isset( $parseUrl[ 'fragment' ] ) ? $parseUrl[ 'fragment' ] : null;
         } else {
+            $this->segments = new Segments();
+
             /**
              * Define Uri Host
              */
@@ -298,6 +316,58 @@ class Uri implements UriInterface
 
             unset( $this->tlds[ $key ] );
         }
+
+        if(function_exists('config')) {
+            if(config()->offsetExists('uri')) {
+                $this->setSuffix( config( 'uri' )->offsetGet( 'suffix' ) );
+            }
+        }
+    }
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * Uri::getSegments
+     *
+     * @return Segments
+     */
+    public function &getSegments()
+    {
+        return $this->segments;
+    }
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * Uri::withSegments
+     *
+     * @param Segments $segments
+     *
+     * @return Uri
+     */
+    public function withSegments( Segments $segments )
+    {
+        $uri = clone $this;
+        $uri->segments = $segments;
+
+        return $uri;
+    }
+
+    // ------------------------------------------------------------------------
+
+    public function addSegments( $segments )
+    {
+        if( ! $segments instanceof Segments ) {
+            $segments = new Segments( $segments );
+        }
+
+        $currentSegments = $this->segments->getParts();
+        $addSegments = $segments->getParts();
+
+        $uri = clone $this;
+        $uri->segments = new Segments( array_merge( $currentSegments, $addSegments ) );
+
+        return $uri;
     }
 
     // ------------------------------------------------------------------------
@@ -559,7 +629,7 @@ class Uri implements UriInterface
      *
      * @param string $scheme The scheme to use with the new instance.
      *
-     * @return static|\O2System\Framework\Http\Message\Uri A new instance with the specified scheme.
+     * @return static|\O2System\Kernel\Http\Message\Uri A new instance with the specified scheme.
      * @throws \InvalidArgumentException for invalid schemes.
      * @throws \InvalidArgumentException for unsupported schemes.
      */
@@ -591,7 +661,7 @@ class Uri implements UriInterface
      * @param string      $user     The user name to use for authority.
      * @param null|string $password The password associated with $user.
      *
-     * @return static|\O2System\Framework\Http\Message\Uri A new instance with the specified user information.
+     * @return static|\O2System\Kernel\Http\Message\Uri A new instance with the specified user information.
      */
     public function withUserInfo( $user, $password = null )
     {
@@ -615,7 +685,7 @@ class Uri implements UriInterface
      *
      * @param string $host The hostname to use with the new instance.
      *
-     * @return static|\O2System\Framework\Http\Message\Uri A new instance with the specified host.
+     * @return static|\O2System\Kernel\Http\Message\Uri A new instance with the specified host.
      * @throws \InvalidArgumentException for invalid hostnames.
      */
     public function withHost( $host )
@@ -645,7 +715,7 @@ class Uri implements UriInterface
      * @param null|int $port The port to use with the new instance; a null value
      *                       removes the port information.
      *
-     * @return static|\O2System\Framework\Http\Message\Uri A new instance with the specified port.
+     * @return static|\O2System\Kernel\Http\Message\Uri A new instance with the specified port.
      * @throws \InvalidArgumentException for invalid ports.
      */
     public function withPort( $port )
@@ -680,13 +750,23 @@ class Uri implements UriInterface
      *
      * @param string $path The path to use with the new instance.
      *
-     * @return static|\O2System\Framework\Http\Message\Uri A new instance with the specified path.
+     * @return static|\O2System\Kernel\Http\Message\Uri A new instance with the specified path.
      * @throws \InvalidArgumentException for invalid paths.
      */
     public function withPath( $path )
     {
         $uri = clone $this;
         $uri->path = ltrim( $path, '/' );
+
+        return $uri;
+    }
+
+    // ------------------------------------------------------------------------
+
+    public function addPath( $path )
+    {
+        $uri = clone $this;
+        $uri->path .= '/' . ltrim( $path, '/' );
 
         return $uri;
     }
@@ -708,13 +788,36 @@ class Uri implements UriInterface
      *
      * @param string|array $query The query string to use with the new instance.
      *
-     * @return static|\O2System\Framework\Http\Message\Uri A new instance with the specified query string.
+     * @return static|\O2System\Kernel\Http\Message\Uri A new instance with the specified query string.
      * @throws \InvalidArgumentException for invalid query strings.
      */
     public function withQuery( $query )
     {
         $uri = clone $this;
         $uri->query = is_array( $query ) ? http_build_query( $query, null,null,PHP_QUERY_RFC3986 ) : $query;
+
+        return $uri;
+    }
+
+    // ------------------------------------------------------------------------
+
+    public function addQuery( $query )
+    {
+        $uri = clone $this;
+        $query = is_array( $query ) ? http_build_query( $query, PHP_QUERY_RFC3986 ) : $query;
+
+        parse_str( $query, $newQuery );
+
+        if( ! empty( $uri->query ) ) {
+            parse_str( $uri->query, $oldQuery );
+            $query = array_merge( $oldQuery, $newQuery );
+        } else {
+            $query = $newQuery;
+        }
+
+        if( is_array( $query ) ) {
+            $uri->query = http_build_query( $query, PHP_QUERY_RFC3986 );
+        }
 
         return $uri;
     }
@@ -736,12 +839,42 @@ class Uri implements UriInterface
      *
      * @param string $fragment The fragment to use with the new instance.
      *
-     * @return static|\O2System\Framework\Http\Message\Uri A new instance with the specified fragment.
+     * @return static|\O2System\Kernel\Http\Message\Uri A new instance with the specified fragment.
      */
     public function withFragment( $fragment )
     {
         $uri = clone $this;
         $uri->fragment = $fragment;
+
+        return $uri;
+    }
+
+    // ------------------------------------------------------------------------
+
+    public function getSuffix()
+    {
+        return $this->suffix;
+    }
+
+    // ------------------------------------------------------------------------
+
+    protected function setSuffix( $suffix )
+    {
+        if ( is_null( $suffix ) or is_bool( $suffix ) ) {
+            $this->suffix = null;
+        } elseif ( $suffix === '/' ) {
+            $this->suffix = $suffix;
+        } else {
+            $this->suffix = '.' . trim( $suffix, '.' );
+        }
+    }
+
+    // ------------------------------------------------------------------------
+
+    public function withSuffix( $suffix )
+    {
+        $uri = clone $this;
+        $uri->setSuffix( $suffix );
 
         return $uri;
     }
@@ -787,9 +920,40 @@ class Uri implements UriInterface
             $uriString .= ':' . $this->port;
         }
 
-        $uriString .= empty( $this->path ) ? '' : '/' . $this->path;
-        $uriString .= empty( $this->query ) ? '' : '/?' . $this->query;
-        $uriString .= empty( $this->fragment ) ? '' : '#' . $this->fragment;
+        $uriPath = empty( $this->path )
+            ? '/'
+            : '/' . trim( $this->path, '/' ) . '/';
+
+        $uriPath .= empty( $this->string )
+            ? ''
+            : '/' . trim( $this->string, '/' ) . '/';
+
+        $uriPath .= $this->segments->getTotalParts() == 0
+            ? ''
+            : '/' . trim( $this->segments->getString(), '/' );
+
+        if ( $uriPath !== '/' &&
+            substr($uriPath, strlen($uriPath) - 1) !== '/' &&
+            $this->suffix !== '' && $this->suffix !== '.' &&
+            ( $uriPath . '/' !== $_SERVER['REQUEST_URI'] ) &&
+            pathinfo( $uriPath, PATHINFO_EXTENSION ) === '' &&
+            strpos( $uriPath, '#' ) === false &&
+            empty( $this->query )
+        ) {
+            $uriPath .= $this->suffix;
+        } elseif( pathinfo( $uriPath, PATHINFO_EXTENSION ) === '' ) {
+            $uriPath .= '/';
+        }
+
+        $uriPath = rtrim( $uriPath, '/' );
+
+        $uriString .= str_replace( '//', '/', $uriPath );
+        $uriString .= empty( $this->query )
+            ? ''
+            : '/?' . $this->query;
+        $uriString .= empty( $this->fragment )
+            ? ''
+            : $this->fragment;
 
         return $uriString;
     }

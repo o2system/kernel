@@ -38,11 +38,115 @@ class Request extends AbstractMessage implements
     /**
      * Request Uri
      *
-     * @var Uri|\O2System\Framework\Http\Message\Uri
+     * @var Uri|\O2System\Kernel\Http\Message\Uri
      */
     protected $uri;
 
     // ------------------------------------------------------------------------
+
+    public function __construct()
+    {
+        $this->uri = new Uri();
+    }
+
+    // ------------------------------------------------------------------------
+
+    public function getClientIpAddress()
+    {
+        return input()->ipAddress( config()->getItem( 'ipAddresses' )->proxy );
+    }
+
+    // ------------------------------------------------------------------------
+
+    public function getClientUserAgent()
+    {
+        return input()->userAgent();
+    }
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * Determines if this request was made from the command line (CLI).
+     *
+     * @return bool
+     */
+    public function isCli()
+    {
+        return ( PHP_SAPI === 'cli' || defined( 'STDIN' ) );
+    }
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * Test to see if a request contains the HTTP_X_REQUESTED_WITH header.
+     *
+     * @return bool
+     */
+    public function isAjax()
+    {
+        return ( ! empty( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) &&
+            strtolower( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) === 'xmlhttprequest' );
+    }
+
+    //--------------------------------------------------------------------
+
+    /**
+     * Attempts to detect if the current connection is secure through
+     * a few different methods.
+     *
+     * @return bool
+     */
+    public function isSecure()
+    {
+        if ( ! empty( $_SERVER[ 'HTTPS' ] ) && strtolower( $_SERVER[ 'HTTPS' ] ) !== 'off' ) {
+            return true;
+        } elseif ( isset( $_SERVER[ 'HTTP_X_FORWARDED_PROTO' ] ) && $_SERVER[ 'HTTP_X_FORWARDED_PROTO' ] === 'https' ) {
+            return true;
+        } elseif ( ! empty( $_SERVER[ 'HTTP_FRONT_END_HTTPS' ] ) && strtolower(
+                $_SERVER[ 'HTTP_FRONT_END_HTTPS' ]
+            ) !== 'off'
+        ) {
+            return true;
+        }
+
+        return false;
+    }
+
+    //--------------------------------------------------------------------
+
+    /**
+     * Request::getTime
+     *
+     * @param string $format
+     *
+     * @return bool|mixed|string
+     */
+    public function getTime( $format = null )
+    {
+        return isset( $format )
+            ? date( $format, $_SERVER[ 'REQUEST_TIME' ] )
+            : $_SERVER[ 'REQUEST_TIME' ];
+    }
+
+    //--------------------------------------------------------------------
+
+    /**
+     * Request::getServer
+     *
+     * @return \O2System\Kernel\Http\Message\ServerRequest
+     */
+    public function getServer()
+    {
+        static $serverRequest;
+
+        if ( empty( $serverRequest ) ) {
+            $serverRequest = new ServerRequest();
+        }
+
+        return $serverRequest;
+    }
+
+    //--------------------------------------------------------------------
 
     /**
      * RequestInterface::getRequestTarget
@@ -184,6 +288,13 @@ class Request extends AbstractMessage implements
 
     // ------------------------------------------------------------------------
 
+    public function setUri( UriInterface $uri )
+    {
+        $this->uri = $uri;
+    }
+
+    // ------------------------------------------------------------------------
+
     /**
      * RequestInterface::getUri
      *
@@ -192,7 +303,7 @@ class Request extends AbstractMessage implements
      * This method MUST return a UriInterface instance.
      *
      * @see http://tools.ietf.org/html/rfc3986#section-4.3
-     * @return Uri|\O2System\Framework\Http\Message\Uri Returns a UriInterface instance
+     * @return Uri|\O2System\Kernel\Http\Message\Uri Returns a UriInterface instance
      *     representing the URI of the request.
      */
     public function &getUri()
