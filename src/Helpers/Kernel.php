@@ -10,7 +10,7 @@
  */
 // ------------------------------------------------------------------------
 
-if ( ! function_exists( 'kernel' ) ) {
+if ( ! function_exists('kernel')) {
     /**
      * kernel
      *
@@ -20,7 +20,7 @@ if ( ! function_exists( 'kernel' ) ) {
      */
     function kernel()
     {
-        if ( class_exists( 'O2System\Framework', false ) ) {
+        if (class_exists('O2System\Framework', false)) {
             return O2System\Framework::getInstance();
         }
 
@@ -30,7 +30,7 @@ if ( ! function_exists( 'kernel' ) ) {
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists( 'profiler' ) ) {
+if ( ! function_exists('profiler')) {
     /**
      * profiler
      *
@@ -40,13 +40,13 @@ if ( ! function_exists( 'profiler' ) ) {
      */
     function profiler()
     {
-        return kernel()->getService( 'profiler' );
+        return kernel()->getService('profiler');
     }
 }
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists( 'language' ) ) {
+if ( ! function_exists('language')) {
     /**
      * language
      *
@@ -56,13 +56,13 @@ if ( ! function_exists( 'language' ) ) {
      */
     function language()
     {
-        return kernel()->getService( 'language' );
+        return kernel()->getService('language');
     }
 }
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists( 'logger' ) ) {
+if ( ! function_exists('logger')) {
     /**
      * logger
      *
@@ -74,19 +74,19 @@ if ( ! function_exists( 'logger' ) ) {
     {
         $args = func_get_args();
 
-        if ( count( $args ) ) {
-            $logger =& kernel()->getService( 'logger' );
+        if (count($args)) {
+            $logger =& kernel()->getService('logger');
 
-            return call_user_func_array( [ &$logger, 'log' ], $args );
+            return call_user_func_array([&$logger, 'log'], $args);
         }
 
-        return kernel()->getService( 'logger' );
+        return kernel()->getService('logger');
     }
 }
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists( 'shutdown' ) ) {
+if ( ! function_exists('shutdown')) {
     /**
      * shutdown
      *
@@ -96,13 +96,13 @@ if ( ! function_exists( 'shutdown' ) ) {
      */
     function shutdown()
     {
-        return kernel()->getService( 'shutdown' );
+        return kernel()->getService('shutdown');
     }
 }
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists( 'input' ) ) {
+if ( ! function_exists('input')) {
     /**
      * input
      *
@@ -112,13 +112,13 @@ if ( ! function_exists( 'input' ) ) {
      */
     function input()
     {
-        return kernel()->getService( 'input' );
+        return kernel()->getService('input');
     }
 }
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists( 'output' ) ) {
+if ( ! function_exists('output')) {
     /**
      * output
      *
@@ -128,7 +128,55 @@ if ( ! function_exists( 'output' ) ) {
      */
     function output()
     {
-        return kernel()->getService( 'output' );
+        return kernel()->getService('output');
+    }
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('globals')) {
+    /**
+     * globals
+     *
+     * Convenient shortcut for O2System Kernel Globals container.
+     *
+     * @param string $offset
+     *
+     * @return O2System\Kernel\Containers\Globals
+     */
+    function globals($offset = null)
+    {
+        if (isset($offset)) {
+            if (isset($GLOBALS[ $offset ])) {
+                return $GLOBALS[ $offset ];
+            }
+        }
+
+        return kernel()->getService('globals');
+    }
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('env')) {
+    /**
+     * env
+     *
+     * Convenient shortcut for O2System Kernel Environment container.
+     *
+     * @param string $offset
+     *
+     * @return O2System\Kernel\Containers\Globals
+     */
+    function env($offset = null)
+    {
+        if (isset($offset)) {
+            if (isset($_ENV[ $offset ])) {
+                return $_ENV[ $offset ];
+            }
+        }
+
+        return kernel()->getService('environment');
     }
 }
 

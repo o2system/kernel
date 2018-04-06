@@ -14,6 +14,12 @@ namespace O2System;
 
 // ------------------------------------------------------------------------
 
+use O2System\Kernel\Containers\Globals;
+use O2System\Kernel\Containers\Environment;
+use O2System\Psr\Container\ContainerExceptionInterface;
+use O2System\Psr\Container\ContainerInterface;
+use O2System\Psr\NotFoundExceptionInterface;
+
 /*
  *---------------------------------------------------------------
  * KERNEL PATH
@@ -34,7 +40,7 @@ require_once 'Helpers/Kernel.php';
  *
  * @package O2System
  */
-class Kernel extends Psr\Patterns\AbstractSingletonPattern
+class Kernel extends Psr\Patterns\AbstractSingletonPattern implements ContainerInterface
 {
     /**
      * Kernel Services
@@ -55,6 +61,14 @@ class Kernel extends Psr\Patterns\AbstractSingletonPattern
         $this->addService( new Gear\Profiler() );
 
         $this->getService( 'profiler' )->watch( 'INSTANTIATE_KERNEL_SERVICES' );
+
+        // Instantiate Globals Container
+        $this->getService( 'profiler' )->watch( 'INSTANTIATE_GLOBALS_CONTAINER' );
+        $this->addService(new Globals(), 'globals');
+
+        // Instantiate Environment Container
+        $this->getService( 'profiler' )->watch( 'INSTANTIATE_GLOBALS_CONTAINER' );
+        $this->addService(new Environment(), 'environment');
 
         foreach ( [ 'Language', 'Logger', 'Shutdown' ] as $serviceClassName ) {
             if ( class_exists( 'O2System\Framework', false ) ) {
@@ -205,5 +219,44 @@ class Kernel extends Psr\Patterns\AbstractSingletonPattern
                 : $service->getClassParameter();
             $this->services[ $offset ] = $service;
         }
+    }
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * Finds an entry of the container by its identifier and returns it.
+     *
+     * @param string $id Identifier of the entry to look for.
+     *
+     * @throws NotFoundExceptionInterface  No entry was found for **this** identifier.
+     * @throws ContainerExceptionInterface Error while retrieving the entry.
+     *
+     * @return mixed Entry.
+     */
+    public function get($id)
+    {
+        if($this->has($id)) {
+            return $this->getService($id);
+        }
+
+        // @todo throw exception
+    }
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * Returns true if the container can return an entry for the given identifier.
+     * Returns false otherwise.
+     *
+     * `has($id)` returning true does not mean that `get($id)` will not throw an exception.
+     * It does however mean that `get($id)` will not throw a `NotFoundExceptionInterface`.
+     *
+     * @param string $id Identifier of the entry to look for.
+     *
+     * @return bool
+     */
+    public function has($id)
+    {
+        return (bool) $this->hasService($id);
     }
 }
