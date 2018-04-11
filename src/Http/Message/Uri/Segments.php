@@ -15,6 +15,7 @@ namespace O2System\Kernel\Http\Message\Uri;
 
 // ------------------------------------------------------------------------
 
+use O2System\Spl\Datastructures\SplArrayObject;
 use O2System\Spl\Exceptions\RuntimeException;
 
 /**
@@ -315,7 +316,9 @@ class Segments
     {
         if (function_exists('config')) {
             $config = config('uri');
-        } else {
+        }
+
+        if(empty($config)) {
             $config = new SplArrayObject([
                 'permittedChars' => 'a-z 0-9~%.:_\-@#',
                 'suffix'         => null,
