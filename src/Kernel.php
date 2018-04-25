@@ -62,6 +62,14 @@ class Kernel extends Psr\Patterns\AbstractSingletonPattern implements ContainerI
 
         $this->getService( 'profiler' )->watch( 'INSTANTIATE_KERNEL_SERVICES' );
 
+        // Instantiate Globals Container
+        $this->getService( 'profiler' )->watch( 'INSTANTIATE_GLOBALS_CONTAINER' );
+        $this->addService(new Globals(), 'globals');
+
+        // Instantiate Environment Container
+        $this->getService( 'profiler' )->watch( 'INSTANTIATE_GLOBALS_CONTAINER' );
+        $this->addService(new Environment(), 'environment');
+
         foreach ( [ 'Language', 'Logger', 'Shutdown' ] as $serviceClassName ) {
             if ( class_exists( 'O2System\Framework', false ) ) {
                 if ( class_exists( 'App\Kernel\Services\\' . $serviceClassName ) ) {

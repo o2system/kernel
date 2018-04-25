@@ -266,7 +266,8 @@ class UploadFile implements UploadedFileInterface
      */
     public function getFileMime()
     {
-        $mime = finfo_file( finfo_open( FILEINFO_MIME_TYPE ), $this->tmpName );
+        $finfo = new \finfo;
+        $mime = $finfo->file( $this->tmpName, FILEINFO_MIME );
 
         return $mime;
     }

@@ -8,7 +8,6 @@
  * @author         Steeve Andrian Salim
  * @copyright      Copyright (c) Steeve Andrian Salim
  */
-
 // ------------------------------------------------------------------------
 
 namespace O2System\Kernel\Http\Message;
@@ -67,59 +66,51 @@ class ServerRequest extends Request implements ServerRequestInterface
 
         // Set Header Params
         // In Apache, you can simply call apache_request_headers()
-        if (function_exists('apache_request_headers')) {
+        if ( function_exists( 'apache_request_headers' ) ) {
             $this->headers = apache_request_headers();
         }
 
-        $this->headers[ 'Content-Type' ] = isset($_SERVER[ 'CONTENT_TYPE' ])
+        $this->headers[ 'Content-Type' ] = isset( $_SERVER[ 'CONTENT_TYPE' ] )
             ? $_SERVER[ 'CONTENT_TYPE' ]
             : @getenv(
                 'CONTENT_TYPE'
             );
 
-        foreach ($_SERVER as $key => $val) {
-            if (strpos($key, 'SERVER') !== false) {
-                $key = str_replace('SERVER_', '', $key);
+        foreach ( $_SERVER as $key => $val ) {
+            if ( strpos( $key, 'SERVER' ) !== false ) {
+                $key = str_replace( 'SERVER_', '', $key );
                 $this->serverParams[ $key ] = $val;
             }
 
-            if (sscanf($key, 'HTTP_%s', $header) === 1) {
+            if ( sscanf( $key, 'HTTP_%s', $header ) === 1 ) {
                 // take SOME_HEADER and turn it into Some-Header
-                $header = str_replace('_', ' ', strtolower($header));
-                $header = str_replace(' ', '-', ucwords($header));
+                $header = str_replace( '_', ' ', strtolower( $header ) );
+                $header = str_replace( ' ', '-', ucwords( $header ) );
 
                 $this->headers[ $header ] = $_SERVER[ $key ];
             }
         }
 
         // Set Query Params
-        if (null !== ($queryString = $this->uri->getQuery())) {
-            parse_str($queryString, $this->queryParams);
+        if ( null !== ( $queryString = $this->uri->getQuery() ) ) {
+            parse_str( $queryString, $this->queryParams );
         }
 
         // Populate file array
         $uploadedFiles = [];
 
-        foreach ($_FILES as $key => $value) {
-            if (is_array($value[ 'name' ])) {
-                for ($i = 0; $i < count($value[ 'name' ]); $i++) {
-                    if ( ! is_array($value[ 'name' ])) {
-                        $uploadedFiles[ $key ][ $i ] = $value;
-                        break;
-                    }
-
-                    $uploadedFiles[ $key ][ $i ][ 'name' ] = $value[ 'name' ][ $i ];
-                    $uploadedFiles[ $key ][ $i ][ 'type' ] = $value[ 'type' ][ $i ];
-                    $uploadedFiles[ $key ][ $i ][ 'tmp_name' ] = $value[ 'tmp_name' ][ $i ];
-                    $uploadedFiles[ $key ][ $i ][ 'error' ] = $value[ 'error' ][ $i ];
-                    $uploadedFiles[ $key ][ $i ][ 'size' ] = $value[ 'size' ][ $i ];
+        foreach ( $_FILES as $key => $value ) {
+            for ( $i = 0; $i < count( $value[ 'name' ] ); $i++ ) {
+                if ( ! is_array( $value[ 'name' ] ) ) {
+                    $uploadedFiles[ $key ][ $i ] = $value;
+                    break;
                 }
-            } else {
-                $uploadedFiles[ $key ][ 'name' ] = $value[ 'name' ];
-                $uploadedFiles[ $key ][ 'type' ] = $value[ 'type' ];
-                $uploadedFiles[ $key ][ 'tmp_name' ] = $value[ 'tmp_name' ];
-                $uploadedFiles[ $key ][ 'error' ] = $value[ 'error' ];
-                $uploadedFiles[ $key ][ 'size' ] = $value[ 'size' ];
+
+                $uploadedFiles[ $key ][ $i ][ 'name' ] = $value[ 'name' ][ $i ];
+                $uploadedFiles[ $key ][ $i ][ 'type' ] = $value[ 'type' ][ $i ];
+                $uploadedFiles[ $key ][ $i ][ 'tmp_name' ] = $value[ 'tmp_name' ][ $i ];
+                $uploadedFiles[ $key ][ $i ][ 'error' ] = $value[ 'error' ][ $i ];
+                $uploadedFiles[ $key ][ $i ][ 'size' ] = $value[ 'size' ][ $i ];
             }
         }
 
@@ -185,11 +176,11 @@ class ServerRequest extends Request implements ServerRequestInterface
      *
      * @return static
      */
-    public function withCookieParams(array $cookies)
+    public function withCookieParams( array $cookies )
     {
         $message = clone $this;
 
-        foreach ($cookies as $key => $value) {
+        foreach ( $cookies as $key => $value ) {
             $message->cookieParams[ $key ] = $value;
         }
 
@@ -244,11 +235,11 @@ class ServerRequest extends Request implements ServerRequestInterface
      *
      * @return static
      */
-    public function withQueryParams(array $query)
+    public function withQueryParams( array $query )
     {
         $message = clone $this;
         $message->queryParams = $query;
-        $message->uri = $this->uri->withQuery(http_build_query($query));
+        $message->uri = $this->uri->withQuery( http_build_query( $query ) );
 
         return $message;
     }
@@ -272,13 +263,9 @@ class ServerRequest extends Request implements ServerRequestInterface
     public function getUploadedFiles()
     {
         $response = [];
-        foreach ($this->uploadedFiles as $key => $uploadedFile) {
-            if (is_numeric(key($uploadedFile))) {
-                foreach ($uploadedFile as $index => $file) {
-                    $response[ $key ][ $index ] = new UploadFile($file);
-                }
-            } else {
-                $response[ $key ] = new UploadFile($uploadedFile);
+        foreach ( $this->uploadedFiles as $key => $uploadedFile ) {
+            foreach ( $uploadedFile as $file ) {
+                $response[ $key ][] = new UploadFile( $file );
             }
         }
 
@@ -301,15 +288,15 @@ class ServerRequest extends Request implements ServerRequestInterface
      * @return static
      * @throws \InvalidArgumentException if an invalid structure is provided.
      */
-    public function withUploadedFiles(array $uploadedFiles)
+    public function withUploadedFiles( array $uploadedFiles )
     {
         $message = clone $this;
 
-        foreach ($uploadedFiles as $uploadedFile) {
-            if ($uploadedFile instanceof UploadedFileInterface) {
+        foreach ( $uploadedFiles as $uploadedFile ) {
+            if ( $uploadedFile instanceof UploadedFileInterface ) {
                 $message->uploadedFiles[] = $uploadedFile;
             } else {
-                throw new \InvalidArgumentException('Not Instance Of UploadedFileInterface');
+                throw new \InvalidArgumentException( 'Not Instance Of UploadedFileInterface' );
                 break;
             }
         }
@@ -336,14 +323,14 @@ class ServerRequest extends Request implements ServerRequestInterface
      */
     public function getParsedBody()
     {
-        if (isset($this->headers[ 'Content-Type' ])) {
-            if (in_array(
-                strtolower($this->headers[ 'Content-Type' ]),
+        if ( isset( $this->headers[ 'Content-Type' ] ) ) {
+            if ( in_array(
+                strtolower( $this->headers[ 'Content-Type' ] ),
                 [
                     'application/x-www-form-urlencoded',
                     'multipart/form-data',
                 ]
-            )) {
+            ) ) {
                 return $_POST;
             }
         }
@@ -384,14 +371,14 @@ class ServerRequest extends Request implements ServerRequestInterface
      * @throws \InvalidArgumentException if an unsupported argument type is
      *     provided.
      */
-    public function withParsedBody($data)
+    public function withParsedBody( $data )
     {
         $message = clone $this;
 
-        if ($data instanceof StreamInterface) {
+        if ( $data instanceof StreamInterface ) {
             $message->body = $data;
-        } elseif (is_string($data)) {
-            $message->body->write($data);
+        } elseif ( is_string( $data ) ) {
+            $message->body->write( $data );
         }
 
         return $message;
@@ -414,7 +401,7 @@ class ServerRequest extends Request implements ServerRequestInterface
      */
     public function getAttributes()
     {
-        return array_keys($this->serverParams);
+        return array_keys( $this->serverParams );
     }
 
     //--------------------------------------------------------------------
@@ -438,14 +425,14 @@ class ServerRequest extends Request implements ServerRequestInterface
      *
      * @return mixed
      */
-    public function getAttribute($name, $default = null)
+    public function getAttribute( $name, $default = null )
     {
-        $name = str_replace('SERVER_', '', $name);
-        $name = strtoupper($name);
+        $name = str_replace( 'SERVER_', '', $name );
+        $name = strtoupper( $name );
 
-        if (isset($this->serverParams[ $name ])) {
+        if ( isset( $this->serverParams[ $name ] ) ) {
             return $this->serverParams[ $name ];
-        } elseif (isset($_SERVER[ $name ])) {
+        } elseif ( isset( $_SERVER[ $name ] ) ) {
             return $_SERVER[ $name ];
         }
 
@@ -473,15 +460,15 @@ class ServerRequest extends Request implements ServerRequestInterface
      *
      * @return static
      */
-    public function withAttribute($name, $value)
+    public function withAttribute( $name, $value )
     {
-        $name = str_replace('SERVER_', '', $name);
-        $name = strtoupper($name);
+        $name = str_replace( 'SERVER_', '', $name );
+        $name = strtoupper( $name );
 
         $message = clone $this;
         $message->serverParams[ $name ] = $value;
 
-        if (empty($_SERVER[ 'SERVER_' . $name ])) {
+        if ( empty( $_SERVER[ 'SERVER_' . $name ] ) ) {
             $_SERVER[ 'SERVER_' . $name ] = $value;
         }
 
@@ -508,15 +495,15 @@ class ServerRequest extends Request implements ServerRequestInterface
      *
      * @return static
      */
-    public function withoutAttribute($name)
+    public function withoutAttribute( $name )
     {
-        $name = str_replace('SERVER_', '', $name);
-        $name = strtoupper($name);
+        $name = str_replace( 'SERVER_', '', $name );
+        $name = strtoupper( $name );
 
         $message = clone $this;
 
-        if (isset($this->serverParams[ $name ])) {
-            unset($this->serverParams[ $name ]);
+        if ( isset( $this->serverParams[ $name ] ) ) {
+            unset( $this->serverParams[ $name ] );
         }
 
         return $message;

@@ -8,7 +8,6 @@
  * @author         Steeve Andrian Salim
  * @copyright      Copyright (c) Steeve Andrian Salim
  */
-
 // ------------------------------------------------------------------------
 
 namespace O2System\Kernel\Http\Router\Datastructures;
@@ -68,26 +67,26 @@ class Action
      * @param \Closure $closure The route closure.
      * @param string   $domain  The route domain.
      */
-    public function __construct($method, $path, \Closure $closure, $domain = null)
+    public function __construct( $method, $path, \Closure $closure, $domain = null )
     {
-        $this->methods = explode('|', $method);
-        $this->methods = array_map('strtoupper', $this->methods);
+        $this->methods = explode( '|', $method );
+        $this->methods = array_map( 'strtoupper', $this->methods );
 
         $this->path = $path;
         $this->closure = $closure;
-        $this->domain = is_null($domain)
-            ? isset($_SERVER[ 'HTTP_HOST' ])
+        $this->domain = is_null( $domain )
+            ? isset( $_SERVER[ 'HTTP_HOST' ] )
                 ? @$_SERVER[ 'HTTP_HOST' ]
                 : @$_SERVER[ 'SERVER_NAME' ]
             : $domain;
 
         // Remove www
-        if (strpos($this->domain, 'www.') !== false) {
+        if(strpos($this->domain, 'www.') !== false) {
             $this->domain = str_replace('www.', '', $this->domain);
         }
 
-        if (preg_match_all("/{(.*)}/", $this->domain, $matches)) {
-            foreach ($matches[ 1 ] as $match) {
+        if ( preg_match_all( "/{(.*)}/", $this->domain, $matches ) ) {
+            foreach ( $matches[ 1 ] as $match ) {
                 $this->closureParameters[] = $match;
             }
         }
@@ -118,12 +117,12 @@ class Action
 
     public function getClosure()
     {
-        return call_user_func_array($this->closure, $this->closureParameters);
+        return call_user_func_array( $this->closure, $this->closureParameters );
     }
 
     // ------------------------------------------------------------------------
 
-    public function addClosureParameters($value)
+    public function addClosureParameters( $value )
     {
         $this->closureParameters[] = $value;
 
@@ -135,7 +134,7 @@ class Action
         return $this->closureParameters;
     }
 
-    public function setClosureParameters(array $parameters)
+    public function setClosureParameters( array $parameters )
     {
         $this->closureParameters = $parameters;
 
@@ -146,11 +145,11 @@ class Action
 
     public function isValidDomain()
     {
-        $domain = isset($_SERVER[ 'HTTP_HOST' ])
+        $domain = isset( $_SERVER[ 'HTTP_HOST' ] )
             ? $_SERVER[ 'HTTP_HOST' ]
             : $_SERVER[ 'SERVER_NAME' ];
 
-        if ($this->domain === $domain) {
+        if ( $this->domain === $domain ) {
             return true;
         }
 
@@ -159,47 +158,18 @@ class Action
 
     // ------------------------------------------------------------------------
 
-    public function isValidUriString($uriString)
+    public function isValidUriString( $uriString )
     {
-        $uriString = '/' . ltrim($uriString, '/');
-
-        if (strtolower($uriString) === $this->path) {
+        if ( strtolower( $uriString ) === $this->path ) {
             $this->closureParameters = array_merge(
                 $this->closureParameters,
-                array_filter(explode('/', $uriString))
+                array_filter( explode( '/', $uriString ) )
             );
 
             return true;
-        } elseif (false !== ($matches = $this->getParseUriString($uriString))) {
-            $parameters = [];
-            $closure = new \ReflectionFunction($this->closure);
+        } elseif ( false !== ( $matches = $this->getParseUriString( $uriString ) ) ) {
+            $this->closureParameters = array_merge( $this->closureParameters, $matches );
 
-            if (is_string(key($matches))) {
-                foreach ($closure->getParameters() as $index => $parameter) {
-                    if(($class = $parameter->getClass()) instanceof \ReflectionClass) {
-                        $className = $class->getName();
-                        if(class_exists($className)) {
-                            if (isset($matches[ $parameter->name ])) {
-                                $parameters[ $index ] = new $className($matches[ $parameter->name ]);
-                            }
-                        }
-                    } elseif (isset($matches[ $parameter->name ])) {
-                        $parameters[ $index ] = $matches[ $parameter->name ];
-                    } else {
-                        $parameters[ $index ] = null;
-                    }
-                }
-            } else {
-                foreach ($closure->getParameters() as $index => $parameter) {
-                    if (isset($matches[ $index ])) {
-                        $parameters[ $index ] = $matches[ $index ];
-                    } else {
-                        $parameters[ $index ] = null;
-                    }
-                }
-            }
-
-            $this->closureParameters = $parameters;
             return true;
         }
 
@@ -208,51 +178,15 @@ class Action
 
     // ------------------------------------------------------------------------
 
-    public function getParseUriString($uriString)
+    public function getParseUriString( $string )
     {
-        // Convert wildcards to RegEx
-        $regex = str_replace(['/(:any?)',':any', ':num'], ['/?([^/]+)?','[^/]+', '[0-9]+'], $this->path);
-        $regex = str_replace('/', '\/', $regex);
+        $string = '/' . trim( $string, '/' );
+        $regex = str_replace( [ ':any', ':num' ], [ '[^/]+', '[0-9]+' ], $this->path );
 
-        $uriString = '/' . ltrim($uriString, '/');
-
-        // CodeIgniter Like Routing
-        if (preg_match('/' . $regex . '/', $uriString, $matches)) {
-
-            // Remove first match
-            array_shift($matches);
-
-            return (count($matches) ? $matches : false);
-        }
-
-        // Laravel Like Routing
-        if(preg_match("/{(.*)}/", $this->path)) {
-            // Try to find from each parts
-            $pathParts = explode('/', $this->path);
-            $stringParts = explode('/', $uriString);
-
-            $pathParts = array_filter($pathParts);
-            $stringParts = array_filter($stringParts);
-
-            $matches = [];
-            $parameters = [];
-
-            for ($i = 0; $i <= count($pathParts); $i++) {
-                if (isset($pathParts[ $i ]) && isset($stringParts[ $i ])) {
-                    if ($pathParts[ $i ] == $stringParts[ $i ]) {
-                        $matches[ $i ] = $stringParts[ $i ];
-                    }
-                }
-
-                if (isset($pathParts[ $i ])) {
-                    if (preg_match("/{(.*)}/", $pathParts[ $i ])) {
-                        $index = str_replace(['{$', '}'], '', $pathParts[ $i ]);
-                        $parameters[ $index ] = isset($stringParts[ $i ]) ? $stringParts[ $i ] : null;
-                    }
-                }
-            }
-
-            return (count($matches) ? $parameters : false);
+        if ( preg_match( '#^' . $regex . '$#', $string, $matches ) ) {
+            // Remove the original string from the matches array.
+            array_shift( $matches );
+            return $matches;
         }
 
         return false;
@@ -260,21 +194,21 @@ class Action
 
     // ------------------------------------------------------------------------
 
-    public function isValidHttpMethod($method)
+    public function isValidHttpMethod( $method )
     {
-        $method = strtoupper($method);
+        $method = strtoupper( $method );
 
-        if (in_array('ANY', $this->methods)) {
+        if ( in_array( 'ANY', $this->methods ) ) {
             return true;
         }
 
-        return (bool)in_array($method, $this->methods);
+        return (bool)in_array( $method, $this->methods );
     }
 
     // ------------------------------------------------------------------------
 
     public function isAnyHttpMethod()
     {
-        return (bool)in_array('ANY', $this->methods);
+        return (bool)in_array( 'ANY', $this->methods );
     }
 }

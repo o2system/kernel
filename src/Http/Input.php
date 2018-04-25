@@ -431,7 +431,7 @@ class Input
      *
      * @return string
      */
-    public function ipAddress( $proxyIps = [] )
+    public function ipAddress( $proxyIps = null )
     {
         if ( ! empty( $proxyIps ) && ! is_array( $proxyIps ) ) {
             $proxyIps = explode( ',', str_replace( ' ', '', $proxyIps ) );

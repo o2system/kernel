@@ -15,7 +15,6 @@ namespace O2System\Kernel\Http\Router;
 // ------------------------------------------------------------------------
 
 use O2System\Kernel\Http\Message\Uri\Domain;
-use O2System\Kernel\Http\Router\Datastructures\Action;
 
 /**
  * Class Addresses
@@ -144,13 +143,6 @@ class Addresses
 
         if ( isset( $translations[ $path ] ) ) {
             return $translations[ $path ];
-        } elseif( count( $translations ) ) {
-            foreach($translations as $translation => $action) {
-                if ( $action->isValidUriString( $path ) ) {
-                    return $action;
-                    break;
-                }
-            }
         }
 
         return false;
@@ -179,6 +171,30 @@ class Addresses
 
         if ( isset( $this->translations[ $domain ] ) ) {
             $translations = $this->translations[ $domain ];
+        } elseif ( $module = modules()->getModule( $hostDomain->getSubDomains() ) ) {
+            // remove autoload addresses
+            config()->remove( 'addresses' );
+
+            // autoload module
+            modules()->push( $module );
+
+            // get module addresses
+            $addresses = config()->getItem( 'addresses' );
+
+            if ( $addresses instanceof Addresses ) {
+                $translations = $addresses->getTranslations( $hostDomain->getOrigin() );
+            } else {
+                $addresses = new Addresses();
+                $controllerClassName = $module->getNamespace() . 'Controllers\\' . camelcase( $module->getParameter() );
+
+                if ( class_exists( $controllerClassName ) ) {
+                    $addresses->any( '/', function () use ( $controllerClassName ) {
+                        return new $controllerClassName();
+                    } );
+
+                    return $addresses->getTranslations( $hostDomain->getOrigin() );
+                }
+            }
         } else {
             $domain = new Domain( $domain );
             if ( array_key_exists( $domain->getString(), $this->translations ) ) {
@@ -243,8 +259,6 @@ class Addresses
 
     public function addTranslation( $path, $address, $method = self::HTTP_GET )
     {
-        $path = '/' . ltrim( $path, '/' );
-
         if ( $address instanceof \Closure ) {
             $closure = $address;
         } else {
@@ -343,15 +357,20 @@ class Addresses
             }
 
             return $this->domains[ $domain ];
-        } elseif ( isset( $this->domains[ '*' ] ) and is_callable( $this->domains[ '*' ] ) ) {
-            // check wildcard domain closure
-            if ( false !== ( $address = call_user_func( $this->domains[ '*' ], $domain ) ) ) {
-                return $address;
-            }
         } elseif ( count( $this->domains ) ) {
+
+            // check wildcard domain closure
+            if ( isset( $this->domains[ '*' ] ) and is_callable( $this->domains[ '*' ] ) ) {
+                if ( false !== ( $address = call_user_func( $this->domains[ '*' ], $domain ) ) ) {
+                    return $address;
+                }
+            }
+
             // check pregmatch domain closure
             foreach ( $this->domains as $address => $closure ) {
-                if ( preg_match( '/[{][a-zA-Z0-9$_]+[}]/', $address ) and $closure instanceof \Closure ) {
+                if ( $address === '*' ) {
+                    continue;
+                } elseif ( preg_match( '/[{][a-zA-Z0-9$_]+[}]/', $address ) and $closure instanceof \Closure ) {
                     $addressDomain = new Domain( $address );
                     $checkDomain = new Domain( $domain );
                     $parameters = [];

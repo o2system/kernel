@@ -134,22 +134,6 @@ if ( ! function_exists('output')) {
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists( 'request' ) ) {
-    /**
-     * request
-     *
-     * Convenient shortcut for O2System Kernel Http Message Request service.
-     *
-     * @return O2System\Kernel\Http\Message\Request
-     */
-    function request ()
-    {
-        return o2system()->getService( 'request' );
-    }
-}
-
-// ------------------------------------------------------------------------
-
 if ( ! function_exists('globals')) {
     /**
      * globals
