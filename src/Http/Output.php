@@ -119,6 +119,12 @@ class Output extends Message\Response
      */
     public function errorHandler($errorSeverity, $errorMessage, $errorFile, $errorLine, $errorContext = [])
     {
+        if(strpos($errorFile, 'parser') !== false) {
+            if(function_exists('parser')) {
+                $errorFile = parser()->getSourceFilePath();
+            }
+        }
+
         $isFatalError = (((E_ERROR | E_COMPILE_ERROR | E_CORE_ERROR | E_USER_ERROR) & $errorSeverity) === $errorSeverity);
 
         // When the error is fatal the Kernel will throw it as an exception.

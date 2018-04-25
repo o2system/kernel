@@ -609,10 +609,42 @@ class Uri implements UriInterface
         return false;
     }
 
+    // ------------------------------------------------------------------------
+
+    public function withSubDomain( $subDomain )
+    {
+        $uri = clone $this;
+
+        if(is_null($subDomain)) {
+            $uri->subDomain = null;
+            $uri->subDomains = [];
+        } else {
+            $uri->subDomain = $subDomain;
+            $uri->subDomains = [ $subDomain ];
+        }
+
+        return $uri;
+    }
+
+    // ------------------------------------------------------------------------
+
     public function getSubDomains()
     {
         return $this->subDomains;
     }
+
+    // ------------------------------------------------------------------------
+
+    public function withSubDomains( array $subDomains )
+    {
+        $uri = clone $this;
+        $uri->subDomain = reset($subDomains);
+        $uri->subDomains = $subDomains;
+
+        return $uri;
+    }
+
+    // ------------------------------------------------------------------------
 
     /**
      * UriInterface::withScheme

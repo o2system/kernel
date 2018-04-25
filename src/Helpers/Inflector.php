@@ -200,17 +200,9 @@ if ( ! function_exists('snakecase')) {
      *
      * @return string
      */
-    function snakecase($string, $glue = '_')
+    function snakecase($string)
     {
-        $string = str_replace(' ', '', $string);
-        preg_match_all('!([A-Z][A-Z0-9]*(?=$|[A-Z][a-z0-9])|[A-Za-z][a-z0-9]+)!', $string, $matches);
-
-        $matches = $matches[ 0 ];
-        foreach ($matches as &$match) {
-            $match = $match === strtoupper($match) ? strtolower($match) : lcfirst($match);
-        }
-
-        return implode($glue, $matches);
+        return strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $string));
     }
 }
 
