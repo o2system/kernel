@@ -96,12 +96,10 @@ class Router
 
     protected function parseAction(Router\Datastructures\Action $action, array $uriSegments = [])
     {
-        ob_start();
         $closure = $action->getClosure();
         if (empty($closure)) {
-            $closure = ob_get_contents();
+            output()->sendError(204);
         }
-        ob_end_clean();
 
         if ($closure instanceof Controller) {
             $uriSegments = empty($uriSegments)
@@ -112,11 +110,11 @@ class Router
                     ->setRequestMethod('index'),
                 $uriSegments
             );
-        } elseif ($closure instanceof Controller) {
+        } elseif ($closure instanceof Router\Datastructures\Controller) {
             $this->setController($closure, $action->getClosureParameters());
         } elseif (is_array($closure)) {
-            $uri = (new \O2System\Kernel\Http\Message\Uri())
-                ->withSegments(new \O2System\Kernel\Http\Message\Uri\Segments(''))
+            $uri = (new Message\Uri())
+                ->withSegments(new Message\Uri\Segments(''))
                 ->withQuery('');
             $this->parseRequest($uri->addSegments($closure));
         } else {
@@ -132,19 +130,6 @@ class Router
                         ->setRequestMethod($matches[ 3 ]),
                     $uriSegments
                 );
-            } elseif (presenter()->theme->use === true) {
-                if ( ! presenter()->partials->offsetExists('content') && $closure !== '') {
-                    presenter()->partials->offsetSet('content', $closure);
-                }
-
-                if (presenter()->partials->offsetExists('content')) {
-                    profiler()->watch('VIEW_SERVICE_RENDER');
-                    view()->render();
-                    exit(EXIT_SUCCESS);
-                } else {
-                    output()->sendError(204);
-                    exit(EXIT_ERROR);
-                }
             } elseif (is_string($closure) && $closure !== '') {
                 if (is_json($closure)) {
                     output()->setContentType('application/json');
@@ -161,5 +146,83 @@ class Router
                 exit(EXIT_ERROR);
             }
         }
+    }
+
+    // ------------------------------------------------------------------------
+
+    protected function setController(
+        Router\Datastructures\Controller $controller,
+        array $uriSegments = []
+    ) {
+        if ( ! $controller->isValid()) {
+            output()->sendError(400);
+        }
+
+        // Add Controller PSR4 Namespace
+        loader()->addNamespace($controller->getNamespaceName(), $controller->getFileInfo()->getPath());
+
+        $controllerMethod = $controller->getRequestMethod();
+        $controllerMethod = empty($controllerMethod) ? reset($uriSegments) : $controllerMethod;
+        $controllerMethod = camelcase($controllerMethod);
+
+        // Set default controller method to index
+        if ( ! $controller->hasMethod($controllerMethod) &&
+            ! $controller->hasMethod('route')
+        ) {
+            $controllerMethod = 'index';
+        }
+
+        // has route method, controller method set to index as default
+        if (empty($controllerMethod)) {
+            $controllerMethod = 'index';
+        }
+
+        if (camelcase(reset($uriSegments)) === $controllerMethod) {
+            array_shift($uriSegments);
+        }
+
+        $controllerMethodParams = $uriSegments;
+
+        if ($controller->hasMethod('route')) {
+            $controller->setRequestMethod('route');
+            $controller->setRequestMethodArgs([
+                $controllerMethod,
+                $controllerMethodParams,
+            ]);
+        } elseif ($controller->hasMethod($controllerMethod)) {
+            $method = $controller->getMethod($controllerMethod);
+
+            // Method doesn't need any parameters
+            if ($method->getNumberOfParameters() == 0) {
+                // But there is parameters requested
+                if (count($controllerMethodParams)) {
+                    output()->sendError(404);
+                } else {
+                    $controller->setRequestMethod($controllerMethod);
+                }
+            } else {
+                $parameters = [];
+
+                if (count($controllerMethodParams)) {
+                    if (is_numeric(key($controllerMethodParams))) {
+                        $parameters = $controllerMethodParams;
+                    } else {
+                        foreach ($method->getParameters() as $index => $parameter) {
+                            if (isset($uriSegments[ $parameter->name ])) {
+                                $parameters[ $index ] = $controllerMethodParams[ $parameter->name ];
+                            } else {
+                                $parameters[ $index ] = null;
+                            }
+                        }
+                    }
+                }
+
+                $controller->setRequestMethod($controllerMethod);
+                $controller->setRequestMethodArgs($parameters);
+            }
+        }
+
+        // Set Controller
+        kernel()->addService($controller, 'controller');
     }
 }

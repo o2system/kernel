@@ -68,7 +68,7 @@ class Environment implements
      * Environment::exists
      *
      * Checks if the data exists on the storage.
-     * An alias of AbstractObjectContainerPattern::__isset method.
+     * An alias of Environment::__isset method.
      *
      * @param string $offset The object offset key.
      *

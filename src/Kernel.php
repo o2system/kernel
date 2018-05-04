@@ -40,7 +40,7 @@ require_once 'Helpers/Kernel.php';
  *
  * @package O2System
  */
-class Kernel extends Psr\Patterns\AbstractSingletonPattern implements ContainerInterface
+class Kernel extends Psr\Patterns\Creational\Singleton\AbstractSingleton implements ContainerInterface
 {
     /**
      * Kernel Services

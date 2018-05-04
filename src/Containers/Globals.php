@@ -68,7 +68,7 @@ class Globals implements
      * Globals::exists
      *
      * Checks if the data exists on the storage.
-     * An alias of AbstractObjectContainerPattern::__isset method.
+     * An alias of Globals::__isset method.
      *
      * @param string $offset The object offset key.
      *
@@ -350,7 +350,7 @@ class Globals implements
      */
     public function unserialize( $serialized )
     {
-        $this->storage = unserialize( $serialized );
+        $GLOBALS = unserialize( $serialized );
     }
 
     // ------------------------------------------------------------------------
