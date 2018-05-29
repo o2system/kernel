@@ -14,7 +14,7 @@
 |  PHP File Extension Constant
 | -------------------------------------------------------------------
 */
-define( '__EXT__', '.php' );
+define('__EXT__', '.php');
 
 /*
 |--------------------------------------------------------------------------
@@ -29,10 +29,10 @@ define( '__EXT__', '.php' );
 | always be used to set the mode correctly.
 |
 */
-define( 'FILE_READ_MODE', 0644 );
-define( 'FILE_WRITE_MODE', 0666 );
-define( 'DIR_READ_MODE', 0755 );
-define( 'DIR_WRITE_MODE', 0755 );
+define('FILE_READ_MODE', 0644);
+define('FILE_WRITE_MODE', 0666);
+define('DIR_READ_MODE', 0755);
+define('DIR_WRITE_MODE', 0755);
 
 /*
 |--------------------------------------------------------------------------
@@ -59,29 +59,29 @@ define( 'DIR_WRITE_MODE', 0755 );
 |       http://tldp.org/LDP/abs/html/exitcodes.html
 |
 */
-defined( 'EXIT_SUCCESS' ) || define( 'EXIT_SUCCESS', 0 ); // no errors
-defined( 'EXIT_ERROR' ) || define( 'EXIT_ERROR', 1 ); // generic error
-defined( 'EXIT_CONFIG' ) || define( 'EXIT_CONFIG', 3 ); // configuration error
-defined( 'EXIT_UNKNOWN_FILE' ) || define( 'EXIT_UNKNOWN_FILE', 4 ); // file not found
-defined( 'EXIT_UNKNOWN_CLASS' ) || define( 'EXIT_UNKNOWN_CLASS', 5 ); // unknown class
-defined( 'EXIT_UNKNOWN_METHOD' ) || define( 'EXIT_UNKNOWN_METHOD', 6 ); // unknown class member
-defined( 'EXIT_USER_INPUT' ) || define( 'EXIT_USER_INPUT', 7 ); // invalid user input
-defined( 'EXIT_DATABASE' ) || define( 'EXIT_DATABASE', 8 ); // database error
-defined( 'EXIT__AUTO_MIN' ) || define( 'EXIT__AUTO_MIN', 9 ); // lowest automatically-assigned error code
-defined( 'EXIT__AUTO_MAX' ) || define( 'EXIT__AUTO_MAX', 125 ); // highest automatically-assigned error code
+defined('EXIT_SUCCESS') || define('EXIT_SUCCESS', 0); // no errors
+defined('EXIT_ERROR') || define('EXIT_ERROR', 1); // generic error
+defined('EXIT_CONFIG') || define('EXIT_CONFIG', 3); // configuration error
+defined('EXIT_UNKNOWN_FILE') || define('EXIT_UNKNOWN_FILE', 4); // file not found
+defined('EXIT_UNKNOWN_CLASS') || define('EXIT_UNKNOWN_CLASS', 5); // unknown class
+defined('EXIT_UNKNOWN_METHOD') || define('EXIT_UNKNOWN_METHOD', 6); // unknown class member
+defined('EXIT_USER_INPUT') || define('EXIT_USER_INPUT', 7); // invalid user input
+defined('EXIT_DATABASE') || define('EXIT_DATABASE', 8); // database error
+defined('EXIT__AUTO_MIN') || define('EXIT__AUTO_MIN', 9); // lowest automatically-assigned error code
+defined('EXIT__AUTO_MAX') || define('EXIT__AUTO_MAX', 125); // highest automatically-assigned error code
 
 /*
 | -------------------------------------------------------------------
 | Logger Constants
 | -------------------------------------------------------------------
 */
-define( 'LOGGER_DISABLED', 0 ); // disabled all log writing
-define( 'LOGGER_INFO', 1 ); // write log marked as INFO
-define( 'LOGGER_ERROR', 2 ); // write log marked as ERROR
-define( 'LOGGER_DEBUG', 3 ); // write log marked as DEBUG
-define( 'LOGGER_NOTICE', 4 ); // write log marked as NOTICE
-define( 'LOGGER_WARNING', 5 ); // write log marked as WARNING
-define( 'LOGGER_ALERT', 6 ); // write log marked as ALERT
-define( 'LOGGER_EMERGENCY', 7 ); // write log marked as EMERGENCY
-define( 'LOGGER_CRITICAL', 8 ); // write log marked as CRITICAL
-define( 'LOGGER_ALL', 9 ); // enabled all log writing
+define('LOGGER_DISABLED', 0); // disabled all log writing
+define('LOGGER_INFO', 1); // write log marked as INFO
+define('LOGGER_ERROR', 2); // write log marked as ERROR
+define('LOGGER_DEBUG', 3); // write log marked as DEBUG
+define('LOGGER_NOTICE', 4); // write log marked as NOTICE
+define('LOGGER_WARNING', 5); // write log marked as WARNING
+define('LOGGER_ALERT', 6); // write log marked as ALERT
+define('LOGGER_EMERGENCY', 7); // write log marked as EMERGENCY
+define('LOGGER_CRITICAL', 8); // write log marked as CRITICAL
+define('LOGGER_ALL', 9); // enabled all log writing

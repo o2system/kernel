@@ -119,8 +119,8 @@ class Output extends Message\Response
      */
     public function errorHandler($errorSeverity, $errorMessage, $errorFile, $errorLine, $errorContext = [])
     {
-        if(strpos($errorFile, 'parser') !== false) {
-            if(function_exists('parser')) {
+        if (strpos($errorFile, 'parser') !== false) {
+            if (function_exists('parser')) {
                 $errorFile = parser()->getSourceFilePath();
             }
         }
@@ -279,7 +279,7 @@ class Output extends Message\Response
             'reason'  => $reasonPhrase,
             'success' => $statusCode >= 200 && $statusCode < 300 ? true : false,
             'message' => isset($data[ 'message' ]) ? $data[ 'message' ] : '',
-            'result' => [],
+            'result'  => [],
         ];
 
         if (is_array($data) or is_object($data)) {
@@ -315,10 +315,10 @@ class Output extends Message\Response
             if (is_array($data)) {
                 if (is_numeric(key($data))) {
                     $response[ 'result' ] = $data;
-                } elseif(is_string(key($data))) {
+                } elseif (is_string(key($data))) {
                     $response[ 'result' ] = [$data];
-                } elseif(count($data)) {
-                    $response['result'] = $data;
+                } elseif (count($data)) {
+                    $response[ 'result' ] = $data;
                 }
             } elseif (is_object($data)) {
                 $response[ 'result' ] = [$data];

@@ -8,6 +8,7 @@
  * @author         Steeve Andrian Salim
  * @copyright      Copyright (c) Steeve Andrian Salim
  */
+
 // ------------------------------------------------------------------------
 
 namespace O2System\Kernel\Cli\Writers;
@@ -96,7 +97,7 @@ class Table
      *
      * @return static
      */
-    public function setHeaders( array $headers )
+    public function setHeaders(array $headers)
     {
         $this->rows[ self::HEADER_INDEX ] = $headers;
 
@@ -114,7 +115,7 @@ class Table
      *
      * @return static
      */
-    public function addHeader( $content = '' )
+    public function addHeader($content = '')
     {
         $this->rows[ self::HEADER_INDEX ][] = $content;
 
@@ -132,7 +133,7 @@ class Table
      */
     public function getHeaders()
     {
-        return isset( $this->rows[ self::HEADER_INDEX ] )
+        return isset($this->rows[ self::HEADER_INDEX ])
             ? $this->rows[ self::HEADER_INDEX ]
             : null;
     }
@@ -148,11 +149,11 @@ class Table
      *
      * @return static
      */
-    public function addRow( $data = null )
+    public function addRow($data = null)
     {
         $this->rowIndex++;
-        if ( is_array( $data ) ) {
-            foreach ( $data as $column => $content ) {
+        if (is_array($data)) {
+            foreach ($data as $column => $content) {
                 $this->rows[ $this->rowIndex ][ $column ] = $content;
             }
         }
@@ -171,14 +172,14 @@ class Table
      *
      * @return static
      */
-    public function addColumn( $content, $columnIndex = null, $rowIndex = null )
+    public function addColumn($content, $columnIndex = null, $rowIndex = null)
     {
         $rowIndex = $rowIndex === null
             ? $this->rowIndex
             : $rowIndex;
-        if ( $columnIndex === null ) {
-            $columnIndex = isset( $this->rows[ $rowIndex ] )
-                ? count( $this->rows[ $rowIndex ] )
+        if ($columnIndex === null) {
+            $columnIndex = isset($this->rows[ $rowIndex ])
+                ? count($this->rows[ $rowIndex ])
                 : 0;
         }
         $this->rows[ $rowIndex ][ $columnIndex ] = $content;
@@ -197,7 +198,7 @@ class Table
      *
      * @return static
      */
-    public function setPadding( $numbers = 1 )
+    public function setPadding($numbers = 1)
     {
         $this->padding = $numbers;
 
@@ -215,7 +216,7 @@ class Table
      *
      * @return static
      */
-    public function setLeftMargin( $numbers = 0 )
+    public function setLeftMargin($numbers = 0)
     {
         $this->leftMargin = $numbers;
 
@@ -252,12 +253,12 @@ class Table
         $output = $this->isShowBorder
             ? $this->renderBorder()
             : '';
-        foreach ( $this->rows as $rowIndex => $row ) {
-            foreach ( $row as $cellIndex => $cell ) {
-                $output .= $this->renderCell( $cellIndex, $row );
+        foreach ($this->rows as $rowIndex => $row) {
+            foreach ($row as $cellIndex => $cell) {
+                $output .= $this->renderCell($cellIndex, $row);
             }
             $output .= "\n";
-            if ( $rowIndex === self::HEADER_INDEX ) {
+            if ($rowIndex === self::HEADER_INDEX) {
                 $output .= $this->renderBorder();
             }
         }
@@ -279,13 +280,13 @@ class Table
      */
     private function calculateColumnWidth()
     {
-        foreach ( $this->rows as $rowIndex => $row ) {
-            foreach ( $row as $columnIndex => $column ) {
-                if ( ! isset( $this->columnWidths[ $columnIndex ] ) ) {
-                    $this->columnWidths[ $columnIndex ] = strlen( $column );
+        foreach ($this->rows as $rowIndex => $row) {
+            foreach ($row as $columnIndex => $column) {
+                if ( ! isset($this->columnWidths[ $columnIndex ])) {
+                    $this->columnWidths[ $columnIndex ] = strlen($column);
                 } else {
-                    if ( strlen( $column ) > $this->columnWidths[ $columnIndex ] ) {
-                        $this->columnWidths[ $columnIndex ] = strlen( $column );
+                    if (strlen($column) > $this->columnWidths[ $columnIndex ]) {
+                        $this->columnWidths[ $columnIndex ] = strlen($column);
                     }
                 }
             }
@@ -306,11 +307,11 @@ class Table
     private function renderBorder()
     {
         $output = '';
-        $columnCount = count( $this->rows[ 0 ] );
-        for ( $col = 0; $col < $columnCount; $col++ ) {
-            $output .= $this->renderCell( $col );
+        $columnCount = count($this->rows[ 0 ]);
+        for ($col = 0; $col < $columnCount; $col++) {
+            $output .= $this->renderCell($col);
         }
-        if ( $this->isShowBorder ) {
+        if ($this->isShowBorder) {
             $output .= '+';
         }
         $output .= "\n";
@@ -330,14 +331,14 @@ class Table
      *
      * @return string
      */
-    private function renderCell( $index, $row = null )
+    private function renderCell($index, $row = null)
     {
         $cell = $row
             ? $row[ $index ]
             : '-';
         $width = $this->columnWidths[ $index ];
         $pad = $row
-            ? $width - strlen( $cell )
+            ? $width - strlen($cell)
             : $width;
         $padding = str_repeat(
             $row
@@ -346,10 +347,10 @@ class Table
             $this->padding
         );
         $output = '';
-        if ( $index === 0 ) {
-            $output .= str_repeat( ' ', $this->leftMargin );
+        if ($index === 0) {
+            $output .= str_repeat(' ', $this->leftMargin);
         }
-        if ( $this->isShowBorder ) {
+        if ($this->isShowBorder) {
             $output .= $row
                 ? '|'
                 : '+';
@@ -365,7 +366,7 @@ class Table
         $output .= $padding; # right padding
 
         $row = is_array($row) ? $row : [];
-        if ( $index == count( $row ) - 1 && $this->isShowBorder ) {
+        if ($index == count($row) - 1 && $this->isShowBorder) {
             $output .= $row
                 ? '|'
                 : '+';

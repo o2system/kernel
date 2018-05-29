@@ -8,6 +8,7 @@
  * @author         Steeve Andrian Salim
  * @copyright      Copyright (c) Steeve Andrian Salim
  */
+
 // ------------------------------------------------------------------------
 
 namespace O2System\Kernel\Datastructures;
@@ -54,16 +55,16 @@ class Config extends SplArrayObject
      *
      * @return Config Returns an SplArrayObject object on success.
      */
-    public function __construct( array $config = [], $flag = self::CAMELCASE_OFFSET )
+    public function __construct(array $config = [], $flag = self::CAMELCASE_OFFSET)
     {
-        parent::__construct( $config );
+        parent::__construct($config);
 
         $this->camelcaseOffset = $flag;
 
-        if ( $this->camelcaseOffset === true ) {
-            if ( count( $config ) > 0 ) {
-                foreach ( $config as $offset => $value ) {
-                    $this->offsetSet( $offset, $value );
+        if ($this->camelcaseOffset === true) {
+            if (count($config) > 0) {
+                foreach ($config as $offset => $value) {
+                    $this->offsetSet($offset, $value);
                 }
             }
         }
@@ -82,29 +83,29 @@ class Config extends SplArrayObject
      *
      * @return void
      */
-    public function offsetSet( $offset, $value )
+    public function offsetSet($offset, $value)
     {
-        if ( $this->camelcaseOffset === true ) {
-            if ( is_array( $value ) ) {
-                if ( is_string( key( $value ) ) ) {
+        if ($this->camelcaseOffset === true) {
+            if (is_array($value)) {
+                if (is_string(key($value))) {
                     $newValue = [];
 
-                    foreach ( $value as $key => $val ) {
-                        $newValue[ camelcase( $key ) ] = $val;
+                    foreach ($value as $key => $val) {
+                        $newValue[ camelcase($key) ] = $val;
                     }
 
-                    parent::offsetSet( camelcase( $offset ), new self( $newValue ) );
+                    parent::offsetSet(camelcase($offset), new self($newValue));
 
                     return;
                 }
-            } elseif ( is_string( $offset ) ) {
-                parent::offsetSet( camelcase( $offset ), $value );
+            } elseif (is_string($offset)) {
+                parent::offsetSet(camelcase($offset), $value);
 
                 return;
             }
         }
 
-        parent::offsetSet( $offset, $value );
+        parent::offsetSet($offset, $value);
     }
 
     // ------------------------------------------------------------------------

@@ -8,6 +8,7 @@
  * @author         Steeve Andrian Salim
  * @copyright      Copyright (c) Steeve Andrian Salim
  */
+
 // ------------------------------------------------------------------------
 
 namespace O2System\Kernel\Cli\Writers;
@@ -78,13 +79,13 @@ class Line implements ContextualClassInterface
      * @param int   $width
      * @param array $options
      */
-    public function __construct( $width, array $options = [], $contextualClass = 'default' )
+    public function __construct($width, array $options = [], $contextualClass = 'default')
     {
         $this->width = (int)$width;
         $this->string = '-';
 
-        $this->setOptions( $options );
-        $this->setContextualClass( $contextualClass );
+        $this->setOptions($options);
+        $this->setContextualClass($contextualClass);
     }
 
     // ------------------------------------------------------------------------
@@ -98,7 +99,7 @@ class Line implements ContextualClassInterface
      *
      * @return static
      */
-    public function setNumbers( $numbers )
+    public function setNumbers($numbers)
     {
         $this->numbers = (int)$numbers;
 
@@ -116,7 +117,7 @@ class Line implements ContextualClassInterface
      *
      * @return static
      */
-    public function setWidth( $width )
+    public function setWidth($width)
     {
         $this->width = (int)$width;
 
@@ -151,11 +152,11 @@ class Line implements ContextualClassInterface
     {
         $lines = [];
 
-        for ( $i = 0; $i < $this->numbers; $i++ ) {
-            $lines[ $i ] = $this->color->paint( str_repeat( $this->string, $this->width ) );
+        for ($i = 0; $i < $this->numbers; $i++) {
+            $lines[ $i ] = $this->color->paint(str_repeat($this->string, $this->width));
         }
 
-        return str_repeat( PHP_EOL, $this->newLinesBefore ) . implode( PHP_EOL, $lines ) . str_repeat( PHP_EOL,
-                $this->newLinesAfter );
+        return str_repeat(PHP_EOL, $this->newLinesBefore) . implode(PHP_EOL, $lines) . str_repeat(PHP_EOL,
+                $this->newLinesAfter);
     }
 }

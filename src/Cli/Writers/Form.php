@@ -8,6 +8,7 @@
  * @author         Steeve Andrian Salim
  * @copyright      Copyright (c) Steeve Andrian Salim
  */
+
 // ------------------------------------------------------------------------
 
 namespace O2System\Kernel\Cli\Writers;
@@ -30,28 +31,28 @@ class Form
      * @param string|Format|Text $question
      * @param bool               $required
      */
-    public function text( $name, $question, $required = false )
+    public function text($name, $question, $required = false)
     {
-        if ( is_string( $question ) ) {
+        if (is_string($question)) {
             output()->write(
-                ( new Format() )
-                    ->setString( language()->getLine( $question ) )
-                    ->setSpace( 1 )
+                (new Format())
+                    ->setString(language()->getLine($question))
+                    ->setSpace(1)
             );
-        } elseif ( $question instanceof Format or $question instanceof Text ) {
-            output()->write( $question );
+        } elseif ($question instanceof Format or $question instanceof Text) {
+            output()->write($question);
         }
 
         $standardInput = input()->standard();
 
-        if ( $required === true and empty( $standardInput ) ) {
-            $requiredText = ( new Format() )
-                ->setColor( ( new Color() )->setBackground( Color::RED ) )
-                ->setString( ' ' . language()->getLine( 'REQUIRED' ) . ' ' )
-                ->setIndent( 1 )
+        if ($required === true and empty($standardInput)) {
+            $requiredText = (new Format())
+                ->setColor((new Color())->setBackground(Color::RED))
+                ->setString(' ' . language()->getLine('REQUIRED') . ' ')
+                ->setIndent(1)
                 ->__toString();
 
-            $this->text( $name, str_replace( $requiredText, '', $question ) . $requiredText, $required );
+            $this->text($name, str_replace($requiredText, '', $question) . $requiredText, $required);
 
             return;
         }
@@ -70,33 +71,33 @@ class Form
      * @param string|Format|Text $question
      * @param bool               $required
      */
-    public function confirm( $name, $question, $required = false )
+    public function confirm($name, $question, $required = false)
     {
-        if ( is_string( $question ) ) {
+        if (is_string($question)) {
             output()->write(
-                ( new Format() )
-                    ->setString( rtrim( language()->getLine( $question ), '?' ) . ' (Y/N) ?' )
-                    ->setSpace( 1 )
+                (new Format())
+                    ->setString(rtrim(language()->getLine($question), '?') . ' (Y/N) ?')
+                    ->setSpace(1)
             );
-        } elseif ( $question instanceof Format or $question instanceof Text ) {
-            output()->write( $question . '?' );
+        } elseif ($question instanceof Format or $question instanceof Text) {
+            output()->write($question . '?');
         }
 
-        $standardInput = strtoupper( input()->standard() );
+        $standardInput = strtoupper(input()->standard());
 
-        if ( $required === true and ! in_array( $standardInput, [ 'Y', 'N' ] ) ) {
-            $requiredText = ( new Format() )
-                ->setColor( ( new Color() )->setBackground( Color::RED ) )
-                ->setString( ' ' . language()->getLine( 'REQUIRED' ) . ' ' )
-                ->setIndent( 1 )
+        if ($required === true and ! in_array($standardInput, ['Y', 'N'])) {
+            $requiredText = (new Format())
+                ->setColor((new Color())->setBackground(Color::RED))
+                ->setString(' ' . language()->getLine('REQUIRED') . ' ')
+                ->setIndent(1)
                 ->__toString();
 
-            $this->confirm( $name, str_replace( $requiredText, '', $question ) . $requiredText, $required );
+            $this->confirm($name, str_replace($requiredText, '', $question) . $requiredText, $required);
 
             return;
         }
 
-        $_POST[ $name ] = (bool)( $standardInput === 'Y' );
+        $_POST[ $name ] = (bool)($standardInput === 'Y');
     }
 
     // ------------------------------------------------------------------------
@@ -111,56 +112,56 @@ class Form
      * @param array              $options
      * @param bool               $required
      */
-    public function options( $name, $question, array $options, $required = false )
+    public function options($name, $question, array $options, $required = false)
     {
-        output()->write( PHP_EOL );
+        output()->write(PHP_EOL);
 
         $choices = [];
         $i = 1;
-        foreach ( $options as $value => $label ) {
+        foreach ($options as $value => $label) {
             $choices[ $i ] = $value;
             output()->write(
-                ( new Format() )
-                    ->setString( '(' . $i . ') ' . language()->getLine( $label ) )
-                    ->setNewLinesAfter( 1 )
+                (new Format())
+                    ->setString('(' . $i . ') ' . language()->getLine($label))
+                    ->setNewLinesAfter(1)
             );
             $i++;
         }
 
         //output()->write( PHP_EOL );
 
-        if ( is_string( $question ) ) {
+        if (is_string($question)) {
             output()->write(
-                ( new Format() )
-                    ->setString( language()->getLine( $question ) . ':' )
-                    ->setSpace( 1 )
+                (new Format())
+                    ->setString(language()->getLine($question) . ':')
+                    ->setSpace(1)
             );
-        } elseif ( $question instanceof Format or $question instanceof Text ) {
-            output()->write( $question );
+        } elseif ($question instanceof Format or $question instanceof Text) {
+            output()->write($question);
         }
 
-        $requiredText = ( new Format() )
-            ->setColor( ( new Color() )->setBackground( Color::RED ) )
-            ->setString( ' ' . language()->getLine( 'REQUIRED' ) . ' ' )
-            ->setIndent( 1 )
+        $requiredText = (new Format())
+            ->setColor((new Color())->setBackground(Color::RED))
+            ->setString(' ' . language()->getLine('REQUIRED') . ' ')
+            ->setIndent(1)
             ->__toString();
 
-        $invalidText = ( new Format() )
-            ->setColor( ( new Color() )->setBackground( Color::RED ) )
-            ->setString( ' ' . language()->getLine( 'INVALID' ) . ' ' )
-            ->setIndent( 1 )
+        $invalidText = (new Format())
+            ->setColor((new Color())->setBackground(Color::RED))
+            ->setString(' ' . language()->getLine('INVALID') . ' ')
+            ->setIndent(1)
             ->__toString();
 
-        $question = str_replace( [ $requiredText, $invalidText ], '', $question );
+        $question = str_replace([$requiredText, $invalidText], '', $question);
 
         $standardInput = input()->standard();
 
-        if ( $required === true and empty( $standardInput ) ) {
-            $this->options( $name, $question . $requiredText, $options, $required );
+        if ($required === true and empty($standardInput)) {
+            $this->options($name, $question . $requiredText, $options, $required);
 
             return;
-        } elseif ( ! array_key_exists( $standardInput, $choices ) ) {
-            $this->options( $name, $question . $invalidText, $options, $required );
+        } elseif ( ! array_key_exists($standardInput, $choices)) {
+            $this->options($name, $question . $invalidText, $options, $required);
 
             return;
         }

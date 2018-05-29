@@ -8,6 +8,7 @@
  * @author         Steeve Andrian Salim
  * @copyright      Copyright (c) Steeve Andrian Salim
  */
+
 // ------------------------------------------------------------------------
 
 namespace O2System\Kernel\Cli;
@@ -43,9 +44,9 @@ class Input
      *
      * @return mixed
      */
-    final public function get( $offset = null, $filter = null )
+    final public function get($offset = null, $filter = null)
     {
-        return $this->filter( INPUT_GET, $offset, $filter );
+        return $this->filter(INPUT_GET, $offset, $filter);
     }
 
     // ------------------------------------------------------------------------
@@ -66,13 +67,13 @@ class Input
      *
      * @return mixed|\O2System\Spl\Datastructures\SplArrayObject
      */
-    protected function filter( $type, $offset = null, $filter = FILTER_DEFAULT )
+    protected function filter($type, $offset = null, $filter = FILTER_DEFAULT)
     {
         // If $offset is null, it means that the whole input type array is requested
-        if ( is_null( $offset ) ) {
+        if (is_null($offset)) {
             $loopThrough = [];
 
-            switch ( $type ) {
+            switch ($type) {
                 case INPUT_GET    :
                     $loopThrough = $_GET;
                     break;
@@ -93,63 +94,63 @@ class Input
                     break;
             }
 
-            $loopThrough = $this->filterRecursive( $loopThrough, $filter );
+            $loopThrough = $this->filterRecursive($loopThrough, $filter);
 
-            if ( empty( $loopThrough ) ) {
+            if (empty($loopThrough)) {
                 return false;
             }
 
-            return new SplArrayObject( $loopThrough );
+            return new SplArrayObject($loopThrough);
         } // allow fetching multiple keys at once
-        elseif ( is_array( $offset ) ) {
+        elseif (is_array($offset)) {
             $loopThrough = [];
 
-            foreach ( $offset as $key ) {
-                $loopThrough[ $key ] = $this->filter( $type, $key, $filter );
+            foreach ($offset as $key) {
+                $loopThrough[ $key ] = $this->filter($type, $key, $filter);
             }
 
-            if ( empty( $loopThrough ) ) {
+            if (empty($loopThrough)) {
                 return false;
             }
 
-            return new SplArrayObject( $loopThrough );
-        } elseif ( isset( $offset ) ) {
+            return new SplArrayObject($loopThrough);
+        } elseif (isset($offset)) {
             // Due to issues with FastCGI and testing,
             // we need to do these all manually instead
             // of the simpler filter_input();
-            switch ( $type ) {
+            switch ($type) {
                 case INPUT_GET:
-                    $value = isset( $_GET[ $offset ] )
+                    $value = isset($_GET[ $offset ])
                         ? $_GET[ $offset ]
                         : null;
                     break;
                 case INPUT_POST:
-                    $value = isset( $_POST[ $offset ] )
+                    $value = isset($_POST[ $offset ])
                         ? $_POST[ $offset ]
                         : null;
                     break;
                 case INPUT_SERVER:
-                    $value = isset( $_SERVER[ $offset ] )
+                    $value = isset($_SERVER[ $offset ])
                         ? $_SERVER[ $offset ]
                         : null;
                     break;
                 case INPUT_ENV:
-                    $value = isset( $_ENV[ $offset ] )
+                    $value = isset($_ENV[ $offset ])
                         ? $_ENV[ $offset ]
                         : null;
                     break;
                 case INPUT_COOKIE:
-                    $value = isset( $_COOKIE[ $offset ] )
+                    $value = isset($_COOKIE[ $offset ])
                         ? $_COOKIE[ $offset ]
                         : null;
                     break;
                 case INPUT_REQUEST:
-                    $value = isset( $_REQUEST[ $offset ] )
+                    $value = isset($_REQUEST[ $offset ])
                         ? $_REQUEST[ $offset ]
                         : null;
                     break;
                 case INPUT_SESSION:
-                    $value = isset( $_SESSION[ $offset ] )
+                    $value = isset($_SESSION[ $offset ])
                         ? $_SESSION[ $offset ]
                         : null;
                     break;
@@ -157,20 +158,20 @@ class Input
                     $value = '';
             }
 
-            if ( is_array( $value ) ) {
-                $value = $this->filterRecursive( $value, $filter );
+            if (is_array($value)) {
+                $value = $this->filterRecursive($value, $filter);
 
-                if ( is_string( key( $value ) ) ) {
-                    return new SplArrayObject( $value );
+                if (is_string(key($value))) {
+                    return new SplArrayObject($value);
                 } else {
                     return $value;
                 }
-            } elseif ( is_object( $value ) ) {
+            } elseif (is_object($value)) {
                 return $value;
             }
 
-            if ( isset( $filter ) ) {
-                return filter_var( $value, $filter );
+            if (isset($filter)) {
+                return filter_var($value, $filter);
             }
 
             return $value;
@@ -205,15 +206,15 @@ class Input
      *
      * @return mixed
      */
-    protected function filterRecursive( array $data, $filter = FILTER_DEFAULT )
+    protected function filterRecursive(array $data, $filter = FILTER_DEFAULT)
     {
-        foreach ( $data as $key => $value ) {
-            if ( is_array( $value ) AND is_array( $filter ) ) {
-                $data[ $key ] = filter_var_array( $value, $filter );
-            } elseif ( is_array( $value ) ) {
-                $data[ $key ] = $this->filterRecursive( $value, $filter );
-            } elseif ( isset( $filter ) ) {
-                $data[ $key ] = filter_var( $value, $filter );
+        foreach ($data as $key => $value) {
+            if (is_array($value) AND is_array($filter)) {
+                $data[ $key ] = filter_var_array($value, $filter);
+            } elseif (is_array($value)) {
+                $data[ $key ] = $this->filterRecursive($value, $filter);
+            } elseif (isset($filter)) {
+                $data[ $key ] = filter_var($value, $filter);
             } else {
                 $data[ $key ] = $value;
             }
@@ -238,9 +239,9 @@ class Input
      *
      * @return mixed
      */
-    final public function post( $offset = null, $filter = null )
+    final public function post($offset = null, $filter = null)
     {
-        return $this->filter( INPUT_POST, $offset, $filter );
+        return $this->filter(INPUT_POST, $offset, $filter);
     }
 
     /**
@@ -257,41 +258,41 @@ class Input
      *
      * @return mixed
      */
-    final public function argv( $offset = null, $filter = null )
+    final public function argv($offset = null, $filter = null)
     {
         $arguments = $_SERVER[ 'argv' ];
         $numArguments = $_SERVER[ 'argc' ];
 
         $argv = [];
-        for ( $i = 1; $i < $numArguments; $i++ ) {
-            $optionCommand = trim( $arguments[ $i ] );
+        for ($i = 1; $i < $numArguments; $i++) {
+            $optionCommand = trim($arguments[ $i ]);
             $optionValue = true;
 
-            if ( empty( $optionCommand ) ) {
+            if (empty($optionCommand)) {
                 continue;
             }
 
-            if ( strpos( $optionCommand, '=' ) !== false ) {
-                $xOptionCommand = explode( '=', $optionCommand );
-                $xOptionCommand = array_map( 'trim', $xOptionCommand );
+            if (strpos($optionCommand, '=') !== false) {
+                $xOptionCommand = explode('=', $optionCommand);
+                $xOptionCommand = array_map('trim', $xOptionCommand);
 
-                $optionCommand = str_replace( [ '-', '--' ], '', $xOptionCommand[ 0 ] );
+                $optionCommand = str_replace(['-', '--'], '', $xOptionCommand[ 0 ]);
                 $optionValue = $xOptionCommand[ 1 ];
 
                 $argv[ $optionCommand ] = $optionValue;
                 continue;
             }
 
-            if ( strpos( $optionCommand, '--' ) !== false
-                || strpos( $optionCommand, '-' ) !== false
+            if (strpos($optionCommand, '--') !== false
+                || strpos($optionCommand, '-') !== false
             ) {
-                $optionCommand = str_replace( [ '-', '--' ], '', $optionCommand );
+                $optionCommand = str_replace(['-', '--'], '', $optionCommand);
 
-                if ( isset( $arguments[ $i + 1 ] ) ) {
+                if (isset($arguments[ $i + 1 ])) {
                     $nextOptionCommand = $arguments[ $i + 1 ];
 
-                    if ( strpos( $nextOptionCommand, '--' ) === false
-                        || strpos( $nextOptionCommand, '-' ) === false
+                    if (strpos($nextOptionCommand, '--') === false
+                        || strpos($nextOptionCommand, '-') === false
                     ) {
                         $optionValue = $nextOptionCommand;
                         $arguments[ $i + 1 ] = null;
@@ -299,18 +300,18 @@ class Input
                 }
             }
 
-            if ( isset( $filter ) ) {
-                $optionValue = filter_var( $optionValue, $filter );
+            if (isset($filter)) {
+                $optionValue = filter_var($optionValue, $filter);
             } else {
-                $optionValue = filter_var( $optionValue, FILTER_DEFAULT );
+                $optionValue = filter_var($optionValue, FILTER_DEFAULT);
             }
 
             $argv[ $optionCommand ] = $optionValue;
         }
 
-        if ( empty( $offset ) ) {
+        if (empty($offset)) {
             return $argv;
-        } elseif ( isset( $argv[ $offset ] ) ) {
+        } elseif (isset($argv[ $offset ])) {
             return $argv[ $offset ];
         }
     }
@@ -319,14 +320,14 @@ class Input
 
     public function standard()
     {
-        return trim( fgets( STDIN ) );
+        return trim(fgets(STDIN));
     }
 
     // ------------------------------------------------------------------------
 
     public function getApp()
     {
-        return isset( $_SERVER[ 'argv' ][ 0 ] )
+        return isset($_SERVER[ 'argv' ][ 0 ])
             ? $_SERVER[ 'argv' ][ 0 ]
             : false;
     }
@@ -335,49 +336,49 @@ class Input
 
     public function getCommand()
     {
-        return isset( $_SERVER[ 'argv' ][ 1 ] )
+        return isset($_SERVER[ 'argv' ][ 1 ])
             ? $_SERVER[ 'argv' ][ 1 ]
             : false;
     }
 
     // ------------------------------------------------------------------------
 
-    public function getOptions( $offset = null, $filter = null )
+    public function getOptions($offset = null, $filter = null)
     {
         $arguments = $_SERVER[ 'argv' ];
         $numArguments = $_SERVER[ 'argc' ];
 
         $argv = [];
 
-        for ( $i = 2; $i < $numArguments; $i++ ) {
-            $optionCommand = trim( $arguments[ $i ] );
+        for ($i = 2; $i < $numArguments; $i++) {
+            $optionCommand = trim($arguments[ $i ]);
             $optionValue = true;
 
-            if ( empty( $optionCommand ) ) {
+            if (empty($optionCommand)) {
                 continue;
             }
 
-            if ( strpos( $optionCommand, '=' ) !== false ) {
-                $xOptionCommand = explode( '=', $optionCommand );
-                $xOptionCommand = array_map( 'trim', $xOptionCommand );
+            if (strpos($optionCommand, '=') !== false) {
+                $xOptionCommand = explode('=', $optionCommand);
+                $xOptionCommand = array_map('trim', $xOptionCommand);
 
-                $optionCommand = str_replace( [ '-', '--' ], '', $xOptionCommand[ 0 ] );
+                $optionCommand = str_replace(['-', '--'], '', $xOptionCommand[ 0 ]);
                 $optionValue = $xOptionCommand[ 1 ];
 
                 $argv[ $optionCommand ] = $optionValue;
                 continue;
             }
 
-            if ( strpos( $optionCommand, '--' ) !== false
-                || strpos( $optionCommand, '-' ) !== false
+            if (strpos($optionCommand, '--') !== false
+                || strpos($optionCommand, '-') !== false
             ) {
-                $optionCommand = str_replace( [ '-', '--' ], '', $optionCommand );
+                $optionCommand = str_replace(['-', '--'], '', $optionCommand);
 
-                if ( isset( $arguments[ $i + 1 ] ) ) {
+                if (isset($arguments[ $i + 1 ])) {
                     $nextOptionCommand = $arguments[ $i + 1 ];
 
-                    if ( strpos( $nextOptionCommand, '--' ) === false
-                        || strpos( $nextOptionCommand, '-' ) === false
+                    if (strpos($nextOptionCommand, '--') === false
+                        || strpos($nextOptionCommand, '-') === false
                     ) {
                         $optionValue = $nextOptionCommand;
                         $arguments[ $i + 1 ] = null;
@@ -385,18 +386,18 @@ class Input
                 }
             }
 
-            if ( isset( $filter ) ) {
-                $optionValue = filter_var( $optionValue, $filter );
+            if (isset($filter)) {
+                $optionValue = filter_var($optionValue, $filter);
             } else {
-                $optionValue = filter_var( $optionValue, FILTER_DEFAULT );
+                $optionValue = filter_var($optionValue, FILTER_DEFAULT);
             }
 
             $argv[ $optionCommand ] = $optionValue;
         }
 
-        if ( empty( $offset ) ) {
+        if (empty($offset)) {
             return $argv;
-        } elseif ( isset( $argv[ $offset ] ) ) {
+        } elseif (isset($argv[ $offset ])) {
             return $argv[ $offset ];
         }
     }
@@ -417,9 +418,9 @@ class Input
      *
      * @return mixed
      */
-    final public function env( $offset = null, $filter = null )
+    final public function env($offset = null, $filter = null)
     {
-        return $this->filter( INPUT_ENV, $offset, $filter );
+        return $this->filter(INPUT_ENV, $offset, $filter);
     }
 
     //--------------------------------------------------------------------
@@ -438,9 +439,9 @@ class Input
      *
      * @return mixed
      */
-    final public function cookie( $offset = null, $filter = null )
+    final public function cookie($offset = null, $filter = null)
     {
-        return $this->filter( INPUT_COOKIE, $offset, $filter );
+        return $this->filter(INPUT_COOKIE, $offset, $filter);
     }
 
     //--------------------------------------------------------------------
@@ -459,9 +460,9 @@ class Input
      *
      * @return mixed
      */
-    final public function server( $offset = null, $filter = null )
+    final public function server($offset = null, $filter = null)
     {
-        return $this->filter( INPUT_SERVER, $offset, $filter );
+        return $this->filter(INPUT_SERVER, $offset, $filter);
     }
 
     //--------------------------------------------------------------------
@@ -480,9 +481,9 @@ class Input
      *
      * @return mixed
      */
-    final public function request( $offset = null, $filter = null )
+    final public function request($offset = null, $filter = null)
     {
-        return $this->filter( INPUT_REQUEST, $offset, $filter );
+        return $this->filter(INPUT_REQUEST, $offset, $filter);
     }
 
     //--------------------------------------------------------------------

@@ -8,6 +8,7 @@
  * @author         Steeve Andrian Salim
  * @copyright      Copyright (c) Steeve Andrian Salim
  */
+
 // ------------------------------------------------------------------------
 
 namespace O2System\Kernel\Cli\Writers\Interfaces;
@@ -77,5 +78,5 @@ interface ContextualClassInterface
      *
      * @return static
      */
-    public function setContextualClass( $class );
+    public function setContextualClass($class);
 }

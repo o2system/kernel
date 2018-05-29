@@ -8,6 +8,7 @@
  * @author         Steeve Andrian Salim
  * @copyright      Copyright (c) Steeve Andrian Salim
  */
+
 // ------------------------------------------------------------------------
 
 namespace O2System\Kernel\Cli\Writers;
@@ -32,9 +33,9 @@ class ProgressBar
     public function __construct()
     {
         // change the fps limit as needed
-        $this->limiter = new ProgressBar\Limiter( 10 );
+        $this->limiter = new ProgressBar\Limiter(10);
 
-        output()->write( PHP_EOL );
+        output()->write(PHP_EOL);
     }
 
     // ------------------------------------------------------------------------
@@ -57,7 +58,7 @@ class ProgressBar
     protected function write()
     {
         $this->updateSize();
-        $this->writeStatus( $this->units, $this->total, $this->columns, $this->columns );
+        $this->writeStatus($this->units, $this->total, $this->columns, $this->columns);
     }
 
     // ------------------------------------------------------------------------
@@ -70,7 +71,7 @@ class ProgressBar
     protected function updateSize()
     {
         // get the number of columns
-        $this->columns = exec( "tput cols" );
+        $this->columns = exec("tput cols");
     }
 
     // ------------------------------------------------------------------------
@@ -83,10 +84,10 @@ class ProgressBar
      * @param int $size
      * @param int $lineWidth
      */
-    protected function writeStatus( $done, $total, $size = 30, $lineWidth = -1 )
+    protected function writeStatus($done, $total, $size = 30, $lineWidth = -1)
     {
-        if ( $lineWidth <= 0 ) {
-            $lineWidth = input()->env( 'COLUMNS' );
+        if ($lineWidth <= 0) {
+            $lineWidth = input()->env('COLUMNS');
         }
 
         static $start_time;
@@ -94,66 +95,66 @@ class ProgressBar
         // to take account for [ and ]
         $size -= 3;
         // if we go over our bound, just ignore it
-        if ( $done > $total ) {
+        if ($done > $total) {
             return;
         }
 
-        if ( empty( $start_time ) ) {
+        if (empty($start_time)) {
             $start_time = time();
         }
         $now = time();
 
-        $percent = (double)( $done / $total );
+        $percent = (double)($done / $total);
 
-        $bar = floor( $percent * $size );
+        $bar = floor($percent * $size);
 
         // jump to the begining
-        output()->write( "\r" );
+        output()->write("\r");
 
         // jump a line up
-        output()->write( "\x1b[A" );
+        output()->write("\x1b[A");
 
         $statusBar = "[";
-        $statusBar .= str_repeat( "=", $bar );
-        if ( $bar < $size ) {
+        $statusBar .= str_repeat("=", $bar);
+        if ($bar < $size) {
             $statusBar .= ">";
-            $statusBar .= str_repeat( " ", $size - $bar );
+            $statusBar .= str_repeat(" ", $size - $bar);
         } else {
             $statusBar .= "=";
         }
 
-        $percentOutput = number_format( $percent * 100, 0 );
+        $percentOutput = number_format($percent * 100, 0);
 
         $statusBar .= "]";
         $details = "$percentOutput%  $done/$total";
 
-        $rate = ( $now - $start_time ) / $done;
+        $rate = ($now - $start_time) / $done;
         $left = $total - $done;
-        $eta = round( $rate * $left, 2 );
+        $eta = round($rate * $left, 2);
 
         $elapsed = $now - $start_time;
 
 
-        $details .= ' ' . language()->getLine( 'CLI_PROGRESS_BAR_ESTIMATION' ) . ': ' . $this->formatTime( $eta ) . ' ' . language()->getLine( 'CLI_PROGRESS_BAR_ELAPSED' ) . ': ' . $this->formatTime( $elapsed ) . ' ';
+        $details .= ' ' . language()->getLine('CLI_PROGRESS_BAR_ESTIMATION') . ': ' . $this->formatTime($eta) . ' ' . language()->getLine('CLI_PROGRESS_BAR_ELAPSED') . ': ' . $this->formatTime($elapsed) . ' ';
 
         $lineWidth--;
-        if ( strlen( $details ) >= $lineWidth ) {
-            $details = substr( $details, 0, $lineWidth - 1 );
+        if (strlen($details) >= $lineWidth) {
+            $details = substr($details, 0, $lineWidth - 1);
         }
 
-        output()->write( implode( PHP_EOL, [
+        output()->write(implode(PHP_EOL, [
             $details,
             $statusBar,
-        ] ) );
+        ]));
 
         //echo "$details\n$status_bar";
 
         flush();
 
         // when done, send a newline
-        if ( $done == $total ) {
+        if ($done == $total) {
             //echo "\n";
-            output()->write( PHP_EOL );
+            output()->write(PHP_EOL);
         }
 
     }
@@ -167,20 +168,20 @@ class ProgressBar
      *
      * @return string
      */
-    protected function formatTime( $time )
+    protected function formatTime($time)
     {
-        if ( $time > 100 ) {
+        if ($time > 100) {
             $time /= 60;
-            if ( $time > 100 ) {
+            if ($time > 100) {
                 $time /= 60;
 
-                return number_format( $time ) . " hr";
+                return number_format($time) . " hr";
             }
 
-            return number_format( $time ) . " min";
+            return number_format($time) . " min";
         }
 
-        return number_format( $time ) . " sec";
+        return number_format($time) . " sec";
     }
 
     // ------------------------------------------------------------------------
@@ -191,11 +192,11 @@ class ProgressBar
      * @param $units
      * @param $total
      */
-    public function update( $units, $total )
+    public function update($units, $total)
     {
         $this->units = $units;
         $this->total = $total;
-        if ( ! $this->limiter->isValid() ) {
+        if ( ! $this->limiter->isValid()) {
             return;
         }
         $this->write();

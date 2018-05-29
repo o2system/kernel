@@ -8,6 +8,7 @@
  * @author         Steeve Andrian Salim
  * @copyright      Copyright (c) Steeve Andrian Salim
  */
+
 // ------------------------------------------------------------------------
 
 namespace O2System\Kernel\Cli\Writers\Traits;
@@ -41,7 +42,7 @@ trait SpaceSetterTrait
      *
      * @return static
      */
-    public function setSpace( $space )
+    public function setSpace($space)
     {
         $this->space = (int)$space;
 

@@ -318,7 +318,7 @@ class Segments
             $config = config('uri');
         }
 
-        if(empty($config)) {
+        if (empty($config)) {
             $config = new SplArrayObject([
                 'permittedChars' => 'a-z 0-9~%.:_\-@#',
                 'suffix'         => null,

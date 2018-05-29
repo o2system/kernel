@@ -56,6 +56,14 @@ if ( ! function_exists('language')) {
      */
     function language()
     {
+        $args = func_get_args();
+
+        if (count($args)) {
+            $language =& kernel()->getService('language');
+
+            return call_user_func_array([&$language, 'getLine'], $args);
+        }
+
         return kernel()->getService('language');
     }
 }
@@ -134,17 +142,17 @@ if ( ! function_exists('output')) {
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists( 'request' ) ) {
+if ( ! function_exists('server_request')) {
     /**
-     * request
+     * server_request
      *
      * Convenient shortcut for O2System Kernel Http Message Request service.
      *
      * @return O2System\Kernel\Http\Message\Request
      */
-    function request ()
+    function server_request()
     {
-        return o2system()->getService( 'request' );
+        return o2system()->getService('serverRequest');
     }
 }
 

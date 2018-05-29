@@ -8,6 +8,7 @@
  * @author         Steeve Andrian Salim
  * @copyright      Copyright (c) Steeve Andrian Salim
  */
+
 // ------------------------------------------------------------------------
 
 namespace O2System\Kernel\Cli\Router\Datastructures;
@@ -34,36 +35,36 @@ class Commander extends SplClassInfo
 
     // ------------------------------------------------------------------------
 
-    public function __construct( $filePath )
+    public function __construct($filePath)
     {
-        if ( is_object( $filePath ) ) {
-            if ( $filePath instanceof \O2System\Kernel\Cli\Commander ) {
-                parent::__construct( $filePath );
+        if (is_object($filePath)) {
+            if ($filePath instanceof \O2System\Kernel\Cli\Commander) {
+                parent::__construct($filePath);
                 $this->instance = $filePath;
             }
-        } elseif ( is_string( $filePath ) && is_file( $filePath ) ) {
-            $className = prepare_class_name( pathinfo( $filePath, PATHINFO_FILENAME ) );
-            @list( $namespaceDirectory, $subNamespace ) = explode( 'Commanders', dirname( $filePath ) );
+        } elseif (is_string($filePath) && is_file($filePath)) {
+            $className = prepare_class_name(pathinfo($filePath, PATHINFO_FILENAME));
+            @list($namespaceDirectory, $subNamespace) = explode('Commanders', dirname($filePath));
             $classNamespace = loader()->getDirNamespace(
                     $namespaceDirectory
-                ) . 'Commanders' . ( empty( $subNamespace ) ? null : str_replace( '/', '\\', $subNamespace ) ) . '\\';
+                ) . 'Commanders' . (empty($subNamespace) ? null : str_replace('/', '\\', $subNamespace)) . '\\';
             $className = $classNamespace . $className;
 
-            if ( class_exists( $className ) ) {
-                parent::__construct( $className );
-            } elseif ( class_exists( '\O2System\Kernel\Cli\\' . $className ) ) {
-                parent::__construct( '\O2System\Kernel\Cli\\' . $className );
-            } elseif ( class_exists( '\O2System\Framework\Cli\\' . $className ) ) {
-                parent::__construct( '\O2System\Framework\Cli\\' . $className );
-            } elseif ( class_exists( '\App\Cli\\' . $className ) ) {
-                parent::__construct( '\App\Cli\\' . $className );
+            if (class_exists($className)) {
+                parent::__construct($className);
+            } elseif (class_exists('\O2System\Kernel\Cli\\' . $className)) {
+                parent::__construct('\O2System\Kernel\Cli\\' . $className);
+            } elseif (class_exists('\O2System\Framework\Cli\\' . $className)) {
+                parent::__construct('\O2System\Framework\Cli\\' . $className);
+            } elseif (class_exists('\App\Cli\\' . $className)) {
+                parent::__construct('\App\Cli\\' . $className);
             }
         }
     }
 
     // ------------------------------------------------------------------------
 
-    public function setProperties( array $properties )
+    public function setProperties(array $properties)
     {
         $this->properties = $properties;
     }
@@ -72,23 +73,23 @@ class Commander extends SplClassInfo
 
     public function getParameter()
     {
-        return strtolower( get_class_name( $this->name ) );
+        return strtolower(get_class_name($this->name));
     }
 
     // ------------------------------------------------------------------------
 
     public function &getInstance()
     {
-        if ( empty( $this->instance ) ) {
+        if (empty($this->instance)) {
             $className = $this->name;
             $this->instance = new $className();
 
-            if ( count( $this->properties ) ) {
-                foreach ( $this->properties as $key => $value ) {
-                    $setterMethodName = camelcase( 'set_' . $key );
+            if (count($this->properties)) {
+                foreach ($this->properties as $key => $value) {
+                    $setterMethodName = camelcase('set_' . $key);
 
-                    if ( method_exists( $this->instance, $setterMethodName ) ) {
-                        $this->instance->{$setterMethodName}( $value );
+                    if (method_exists($this->instance, $setterMethodName)) {
+                        $this->instance->{$setterMethodName}($value);
                     } else {
                         $this->instance->{$key} = $value;
                     }
@@ -106,7 +107,7 @@ class Commander extends SplClassInfo
 
     // ------------------------------------------------------------------------
 
-    public function setRequestMethod( $method )
+    public function setRequestMethod($method)
     {
         $this->requestMethod = $method;
 
@@ -120,11 +121,11 @@ class Commander extends SplClassInfo
         return $this->requestMethodArgs;
     }
 
-    public function setRequestMethodArgs( array $arguments )
+    public function setRequestMethodArgs(array $arguments)
     {
-        $arguments = array_values( $arguments );
-        array_unshift( $arguments, null );
-        unset( $arguments[ 0 ] );
+        $arguments = array_values($arguments);
+        array_unshift($arguments, null);
+        unset($arguments[ 0 ]);
 
         $this->requestMethodArgs = $arguments;
 

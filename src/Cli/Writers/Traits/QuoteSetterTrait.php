@@ -8,6 +8,7 @@
  * @author         Steeve Andrian Salim
  * @copyright      Copyright (c) Steeve Andrian Salim
  */
+
 // ------------------------------------------------------------------------
 
 namespace O2System\Kernel\Cli\Writers\Traits;
@@ -41,10 +42,10 @@ trait QuoteSetterTrait
      *
      * @return static
      */
-    public function setQuote( $quote )
+    public function setQuote($quote)
     {
-        if ( isset( $quote ) ) {
-            $this->quote = trim( $quote );
+        if (isset($quote)) {
+            $this->quote = trim($quote);
         }
 
         return $this;

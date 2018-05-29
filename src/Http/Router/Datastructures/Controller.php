@@ -8,6 +8,7 @@
  * @author         Steeve Andrian Salim
  * @copyright      Copyright (c) Steeve Andrian Salim
  */
+
 // ------------------------------------------------------------------------
 
 namespace O2System\Kernel\Http\Router\Datastructures;
@@ -36,62 +37,55 @@ class Controller extends SplClassInfo
 
     // ------------------------------------------------------------------------
 
-    public function __construct( $filePath )
+    public function __construct($filePath)
     {
-        if ( is_object( $filePath ) ) {
-            if ( $filePath instanceof \O2System\Kernel\Http\Controller ) {
-                parent::__construct( $filePath );
+        if (is_object($filePath)) {
+            if ($filePath instanceof \O2System\Kernel\Http\Controller) {
+                parent::__construct($filePath);
                 $this->instance = $filePath;
             }
-        } elseif ( is_string( $filePath ) && is_file( $filePath ) ) {
-            $className = prepare_class_name( pathinfo( $filePath, PATHINFO_FILENAME ) );
-            @list( $namespaceDirectory, $subNamespace ) = explode( 'Controllers', dirname( $filePath ) );
+        } elseif (is_string($filePath) && is_file($filePath)) {
+            $className = prepare_class_name(pathinfo($filePath, PATHINFO_FILENAME));
+            @list($namespaceDirectory, $subNamespace) = explode('Controllers', dirname($filePath));
 
             $classNamespace = loader()->getDirNamespace(
                     $namespaceDirectory
-                ) . 'Controllers' . ( empty( $subNamespace ) ? null : str_replace( '/', '\\', $subNamespace ) ) . '\\';
+                ) . 'Controllers' . (empty($subNamespace) ? null : str_replace('/', '\\', $subNamespace)) . '\\';
             $className = $classNamespace . $className;
 
-            if ( class_exists( $className ) ) {
-                parent::__construct( $className );
-            } elseif ( class_exists( '\O2System\Kernel\Http\\' . $className ) ) {
-                parent::__construct( '\O2System\Kernel\Http\\' . $className );
+            if (class_exists($className)) {
+                parent::__construct($className);
+            } elseif (class_exists('\O2System\Kernel\Http\\' . $className)) {
+                parent::__construct('\O2System\Kernel\Http\\' . $className);
             }
-        } elseif ( class_exists( $filePath ) ) {
-            parent::__construct( $filePath );
-        } elseif ( class_exists( '\O2System\Kernel\Http\\' . $filePath ) ) {
-            parent::__construct( '\O2System\Kernel\Http\\' . $filePath );
+        } elseif (class_exists($filePath)) {
+            parent::__construct($filePath);
+        } elseif (class_exists('\O2System\Kernel\Http\\' . $filePath)) {
+            parent::__construct('\O2System\Kernel\Http\\' . $filePath);
         }
     }
 
     // ------------------------------------------------------------------------
 
-    public function setProperties( array $properties )
+    public function setProperties(array $properties)
     {
         $this->properties = $properties;
     }
 
     // ------------------------------------------------------------------------
 
-    public function getParameter()
-    {
-        return strtolower( get_class_name( $this->name ) );
-    }
-
-    // ------------------------------------------------------------------------
-
     public function &getInstance()
     {
-        if ( empty( $this->instance ) ) {
+        if (empty($this->instance)) {
             $className = $this->name;
             $this->instance = new $className();
 
-            if ( count( $this->properties ) ) {
-                foreach ( $this->properties as $key => $value ) {
-                    $setterMethodName = camelcase( 'set_' . $key );
+            if (count($this->properties)) {
+                foreach ($this->properties as $key => $value) {
+                    $setterMethodName = camelcase('set_' . $key);
 
-                    if ( method_exists( $this->instance, $setterMethodName ) ) {
-                        $this->instance->{$setterMethodName}( $value );
+                    if (method_exists($this->instance, $setterMethodName)) {
+                        $this->instance->{$setterMethodName}($value);
                     } else {
                         $this->instance->{$key} = $value;
                     }
@@ -102,26 +96,33 @@ class Controller extends SplClassInfo
         return $this->instance;
     }
 
-    public function setRequestSegments( array $segments )
+    // ------------------------------------------------------------------------
+
+    public function getRequestSegments()
     {
-        $this->requestSegments = new Segments( $segments );
+        if (empty($this->requestSegments)) {
+            $segments[] = $this->getParameter();
+
+            if ( ! in_array($this->getRequestMethod(), ['index', 'route'])) {
+                array_push($segments, $this->getRequestMethod());
+            }
+
+            $this->setRequestSegments($segments);
+        }
+
+        return $this->requestSegments;
+    }
+
+    public function setRequestSegments(array $segments)
+    {
+        $this->requestSegments = new Segments($segments);
 
         return $this;
     }
 
-    public function getRequestSegments()
+    public function getParameter()
     {
-        if( empty( $this->requestSegments ) ) {
-            $segments[] = $this->getParameter();
-
-            if( ! in_array( $this->getRequestMethod(), [ 'index', 'route' ] ) ) {
-                array_push( $segments, $this->getRequestMethod() );
-            }
-
-            $this->setRequestSegments( $segments );
-        }
-
-        return $this->requestSegments;
+        return strtolower(get_class_name($this->name));
     }
 
     public function getRequestMethod()
@@ -131,7 +132,7 @@ class Controller extends SplClassInfo
 
     // ------------------------------------------------------------------------
 
-    public function setRequestMethod( $method )
+    public function setRequestMethod($method)
     {
         $this->requestMethod = $method;
 
@@ -145,11 +146,11 @@ class Controller extends SplClassInfo
         return $this->requestMethodArgs;
     }
 
-    public function setRequestMethodArgs( array $arguments )
+    public function setRequestMethodArgs(array $arguments)
     {
-        $arguments = array_values( $arguments );
-        array_unshift( $arguments, null );
-        unset( $arguments[ 0 ] );
+        $arguments = array_values($arguments);
+        array_unshift($arguments, null);
+        unset($arguments[ 0 ]);
 
         $this->requestMethodArgs = $arguments;
 
@@ -158,7 +159,7 @@ class Controller extends SplClassInfo
 
     public function isValid()
     {
-        if ( ! empty( $this->name ) and $this->hasMethod( '__call' ) and $this->isSubclassOf( '\O2System\Kernel\Http\Controller' ) ) {
+        if ( ! empty($this->name) and $this->hasMethod('__call') and $this->isSubclassOf('\O2System\Kernel\Http\Controller')) {
             return true;
         }
 

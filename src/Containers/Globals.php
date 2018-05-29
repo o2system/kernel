@@ -8,6 +8,7 @@
  * @author         Steeve Andrian Salim
  * @copyright      Copyright (c) Steeve Andrian Salim
  */
+
 // ------------------------------------------------------------------------
 
 namespace O2System\Kernel\Containers;
@@ -42,24 +43,7 @@ class Globals implements
      */
     public function getIterator()
     {
-        return new \ArrayIterator( $GLOBALS );
-    }
-
-    // ------------------------------------------------------------------------
-
-    /**
-     * Globals__isset
-     *
-     * Implementing magic method __isset to simplify when checks if offset exists on PHP native session variable,
-     * just simply calling isset( $globals[ 'offset' ] ).
-     *
-     * @param mixed $offset PHP native GLOBALS offset.
-     *
-     * @return bool
-     */
-    public function __isset( $offset )
-    {
-        return $this->offsetExists( $offset );
+        return new \ArrayIterator($GLOBALS);
     }
 
     // ------------------------------------------------------------------------
@@ -74,9 +58,26 @@ class Globals implements
      *
      * @return bool Returns TRUE on success or FALSE on failure.
      */
-    public function exists( $offset )
+    public function exists($offset)
     {
-        return $this->__isset( $offset );
+        return $this->__isset($offset);
+    }
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * Globals__isset
+     *
+     * Implementing magic method __isset to simplify when checks if offset exists on PHP native session variable,
+     * just simply calling isset( $globals[ 'offset' ] ).
+     *
+     * @param mixed $offset PHP native GLOBALS offset.
+     *
+     * @return bool
+     */
+    public function __isset($offset)
+    {
+        return $this->offsetExists($offset);
     }
 
     // ------------------------------------------------------------------------
@@ -96,9 +97,9 @@ class Globals implements
      * The return value will be casted to boolean if non-boolean was returned.
      * @since 5.0.0
      */
-    public function offsetExists( $offset )
+    public function offsetExists($offset)
     {
-        return isset( $GLOBALS[ $offset ] );
+        return isset($GLOBALS[ $offset ]);
     }
 
     // ------------------------------------------------------------------------
@@ -113,7 +114,7 @@ class Globals implements
      *
      * @return mixed
      */
-    public function &__get( $offset )
+    public function &__get($offset)
     {
         return $GLOBALS[ $offset ];
     }
@@ -129,9 +130,9 @@ class Globals implements
      * @param mixed $offset PHP native GLOBALS offset.
      * @param mixed $value  PHP native GLOBALS offset value to set.
      */
-    public function __set( $offset, $value )
+    public function __set($offset, $value)
     {
-        $this->offsetSet( $offset, $value );
+        $this->offsetSet($offset, $value);
     }
 
     // ------------------------------------------------------------------------
@@ -147,9 +148,9 @@ class Globals implements
      *
      * @return void
      */
-    public function store( $offset, $value )
+    public function store($offset, $value)
     {
-        $this->__set( $offset, $value );
+        $this->__set($offset, $value);
     }
 
     // ------------------------------------------------------------------------
@@ -169,7 +170,7 @@ class Globals implements
      * @return void
      * @since 5.0.0
      */
-    public function offsetSet( $offset, $value )
+    public function offsetSet($offset, $value)
     {
         $GLOBALS[ $offset ] = $value;
     }
@@ -177,20 +178,18 @@ class Globals implements
     // ------------------------------------------------------------------------
 
     /**
-     * Offset to retrieve
+     * Globals::remove
      *
-     * @link  http://php.net/manual/en/arrayaccess.offsetget.php
+     * Removes a data from the storage.
+     * An alias of Globals::__unset method.
      *
-     * @param mixed $offset <p>
-     *                      The offset to retrieve.
-     *                      </p>
+     * @param string $offset The object offset key.
      *
-     * @return mixed Can return all value types.
-     * @since 5.0.0
+     * @return void
      */
-    public function offsetGet( $offset )
+    public function remove($offset)
     {
-        return ( isset( $GLOBALS[ $offset ] ) ) ? $GLOBALS[ $offset ] : false;
+        $this->__unset($offset);
     }
 
     // ------------------------------------------------------------------------
@@ -205,9 +204,9 @@ class Globals implements
      *
      * @return void
      */
-    public function __unset( $offset )
+    public function __unset($offset)
     {
-        $this->offsetUnset( $offset );
+        $this->offsetUnset($offset);
     }
 
     // ------------------------------------------------------------------------
@@ -224,28 +223,11 @@ class Globals implements
      * @return void
      * @since 5.0.0
      */
-    public function offsetUnset( $offset )
+    public function offsetUnset($offset)
     {
-        if ( isset( $GLOBALS[ $offset ] ) ) {
-            unset( $GLOBALS[ $offset ] );
+        if (isset($GLOBALS[ $offset ])) {
+            unset($GLOBALS[ $offset ]);
         }
-    }
-
-    // ------------------------------------------------------------------------
-
-    /**
-     * Globals::remove
-     *
-     * Removes a data from the storage.
-     * An alias of Globals::__unset method.
-     *
-     * @param string $offset The object offset key.
-     *
-     * @return void
-     */
-    public function remove( $offset )
-    {
-        $this->__unset( $offset );
     }
 
     // ------------------------------------------------------------------------
@@ -259,10 +241,10 @@ class Globals implements
      *
      * @return array The old array of data storage.
      */
-    public function merge( array $data )
+    public function merge(array $data)
     {
         $oldData = $GLOBALS;
-        $GLOBALS = array_merge( $GLOBALS, $data );
+        $GLOBALS = array_merge($GLOBALS, $data);
 
         return $oldData;
     }
@@ -278,7 +260,7 @@ class Globals implements
      *
      * @return array The old array of data storage.
      */
-    public function exchange( array $data )
+    public function exchange(array $data)
     {
         $oldData = $GLOBALS;
         $GLOBALS = $data;
@@ -316,7 +298,7 @@ class Globals implements
      */
     public function count()
     {
-        return (int)count( $GLOBALS );
+        return (int)count($GLOBALS);
     }
 
     // ------------------------------------------------------------------------
@@ -332,7 +314,7 @@ class Globals implements
      */
     public function serialize()
     {
-        return serialize( $GLOBALS );
+        return serialize($GLOBALS);
     }
 
     // ------------------------------------------------------------------------
@@ -348,9 +330,9 @@ class Globals implements
      *
      * @return void
      */
-    public function unserialize( $serialized )
+    public function unserialize($serialized)
     {
-        $GLOBALS = unserialize( $serialized );
+        $GLOBALS = unserialize($serialized);
     }
 
     // ------------------------------------------------------------------------
@@ -398,7 +380,7 @@ class Globals implements
      */
     public function get($id)
     {
-        if($this->has($id)) {
+        if ($this->has($id)) {
             return $this->offsetGet($id);
         }
 
@@ -420,6 +402,25 @@ class Globals implements
      */
     public function has($id)
     {
-        return (bool) $this->offsetExists($id);
+        return (bool)$this->offsetExists($id);
+    }
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * Offset to retrieve
+     *
+     * @link  http://php.net/manual/en/arrayaccess.offsetget.php
+     *
+     * @param mixed $offset <p>
+     *                      The offset to retrieve.
+     *                      </p>
+     *
+     * @return mixed Can return all value types.
+     * @since 5.0.0
+     */
+    public function offsetGet($offset)
+    {
+        return (isset($GLOBALS[ $offset ])) ? $GLOBALS[ $offset ] : false;
     }
 }

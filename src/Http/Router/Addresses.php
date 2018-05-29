@@ -8,6 +8,7 @@
  * @author         Steeve Andrian Salim
  * @copyright      Copyright (c) Steeve Andrian Salim
  */
+
 // ------------------------------------------------------------------------
 
 namespace O2System\Kernel\Http\Router;
@@ -15,7 +16,6 @@ namespace O2System\Kernel\Http\Router;
 // ------------------------------------------------------------------------
 
 use O2System\Kernel\Http\Message\Uri\Domain;
-use O2System\Kernel\Http\Router\Datastructures\Action;
 
 /**
  * Class Addresses
@@ -137,16 +137,16 @@ class Addresses
      *
      * @return bool|\O2System\Kernel\Http\Router\Datastructures\Action
      */
-    public function getTranslation( $path, $domain = null )
+    public function getTranslation($path, $domain = null)
     {
-        $path = '/' . ltrim( $path, '/' );
-        $translations = $this->getTranslations( $domain );
+        $path = '/' . ltrim($path, '/');
+        $translations = $this->getTranslations($domain);
 
-        if ( isset( $translations[ $path ] ) ) {
+        if (isset($translations[ $path ])) {
             return $translations[ $path ];
-        } elseif( count( $translations ) ) {
-            foreach($translations as $translation => $action) {
-                if ( $action->isValidUriString( $path ) ) {
+        } elseif (count($translations)) {
+            foreach ($translations as $translation => $action) {
+                if ($action->isValidUriString($path)) {
                     return $action;
                     break;
                 }
@@ -167,46 +167,46 @@ class Addresses
      *
      * @return array Returns array of domain routes maps.
      */
-    public function getTranslations( $domain = null )
+    public function getTranslations($domain = null)
     {
         $hostDomain = new Domain();
 
-        if ( is_null( $domain ) ) {
+        if (is_null($domain)) {
             $domain = $hostDomain->getOrigin();
         }
 
         $translations = [];
 
-        if ( isset( $this->translations[ $domain ] ) ) {
+        if (isset($this->translations[ $domain ])) {
             $translations = $this->translations[ $domain ];
         } else {
-            $domain = new Domain( $domain );
-            if ( array_key_exists( $domain->getString(), $this->translations ) ) {
+            $domain = new Domain($domain);
+            if (array_key_exists($domain->getString(), $this->translations)) {
                 $translations = $this->translations[ $domain->getString() ];
             } else {
-                foreach ( $this->translations as $domainRoute => $domainMap ) {
-                    if ( preg_match( '/[{][a-zA-Z0-9$_]+[}]/', $domainRoute ) ) {
-                        $domainRoute = new Domain( $domainRoute );
+                foreach ($this->translations as $domainRoute => $domainMap) {
+                    if (preg_match('/[{][a-zA-Z0-9$_]+[}]/', $domainRoute)) {
+                        $domainRoute = new Domain($domainRoute);
 
-                        if ( $domain->getParentDomain() === $domainRoute->getParentDomain() AND
+                        if ($domain->getParentDomain() === $domainRoute->getParentDomain() AND
                             $domain->getTotalSubDomains() == $domainRoute->getTotalSubDomains()
                         ) {
-                            if ( isset( $domainMap[ $domainRoute->getSubDomain() ] ) ) {
+                            if (isset($domainMap[ $domainRoute->getSubDomain() ])) {
                                 $translations = $domainMap;
                                 $address = $translations[ $domainRoute->getSubDomain() ]->setClosureParameters(
                                     $domain->getSubDomains()
                                 );
 
-                                unset( $translations[ $domainRoute->getSubDomain() ] );
+                                unset($translations[ $domainRoute->getSubDomain() ]);
 
-                                if ( false !== ( $closureParameters = $address->getClosure() ) ) {
+                                if (false !== ($closureParameters = $address->getClosure())) {
 
-                                    $closureParameters = ! is_array( $closureParameters )
-                                        ? [ $closureParameters ]
+                                    $closureParameters = ! is_array($closureParameters)
+                                        ? [$closureParameters]
                                         : $closureParameters;
 
-                                    foreach ( $translations as $address ) {
-                                        $address->setClosureParameters( (array)$closureParameters );
+                                    foreach ($translations as $address) {
+                                        $address->setClosureParameters((array)$closureParameters);
                                     }
                                 }
                             }
@@ -224,60 +224,60 @@ class Addresses
     /**
      * Addresses::any
      *
-     * @param string $path   The URI string path.
-     * @param mixed  $address    The routing map of the URI:
-     *                       [string]: string of controller name.
-     *                       [array]: array of URI segment.
-     *                       [\Closure]: the closure map of URI.
+     * @param string $path    The URI string path.
+     * @param mixed  $address The routing map of the URI:
+     *                        [string]: string of controller name.
+     *                        [array]: array of URI segment.
+     *                        [\Closure]: the closure map of URI.
      *
      * @return static
      */
-    public function any( $path, $address )
+    public function any($path, $address)
     {
-        $this->addTranslation( $path, $address, self::HTTP_ANY );
+        $this->addTranslation($path, $address, self::HTTP_ANY);
 
         return $this;
     }
 
     // ------------------------------------------------------------------------
 
-    public function addTranslation( $path, $address, $method = self::HTTP_GET )
+    public function addTranslation($path, $address, $method = self::HTTP_GET)
     {
-        $path = '/' . ltrim( $path, '/' );
+        $path = '/' . ltrim($path, '/');
 
-        if ( $address instanceof \Closure ) {
+        if ($address instanceof \Closure) {
             $closure = $address;
         } else {
 
-            if ( is_string( $address ) ) {
-                $namespace = isset( $this->attributes[ 'namespace' ] )
+            if (is_string($address)) {
+                $namespace = isset($this->attributes[ 'namespace' ])
                     ? $this->attributes[ 'namespace' ]
                     : null;
-                $controllerClassName = trim( $namespace, '\\' ) . '\\' . $address;
+                $controllerClassName = trim($namespace, '\\') . '\\' . $address;
 
-                if ( class_exists( $controllerClassName ) ) {
+                if (class_exists($controllerClassName)) {
                     $address = $controllerClassName;
                 }
             }
 
-            $closure = function () use ( $address ) {
+            $closure = function () use ($address) {
                 return $address;
             };
         }
 
-        $domain = isset( $this->attributes[ 'domain' ] )
+        $domain = isset($this->attributes[ 'domain' ])
             ? $this->attributes[ 'domain' ]
             : null;
 
-        $prefix = isset( $this->attributes[ 'prefix' ] )
+        $prefix = isset($this->attributes[ 'prefix' ])
             ? $this->attributes[ 'prefix' ]
             : null;
 
-        if ( ! preg_match( '/[{][a-zA-Z0-9$_]+[}]/', $path ) ) {
-            $path = '/' . trim( trim( $prefix, '/' ) . '/' . trim( $path, '/' ), '/' );
+        if ( ! preg_match('/[{][a-zA-Z0-9$_]+[}]/', $path)) {
+            $path = '/' . trim(trim($prefix, '/') . '/' . trim($path, '/'), '/');
         }
 
-        $action = new Datastructures\Action( $method, $path, $closure, $domain );
+        $action = new Datastructures\Action($method, $path, $closure, $domain);
 
         $this->translations[ $action->getDomain() ][ $action->getPath() ] = $action;
 
@@ -286,84 +286,84 @@ class Addresses
 
     // ------------------------------------------------------------------------
 
-    public function middleware( array $middleware, $register = true )
+    public function middleware(array $middleware, $register = true)
     {
-        foreach ( $middleware as $offset => $object ) {
-            $offset = is_numeric( $offset ) ? $object : $offset;
+        foreach ($middleware as $offset => $object) {
+            $offset = is_numeric($offset) ? $object : $offset;
 
-            if( $register ) {
-                middleware()->register( $object, $offset );
+            if ($register) {
+                middleware()->register($object, $offset);
             } else {
-                middleware()->unregister( $offset );
+                middleware()->unregister($offset);
             }
         }
 
         return $this;
     }
 
-    public function pool( $attributes, \Closure $closure )
+    public function pool($attributes, \Closure $closure)
     {
         $parentAttributes = $this->attributes;
         $this->attributes = $attributes;
 
-        call_user_func( $closure, $this );
+        call_user_func($closure, $this);
 
         $this->attributes = $parentAttributes;
     }
 
-    public function domains( array $domains )
+    public function domains(array $domains)
     {
-        foreach ( $domains as $domain => $address ) {
-            $this->domain( $domain, $address );
+        foreach ($domains as $domain => $address) {
+            $this->domain($domain, $address);
         }
     }
 
-    public function domain( $domain, $address )
+    public function domain($domain, $address)
     {
-        if ( $domain !== '*' ) {
+        if ($domain !== '*') {
             $hostDomain = new Domain();
-            $domain = str_replace( '.' . $hostDomain->getParentDomain(), '',
-                    $domain ) . '.' . $hostDomain->getParentDomain();
+            $domain = str_replace('.' . $hostDomain->getParentDomain(), '',
+                    $domain) . '.' . $hostDomain->getParentDomain();
         }
 
         $this->domains[ $domain ] = $address;
     }
 
-    public function getDomain( $domain = null )
+    public function getDomain($domain = null)
     {
-        $domain = is_null( $domain )
-            ? isset( $_SERVER[ 'HTTP_HOST' ] )
+        $domain = is_null($domain)
+            ? isset($_SERVER[ 'HTTP_HOST' ])
                 ? $_SERVER[ 'HTTP_HOST' ]
                 : $_SERVER[ 'SERVER_NAME' ]
             : $domain;
 
-        if ( array_key_exists( $domain, $this->domains ) ) {
-            if ( is_callable( $this->domains[ $domain ] ) ) {
-                return call_user_func( $this->domains[ $domain ] );
+        if (array_key_exists($domain, $this->domains)) {
+            if (is_callable($this->domains[ $domain ])) {
+                return call_user_func($this->domains[ $domain ]);
             }
 
             return $this->domains[ $domain ];
-        } elseif ( isset( $this->domains[ '*' ] ) and is_callable( $this->domains[ '*' ] ) ) {
+        } elseif (isset($this->domains[ '*' ]) and is_callable($this->domains[ '*' ])) {
             // check wildcard domain closure
-            if ( false !== ( $address = call_user_func( $this->domains[ '*' ], $domain ) ) ) {
+            if (false !== ($address = call_user_func($this->domains[ '*' ], $domain))) {
                 return $address;
             }
-        } elseif ( count( $this->domains ) ) {
+        } elseif (count($this->domains)) {
             // check pregmatch domain closure
-            foreach ( $this->domains as $address => $closure ) {
-                if ( preg_match( '/[{][a-zA-Z0-9$_]+[}]/', $address ) and $closure instanceof \Closure ) {
-                    $addressDomain = new Domain( $address );
-                    $checkDomain = new Domain( $domain );
+            foreach ($this->domains as $address => $closure) {
+                if (preg_match('/[{][a-zA-Z0-9$_]+[}]/', $address) and $closure instanceof \Closure) {
+                    $addressDomain = new Domain($address);
+                    $checkDomain = new Domain($domain);
                     $parameters = [];
 
-                    if ( $addressDomain->getTotalSubDomains() === $checkDomain->getTotalSubDomains() ) {
-                        foreach ( $addressDomain->getSubDomains() as $level => $name ) {
-                            if ( false !== ( $checkDomainName = $checkDomain->getSubDomain( $level ) ) ) {
+                    if ($addressDomain->getTotalSubDomains() === $checkDomain->getTotalSubDomains()) {
+                        foreach ($addressDomain->getSubDomains() as $level => $name) {
+                            if (false !== ($checkDomainName = $checkDomain->getSubDomain($level))) {
                                 $parameters[] = $checkDomainName;
                             }
                         }
 
-                        if ( false !== ( $address = call_user_func_array( $closure, $parameters ) ) ) {
+                        if (false !== ($address = call_user_func_array($closure, $parameters))) {
                             return $address;
                             break;
                         }
@@ -380,17 +380,17 @@ class Addresses
     /**
      * Addresses::get
      *
-     * @param string $path   The URI string path.
-     * @param mixed  $address    The routing map of the URI:
-     *                       [string]: string of controller name.
-     *                       [array]: array of URI segment.
-     *                       [\Closure]: the closure map of URI.
+     * @param string $path    The URI string path.
+     * @param mixed  $address The routing map of the URI:
+     *                        [string]: string of controller name.
+     *                        [array]: array of URI segment.
+     *                        [\Closure]: the closure map of URI.
      *
      * @return static
      */
-    public function get( $path, $address )
+    public function get($path, $address)
     {
-        $this->addTranslation( $path, $address, self::HTTP_GET );
+        $this->addTranslation($path, $address, self::HTTP_GET);
 
         return $this;
     }
@@ -400,17 +400,17 @@ class Addresses
     /**
      * Addresses::post
      *
-     * @param string $path   The URI string path.
-     * @param mixed  $address    The routing map of the URI:
-     *                       [string]: string of controller name.
-     *                       [array]: array of URI segment.
-     *                       [\Closure]: the closure map of URI.
+     * @param string $path    The URI string path.
+     * @param mixed  $address The routing map of the URI:
+     *                        [string]: string of controller name.
+     *                        [array]: array of URI segment.
+     *                        [\Closure]: the closure map of URI.
      *
      * @return static
      */
-    public function post( $path, $address )
+    public function post($path, $address)
     {
-        $this->addTranslation( $path, $address, self::HTTP_POST );
+        $this->addTranslation($path, $address, self::HTTP_POST);
 
         return $this;
     }
@@ -420,17 +420,17 @@ class Addresses
     /**
      * Addresses::put
      *
-     * @param string $path   The URI string path.
-     * @param mixed  $address    The routing map of the URI:
-     *                       [string]: string of controller name.
-     *                       [array]: array of URI segment.
-     *                       [\Closure]: the closure map of URI.
+     * @param string $path    The URI string path.
+     * @param mixed  $address The routing map of the URI:
+     *                        [string]: string of controller name.
+     *                        [array]: array of URI segment.
+     *                        [\Closure]: the closure map of URI.
      *
      * @return static
      */
-    public function put( $path, $address )
+    public function put($path, $address)
     {
-        $this->addTranslation( $path, $address, self::HTTP_PUT );
+        $this->addTranslation($path, $address, self::HTTP_PUT);
 
         return $this;
     }
@@ -440,17 +440,17 @@ class Addresses
     /**
      * Addresses::connect
      *
-     * @param string $path   The URI string path.
-     * @param mixed  $address    The routing map of the URI:
-     *                       [string]: string of controller name.
-     *                       [array]: array of URI segment.
-     *                       [\Closure]: the closure map of URI.
+     * @param string $path    The URI string path.
+     * @param mixed  $address The routing map of the URI:
+     *                        [string]: string of controller name.
+     *                        [array]: array of URI segment.
+     *                        [\Closure]: the closure map of URI.
      *
      * @return static
      */
-    public function connect( $path, $address )
+    public function connect($path, $address)
     {
-        $this->addTranslation( $path, $address, self::HTTP_CONNECT );
+        $this->addTranslation($path, $address, self::HTTP_CONNECT);
 
         return $this;
     }
@@ -460,17 +460,17 @@ class Addresses
     /**
      * Addresses::delete
      *
-     * @param string $path   The URI string path.
-     * @param mixed  $address    The routing map of the URI:
-     *                       [string]: string of controller name.
-     *                       [array]: array of URI segment.
-     *                       [\Closure]: the closure map of URI.
+     * @param string $path    The URI string path.
+     * @param mixed  $address The routing map of the URI:
+     *                        [string]: string of controller name.
+     *                        [array]: array of URI segment.
+     *                        [\Closure]: the closure map of URI.
      *
      * @return static
      */
-    public function delete( $path, $address )
+    public function delete($path, $address)
     {
-        $this->addTranslation( $path, $address, self::HTTP_DELETE );
+        $this->addTranslation($path, $address, self::HTTP_DELETE);
 
         return $this;
     }
@@ -480,17 +480,17 @@ class Addresses
     /**
      * Addresses::delete
      *
-     * @param string $path   The URI string path.
-     * @param mixed  $address    The routing map of the URI:
-     *                       [string]: string of controller name.
-     *                       [array]: array of URI segment.
-     *                       [\Closure]: the closure map of URI.
+     * @param string $path    The URI string path.
+     * @param mixed  $address The routing map of the URI:
+     *                        [string]: string of controller name.
+     *                        [array]: array of URI segment.
+     *                        [\Closure]: the closure map of URI.
      *
      * @return static
      */
-    public function head( $path, $address )
+    public function head($path, $address)
     {
-        $this->addTranslation( $path, $address, self::HTTP_HEAD );
+        $this->addTranslation($path, $address, self::HTTP_HEAD);
 
         return $this;
     }
@@ -500,17 +500,17 @@ class Addresses
     /**
      * Addresses::options
      *
-     * @param string $path   The URI string path.
-     * @param mixed  $address    The routing map of the URI:
-     *                       [string]: string of controller name.
-     *                       [array]: array of URI segment.
-     *                       [\Closure]: the closure map of URI.
+     * @param string $path    The URI string path.
+     * @param mixed  $address The routing map of the URI:
+     *                        [string]: string of controller name.
+     *                        [array]: array of URI segment.
+     *                        [\Closure]: the closure map of URI.
      *
      * @return static
      */
-    public function options( $path, $address )
+    public function options($path, $address)
     {
-        $this->addTranslation( $path, $address, self::HTTP_OPTIONS );
+        $this->addTranslation($path, $address, self::HTTP_OPTIONS);
 
         return $this;
     }
@@ -520,17 +520,17 @@ class Addresses
     /**
      * Addresses::trace
      *
-     * @param string $path   The URI string path.
-     * @param mixed  $address    The routing map of the URI:
-     *                       [string]: string of controller name.
-     *                       [array]: array of URI segment.
-     *                       [\Closure]: the closure map of URI.
+     * @param string $path    The URI string path.
+     * @param mixed  $address The routing map of the URI:
+     *                        [string]: string of controller name.
+     *                        [array]: array of URI segment.
+     *                        [\Closure]: the closure map of URI.
      *
      * @return static
      */
-    public function trace( $path, $address )
+    public function trace($path, $address)
     {
-        $this->addTranslation( $path, $address, self::HTTP_TRACE );
+        $this->addTranslation($path, $address, self::HTTP_TRACE);
 
         return $this;
     }

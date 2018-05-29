@@ -8,6 +8,7 @@
  * @author         Steeve Andrian Salim
  * @copyright      Copyright (c) Steeve Andrian Salim
  */
+
 // ------------------------------------------------------------------------
 
 namespace O2System\Kernel\Containers;
@@ -25,7 +26,7 @@ use Traversable;
  * @package O2System\Framework\Container
  */
 class Environment implements
-    \ArrayAccess, 
+    \ArrayAccess,
     \IteratorAggregate,
     \Countable,
     \Serializable,
@@ -42,24 +43,7 @@ class Environment implements
      */
     public function getIterator()
     {
-        return new \ArrayIterator( $_ENV );
-    }
-
-    // ------------------------------------------------------------------------
-
-    /**
-     * Environment__isset
-     *
-     * Implementing magic method __isset to simplify when checks if offset exists on PHP native session variable,
-     * just simply calling isset( $globals[ 'offset' ] ).
-     *
-     * @param mixed $offset PHP native GLOBALS offset.
-     *
-     * @return bool
-     */
-    public function __isset( $offset )
-    {
-        return $this->offsetExists( $offset );
+        return new \ArrayIterator($_ENV);
     }
 
     // ------------------------------------------------------------------------
@@ -74,9 +58,26 @@ class Environment implements
      *
      * @return bool Returns TRUE on success or FALSE on failure.
      */
-    public function exists( $offset )
+    public function exists($offset)
     {
-        return $this->__isset( $offset );
+        return $this->__isset($offset);
+    }
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * Environment__isset
+     *
+     * Implementing magic method __isset to simplify when checks if offset exists on PHP native session variable,
+     * just simply calling isset( $globals[ 'offset' ] ).
+     *
+     * @param mixed $offset PHP native GLOBALS offset.
+     *
+     * @return bool
+     */
+    public function __isset($offset)
+    {
+        return $this->offsetExists($offset);
     }
 
     // ------------------------------------------------------------------------
@@ -96,9 +97,9 @@ class Environment implements
      * The return value will be casted to boolean if non-boolean was returned.
      * @since 5.0.0
      */
-    public function offsetExists( $offset )
+    public function offsetExists($offset)
     {
-        return isset( $_ENV[ $offset ] );
+        return isset($_ENV[ $offset ]);
     }
 
     // ------------------------------------------------------------------------
@@ -113,7 +114,7 @@ class Environment implements
      *
      * @return mixed
      */
-    public function &__get( $offset )
+    public function &__get($offset)
     {
         return $_ENV[ $offset ];
     }
@@ -129,9 +130,9 @@ class Environment implements
      * @param mixed $offset PHP native GLOBALS offset.
      * @param mixed $value  PHP native GLOBALS offset value to set.
      */
-    public function __set( $offset, $value )
+    public function __set($offset, $value)
     {
-        $this->offsetSet( $offset, $value );
+        $this->offsetSet($offset, $value);
     }
 
     // ------------------------------------------------------------------------
@@ -147,9 +148,9 @@ class Environment implements
      *
      * @return void
      */
-    public function store( $offset, $value )
+    public function store($offset, $value)
     {
-        $this->__set( $offset, $value );
+        $this->__set($offset, $value);
     }
 
     // ------------------------------------------------------------------------
@@ -169,7 +170,7 @@ class Environment implements
      * @return void
      * @since 5.0.0
      */
-    public function offsetSet( $offset, $value )
+    public function offsetSet($offset, $value)
     {
         $_ENV[ $offset ] = $value;
     }
@@ -177,20 +178,18 @@ class Environment implements
     // ------------------------------------------------------------------------
 
     /**
-     * Offset to retrieve
+     * Environment::remove
      *
-     * @link  http://php.net/manual/en/arrayaccess.offsetget.php
+     * Removes a data from the storage.
+     * An alias of Environment::__unset method.
      *
-     * @param mixed $offset <p>
-     *                      The offset to retrieve.
-     *                      </p>
+     * @param string $offset The object offset key.
      *
-     * @return mixed Can return all value types.
-     * @since 5.0.0
+     * @return void
      */
-    public function offsetGet( $offset )
+    public function remove($offset)
     {
-        return ( isset( $_ENV[ $offset ] ) ) ? $_ENV[ $offset ] : false;
+        $this->__unset($offset);
     }
 
     // ------------------------------------------------------------------------
@@ -205,9 +204,9 @@ class Environment implements
      *
      * @return void
      */
-    public function __unset( $offset )
+    public function __unset($offset)
     {
-        $this->offsetUnset( $offset );
+        $this->offsetUnset($offset);
     }
 
     // ------------------------------------------------------------------------
@@ -224,28 +223,11 @@ class Environment implements
      * @return void
      * @since 5.0.0
      */
-    public function offsetUnset( $offset )
+    public function offsetUnset($offset)
     {
-        if ( isset( $_ENV[ $offset ] ) ) {
-            unset( $_ENV[ $offset ] );
+        if (isset($_ENV[ $offset ])) {
+            unset($_ENV[ $offset ]);
         }
-    }
-
-    // ------------------------------------------------------------------------
-
-    /**
-     * Environment::remove
-     *
-     * Removes a data from the storage.
-     * An alias of Environment::__unset method.
-     *
-     * @param string $offset The object offset key.
-     *
-     * @return void
-     */
-    public function remove( $offset )
-    {
-        $this->__unset( $offset );
     }
 
     // ------------------------------------------------------------------------
@@ -259,10 +241,10 @@ class Environment implements
      *
      * @return array The old array of data storage.
      */
-    public function merge( array $data )
+    public function merge(array $data)
     {
         $oldData = $_ENV;
-        $_ENV = array_merge( $_ENV, $data );
+        $_ENV = array_merge($_ENV, $data);
 
         return $oldData;
     }
@@ -278,7 +260,7 @@ class Environment implements
      *
      * @return array The old array of data storage.
      */
-    public function exchange( array $data )
+    public function exchange(array $data)
     {
         $oldData = $_ENV;
         $_ENV = $data;
@@ -316,7 +298,7 @@ class Environment implements
      */
     public function count()
     {
-        return (int)count( $_ENV );
+        return (int)count($_ENV);
     }
 
     // ------------------------------------------------------------------------
@@ -332,7 +314,7 @@ class Environment implements
      */
     public function serialize()
     {
-        return serialize( $_ENV );
+        return serialize($_ENV);
     }
 
     // ------------------------------------------------------------------------
@@ -348,9 +330,9 @@ class Environment implements
      *
      * @return void
      */
-    public function unserialize( $serialized )
+    public function unserialize($serialized)
     {
-        $_ENV = unserialize( $serialized );
+        $_ENV = unserialize($serialized);
     }
 
     // ------------------------------------------------------------------------
@@ -398,7 +380,7 @@ class Environment implements
      */
     public function get($id)
     {
-        if($this->has($id)) {
+        if ($this->has($id)) {
             return $this->offsetGet($id);
         }
 
@@ -420,6 +402,25 @@ class Environment implements
      */
     public function has($id)
     {
-        return (bool) $this->offsetExists($id);
+        return (bool)$this->offsetExists($id);
+    }
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * Offset to retrieve
+     *
+     * @link  http://php.net/manual/en/arrayaccess.offsetget.php
+     *
+     * @param mixed $offset <p>
+     *                      The offset to retrieve.
+     *                      </p>
+     *
+     * @return mixed Can return all value types.
+     * @since 5.0.0
+     */
+    public function offsetGet($offset)
+    {
+        return (isset($_ENV[ $offset ])) ? $_ENV[ $offset ] : false;
     }
 }

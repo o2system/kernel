@@ -25,29 +25,29 @@ require __DIR__ . DIRECTORY_SEPARATOR . 'Kernel.php';
  * @param $className
  */
 spl_autoload_register(
-    function ( $className ) {
-        if ( $className === 'O2System\Kernel' ) {
+    function ($className) {
+        if ($className === 'O2System\Kernel') {
             require __DIR__ . DIRECTORY_SEPARATOR . 'Kernel.php';
-        } elseif ( strpos( $className, 'O2System\Kernel\\' ) === false ) {
+        } elseif (strpos($className, 'O2System\Kernel\\') === false) {
             return;
         }
 
-        $className = ltrim( $className, '\\' );
+        $className = ltrim($className, '\\');
         $filePath = '';
 
-        if ( $lastNsPos = strripos( $className, '\\' ) ) {
-            $namespace = substr( $className, 0, $lastNsPos );
-            $className = substr( $className, $lastNsPos + 1 );
+        if ($lastNsPos = strripos($className, '\\')) {
+            $namespace = substr($className, 0, $lastNsPos);
+            $className = substr($className, $lastNsPos + 1);
             $filePath = $namespace . '\\';
         }
 
-        $filePath .= str_replace( '_', DIRECTORY_SEPARATOR, $className ) . '.php';
+        $filePath .= str_replace('_', DIRECTORY_SEPARATOR, $className) . '.php';
 
         // Fixed Path
-        $filePath = str_replace( 'O2System\Kernel\\', __DIR__ . DIRECTORY_SEPARATOR, $filePath );
-        $filePath = str_replace( [ '\\', '/' ], DIRECTORY_SEPARATOR, $filePath );
+        $filePath = str_replace('O2System\Kernel\\', __DIR__ . DIRECTORY_SEPARATOR, $filePath);
+        $filePath = str_replace(['\\', '/'], DIRECTORY_SEPARATOR, $filePath);
 
-        if ( file_exists( $filePath ) ) {
+        if (file_exists($filePath)) {
             require $filePath;
         }
 

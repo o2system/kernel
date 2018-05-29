@@ -8,6 +8,7 @@
  * @author         Steeve Andrian Salim
  * @copyright      Copyright (c) Steeve Andrian Salim
  */
+
 // ------------------------------------------------------------------------
 
 namespace O2System\Kernel\Cli\Writers;
@@ -38,11 +39,11 @@ class Label implements ContextualClassInterface
      * @param string $string
      * @param string $contextualClass
      */
-    public function __construct( $string = null, $contextualClass = 'default' )
+    public function __construct($string = null, $contextualClass = 'default')
     {
-        $this->setIndent( 1 );
-        $this->setString( $string );
-        $this->setContextualClass( $contextualClass );
+        $this->setIndent(1);
+        $this->setString($string);
+        $this->setContextualClass($contextualClass);
     }
 
     // ------------------------------------------------------------------------
@@ -72,84 +73,84 @@ class Label implements ContextualClassInterface
     public function render()
     {
         // if the string of label is empty then nothing to be processed.
-        if ( empty( $this->string ) ) {
+        if (empty($this->string)) {
             return '';
         }
 
-        $string = str_repeat( ' ', 2 ) . $this->string . str_repeat( ' ', 2 );
+        $string = str_repeat(' ', 2) . $this->string . str_repeat(' ', 2);
 
-        switch ( $this->contextualClass ) {
+        switch ($this->contextualClass) {
             default:
                 $output = $string;
                 break;
             case 'primary':
-                $output = str_repeat( ' ', $this->indent ) . "\033[1;37m" . "\033[44m" . str_repeat(
+                $output = str_repeat(' ', $this->indent) . "\033[1;37m" . "\033[44m" . str_repeat(
                         ' ',
-                        strlen( $string )
+                        strlen($string)
                     ) . "\033[0m" . "\r\n";
                 $output .= str_repeat(
                         ' ',
                         $this->indent
                     ) . "\033[1;37m" . "\033[44m" . $string . "\033[0m" . "\r\n";
-                $output .= str_repeat( ' ', $this->indent ) . "\033[1;37m" . "\033[44m" . str_repeat(
+                $output .= str_repeat(' ', $this->indent) . "\033[1;37m" . "\033[44m" . str_repeat(
                         ' ',
-                        strlen( $string )
+                        strlen($string)
                     ) . "\033[0m";
                 break;
             case 'success':
-                $output = str_repeat( ' ', $this->indent ) . "\033[1;37m" . "\033[42m" . str_repeat(
+                $output = str_repeat(' ', $this->indent) . "\033[1;37m" . "\033[42m" . str_repeat(
                         ' ',
-                        strlen( $string )
+                        strlen($string)
                     ) . "\033[0m" . "\r\n";
                 $output .= str_repeat(
                         ' ',
                         $this->indent
                     ) . "\033[1;37m" . "\033[42m" . $string . "\033[0m" . "\r\n";
-                $output .= str_repeat( ' ', $this->indent ) . "\033[1;37m" . "\033[42m" . str_repeat(
+                $output .= str_repeat(' ', $this->indent) . "\033[1;37m" . "\033[42m" . str_repeat(
                         ' ',
-                        strlen( $string )
+                        strlen($string)
                     ) . "\033[0m";
                 break;
             case 'info':
-                $output = str_repeat( ' ', $this->indent ) . "\033[1;37m" . "\033[46m" . str_repeat(
+                $output = str_repeat(' ', $this->indent) . "\033[1;37m" . "\033[46m" . str_repeat(
                         ' ',
-                        strlen( $string )
+                        strlen($string)
                     ) . "\033[0m" . "\r\n";
                 $output .= str_repeat(
                         ' ',
                         $this->indent
                     ) . "\033[1;37m" . "\033[46m" . $string . "\033[0m" . "\r\n";
-                $output .= str_repeat( ' ', $this->indent ) . "\033[1;37m" . "\033[46m" . str_repeat(
+                $output .= str_repeat(' ', $this->indent) . "\033[1;37m" . "\033[46m" . str_repeat(
                         ' ',
-                        strlen( $string )
+                        strlen($string)
                     ) . "\033[0m";
                 break;
             case 'warning':
-                $output = str_repeat( ' ', $this->indent ) . "\033[1;37m" . "\033[43m" . str_repeat(
+                $output = str_repeat(' ', $this->indent) . "\033[1;37m" . "\033[43m" . str_repeat(
                         ' ',
-                        strlen( $string )
+                        strlen($string)
                     ) . "\033[0m" . "\r\n";
                 $output .= str_repeat(
                         ' ',
                         $this->indent
                     ) . "\033[1;37m" . "\033[43m" . $string . "\033[0m" . "\r\n";
-                $output .= str_repeat( ' ', $this->indent ) . "\033[1;37m" . "\033[43m" . str_repeat(
+                $output .= str_repeat(' ', $this->indent) . "\033[1;37m" . "\033[43m" . str_repeat(
                         ' ',
-                        strlen( $string )
+                        strlen($string)
                     ) . "\033[0m";
                 break;
             case 'danger':
-                $output = str_repeat( ' ', $this->indent ) . "\033[1;37m" . "\033[41m" .
-                    str_repeat( ' ', strlen( $string ) ) . "\033[0m" . "\r\n";
+                $output = str_repeat(' ', $this->indent) . "\033[1;37m" . "\033[41m" .
+                    str_repeat(' ', strlen($string)) . "\033[0m" . "\r\n";
                 $output .= str_repeat(
                         ' ',
                         $this->indent
                     ) . "\033[1;37m" . "\033[41m" . $string . "\033[0m" . "\r\n";
-                $output .= str_repeat( ' ', $this->indent ) . "\033[1;37m" . "\033[41m" .
-                    str_repeat( ' ', strlen( $string ) ) . "\033[0m";
+                $output .= str_repeat(' ', $this->indent) . "\033[1;37m" . "\033[41m" .
+                    str_repeat(' ', strlen($string)) . "\033[0m";
                 break;
         }
 
-        return str_repeat( PHP_EOL, $this->newLinesBefore ) . $output . str_repeat( PHP_EOL, $this->newLinesAfter );
+        return str_repeat(PHP_EOL, $this->newLinesBefore) . $output . str_repeat(PHP_EOL, $this->newLinesAfter);
     }
 }

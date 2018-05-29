@@ -8,6 +8,7 @@
  * @author         Steeve Andrian Salim
  * @copyright      Copyright (c) Steeve Andrian Salim
  */
+
 // ------------------------------------------------------------------------
 
 namespace O2System\Kernel\Cli\Writers\Traits;
@@ -41,9 +42,9 @@ trait StringSetterTrait
      *
      * @return static
      */
-    public function setString( $string )
+    public function setString($string)
     {
-        if ( isset( $string ) ) {
+        if (isset($string)) {
             $this->string = $string;
         }
 

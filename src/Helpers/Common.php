@@ -10,7 +10,7 @@
  */
 // ------------------------------------------------------------------------
 
-if ( ! function_exists( 'is_php' ) ) {
+if ( ! function_exists('is_php')) {
     /**
      * is_php
      *
@@ -20,13 +20,13 @@ if ( ! function_exists( 'is_php' ) ) {
      *
      * @return    bool    TRUE if the current version is $version or higher
      */
-    function is_php( $version )
+    function is_php($version)
     {
         static $_is_php;
-        $version = (string) $version;
+        $version = (string)$version;
 
-        if ( ! isset( $_is_php[ $version ] ) ) {
-            $_is_php[ $version ] = version_compare( PHP_VERSION, $version, '>=' );
+        if ( ! isset($_is_php[ $version ])) {
+            $_is_php[ $version ] = version_compare(PHP_VERSION, $version, '>=');
         }
 
         return $_is_php[ $version ];
@@ -35,7 +35,7 @@ if ( ! function_exists( 'is_php' ) ) {
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists( 'is_true' ) ) {
+if ( ! function_exists('is_true')) {
     /**
      * is_true
      *
@@ -45,15 +45,15 @@ if ( ! function_exists( 'is_true' ) ) {
      *
      * @return    bool
      */
-    function is_true( $test )
+    function is_true($test)
     {
-        return (bool) ( $test === true );
+        return (bool)($test === true);
     }
 }
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists( 'is_false' ) ) {
+if ( ! function_exists('is_false')) {
     /**
      * is_false
      *
@@ -63,15 +63,15 @@ if ( ! function_exists( 'is_false' ) ) {
      *
      * @return    bool
      */
-    function is_false( $test )
+    function is_false($test)
     {
-        return (bool) ( $test === false );
+        return (bool)($test === false);
     }
 }
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists( 'is_really_writable' ) ) {
+if ( ! function_exists('is_really_writable')) {
     /**
      * is_really_writable
      *
@@ -87,32 +87,32 @@ if ( ! function_exists( 'is_really_writable' ) ) {
      *
      * @return    bool
      */
-    function is_really_writable( $file )
+    function is_really_writable($file)
     {
         // If we're on a Unix server with safe_mode off we call is_writable
-        if ( DIRECTORY_SEPARATOR === '/' && ( is_php( '5.4' ) || ! ini_get( 'safe_mode' ) ) ) {
-            return is_writable( $file );
+        if (DIRECTORY_SEPARATOR === '/' && (is_php('5.4') || ! ini_get('safe_mode'))) {
+            return is_writable($file);
         }
 
         /* For Windows servers and safe_mode "on" installations we'll actually
          * write a file then read it. Bah...
          */
-        if ( is_dir( $file ) ) {
-            $file = rtrim( $file, '/' ) . '/' . md5( mt_rand() );
-            if ( ( $fp = @fopen( $file, 'ab' ) ) === false ) {
+        if (is_dir($file)) {
+            $file = rtrim($file, '/') . '/' . md5(mt_rand());
+            if (($fp = @fopen($file, 'ab')) === false) {
                 return false;
             }
 
-            fclose( $fp );
-            @chmod( $file, 0777 );
-            @unlink( $file );
+            fclose($fp);
+            @chmod($file, 0777);
+            @unlink($file);
 
             return true;
-        } elseif ( ! is_file( $file ) || ( $fp = @fopen( $file, 'ab' ) ) === false ) {
+        } elseif ( ! is_file($file) || ($fp = @fopen($file, 'ab')) === false) {
             return false;
         }
 
-        fclose( $fp );
+        fclose($fp);
 
         return true;
     }
@@ -120,7 +120,7 @@ if ( ! function_exists( 'is_really_writable' ) ) {
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists( 'is_https' ) ) {
+if ( ! function_exists('is_https')) {
     /**
      * is_https
      *
@@ -131,11 +131,11 @@ if ( ! function_exists( 'is_https' ) ) {
      */
     function is_https()
     {
-        if ( ! empty( $_SERVER[ 'HTTPS' ] ) && strtolower( $_SERVER[ 'HTTPS' ] ) !== 'off' ) {
+        if ( ! empty($_SERVER[ 'HTTPS' ]) && strtolower($_SERVER[ 'HTTPS' ]) !== 'off') {
             return true;
-        } elseif ( isset( $_SERVER[ 'HTTP_X_FORWARDED_PROTO' ] ) && $_SERVER[ 'HTTP_X_FORWARDED_PROTO' ] === 'https' ) {
+        } elseif (isset($_SERVER[ 'HTTP_X_FORWARDED_PROTO' ]) && $_SERVER[ 'HTTP_X_FORWARDED_PROTO' ] === 'https') {
             return true;
-        } elseif ( ! empty( $_SERVER[ 'HTTP_FRONT_END_HTTPS' ] ) && strtolower(
+        } elseif ( ! empty($_SERVER[ 'HTTP_FRONT_END_HTTPS' ]) && strtolower(
                 $_SERVER[ 'HTTP_FRONT_END_HTTPS' ]
             ) !== 'off'
         ) {
@@ -148,7 +148,7 @@ if ( ! function_exists( 'is_https' ) ) {
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists( 'is_cli' ) ) {
+if ( ! function_exists('is_cli')) {
     /**
      * is_cli
      *
@@ -158,13 +158,13 @@ if ( ! function_exists( 'is_cli' ) ) {
      */
     function is_cli()
     {
-        return ( php_sapi_name() === 'cli' );
+        return (php_sapi_name() === 'cli');
     }
 }
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists( 'is_ajax' ) ) {
+if ( ! function_exists('is_ajax')) {
     /**
      * is_ajax
      *
@@ -174,15 +174,15 @@ if ( ! function_exists( 'is_ajax' ) ) {
      */
     function is_ajax()
     {
-        return ( ! empty( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) && strtolower(
+        return ( ! empty($_SERVER[ 'HTTP_X_REQUESTED_WITH' ]) && strtolower(
                 $_SERVER[ 'HTTP_X_REQUESTED_WITH' ]
-            ) === 'xmlhttprequest' );
+            ) === 'xmlhttprequest');
     }
 }
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists( 'remove_invisible_characters' ) ) {
+if ( ! function_exists('remove_invisible_characters')) {
     /**
      * remove_invisible_characters
      *
@@ -194,13 +194,13 @@ if ( ! function_exists( 'remove_invisible_characters' ) ) {
      *
      * @return    string
      */
-    function remove_invisible_characters( $str, $url_encoded = true )
+    function remove_invisible_characters($str, $url_encoded = true)
     {
         $non_displayables = [];
 
         // every control character except newline (dec 10),
         // carriage return (dec 13) and horizontal tab (dec 09)
-        if ( $url_encoded ) {
+        if ($url_encoded) {
             $non_displayables[] = '/%0[0-8bcef]/';    // url encoded 00-08, 11, 12, 14, 15
             $non_displayables[] = '/%1[0-9a-f]/';    // url encoded 16-31
         }
@@ -208,8 +208,8 @@ if ( ! function_exists( 'remove_invisible_characters' ) ) {
         $non_displayables[] = '/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]+/S';    // 00-08, 11, 12, 14-31, 127
 
         do {
-            $str = preg_replace( $non_displayables, '', $str, -1, $count );
-        } while ( $count );
+            $str = preg_replace($non_displayables, '', $str, -1, $count);
+        } while ($count);
 
         return $str;
     }
@@ -217,7 +217,7 @@ if ( ! function_exists( 'remove_invisible_characters' ) ) {
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists( 'function_usable' ) ) {
+if ( ! function_exists('function_usable')) {
     /**
      * function_usable
      *
@@ -243,16 +243,16 @@ if ( ! function_exists( 'function_usable' ) ) {
      * @return    bool    TRUE if the function exists and is safe to call,
      *            FALSE otherwise.
      */
-    function function_usable( $function_name )
+    function function_usable($function_name)
     {
         static $suhosinFuncBlacklist;
 
-        if ( function_exists( $function_name ) ) {
-            if ( ! isset( $suhosinFuncBlacklist ) ) {
-                if ( extension_loaded( 'suhosin' ) ) {
-                    $suhosinFuncBlacklist = explode( ',', trim( ini_get( 'suhosin.executor.func.blacklist' ) ) );
+        if (function_exists($function_name)) {
+            if ( ! isset($suhosinFuncBlacklist)) {
+                if (extension_loaded('suhosin')) {
+                    $suhosinFuncBlacklist = explode(',', trim(ini_get('suhosin.executor.func.blacklist')));
 
-                    if ( ! in_array( 'eval', $suhosinFuncBlacklist, true ) && ini_get(
+                    if ( ! in_array('eval', $suhosinFuncBlacklist, true) && ini_get(
                             'suhosin.executor.disable_eval'
                         )
                     ) {
@@ -263,7 +263,7 @@ if ( ! function_exists( 'function_usable' ) ) {
                 }
             }
 
-            return ! in_array( $function_name, $suhosinFuncBlacklist, true );
+            return ! in_array($function_name, $suhosinFuncBlacklist, true);
         }
 
         return false;
@@ -272,34 +272,34 @@ if ( ! function_exists( 'function_usable' ) ) {
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists( 'apache_request_headers' ) ) {
+if ( ! function_exists('apache_request_headers')) {
     function apache_request_headers()
     {
         $headers = [];
         $http_regex = '/\AHTTP_/';
-        foreach ( $_SERVER as $server_key => $server_value ) {
-            if ( preg_match( $http_regex, $server_key ) ) {
-                $header_key = preg_replace( $http_regex, '', $server_key );
+        foreach ($_SERVER as $server_key => $server_value) {
+            if (preg_match($http_regex, $server_key)) {
+                $header_key = preg_replace($http_regex, '', $server_key);
                 $matches_regex = [];
                 // do some nasty string manipulations to restore the original letter case
                 // this should work in most cases
-                $matches_regex = explode( '_', $header_key );
-                if ( count( $matches_regex ) > 0 and strlen( $header_key ) > 2 ) {
-                    foreach ( $matches_regex as $match_key => $match_value ) {
-                        $matches_regex[ $match_key ] = ucfirst( $match_value );
+                $matches_regex = explode('_', $header_key);
+                if (count($matches_regex) > 0 and strlen($header_key) > 2) {
+                    foreach ($matches_regex as $match_key => $match_value) {
+                        $matches_regex[ $match_key ] = ucfirst($match_value);
                     }
-                    $header_key = implode( '-', $matches_regex );
+                    $header_key = implode('-', $matches_regex);
                 }
                 $headers[ $header_key ] = $server_value;
             }
         }
 
-        return ( $headers );
+        return ($headers);
     }
 }
 
 
-if ( ! function_exists( 'path_to_url' ) ) {
+if ( ! function_exists('path_to_url')) {
     /**
      * path_to_url
      *
@@ -307,26 +307,26 @@ if ( ! function_exists( 'path_to_url' ) ) {
      *
      * @return string
      */
-    function path_to_url( $path )
+    function path_to_url($path)
     {
-        $path = str_replace( [ '/', '\\' ], DIRECTORY_SEPARATOR, $path );
+        $path = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $path);
 
         $root_dir = $_SERVER[ 'DOCUMENT_ROOT' ] . DIRECTORY_SEPARATOR;
-        $base_dir = dirname( $_SERVER[ 'SCRIPT_FILENAME' ] ) . DIRECTORY_SEPARATOR;
+        $base_dir = dirname($_SERVER[ 'SCRIPT_FILENAME' ]) . DIRECTORY_SEPARATOR;
 
-        if ( is_dir( DIRECTORY_SEPARATOR . 'private' . $base_dir ) ) {
+        if (is_dir(DIRECTORY_SEPARATOR . 'private' . $base_dir)) {
             $root_dir = DIRECTORY_SEPARATOR . 'private' . $root_dir;
             $base_dir = DIRECTORY_SEPARATOR . 'private' . $base_dir;
         }
 
-        $root_dir = str_replace( [ '/', '\\' ], DIRECTORY_SEPARATOR, $root_dir );
-        $base_dir = str_replace( [ '/', '\\' ], DIRECTORY_SEPARATOR, $base_dir );
+        $root_dir = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $root_dir);
+        $base_dir = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $base_dir);
 
         $base_url = is_https() ? 'https' : 'http';
 
-        if ( isset( $_SERVER[ 'HTTP_HOST' ] ) ) {
+        if (isset($_SERVER[ 'HTTP_HOST' ])) {
             $base_url .= '://' . $_SERVER[ 'HTTP_HOST' ];
-        } elseif ( isset( $_SERVER[ 'SERVER_NAME' ] ) ) {
+        } elseif (isset($_SERVER[ 'SERVER_NAME' ])) {
 
             // Add server name
             $base_url .= '://' . $_SERVER[ 'SERVER_NAME' ];
@@ -336,23 +336,23 @@ if ( ! function_exists( 'path_to_url' ) ) {
         }
 
         // Add base path
-        $base_url .= '/' . str_replace( $root_dir, '', $base_dir );
-        $base_url = str_replace( DIRECTORY_SEPARATOR, '/', $base_url );
-        $base_url = trim( $base_url, '/' ) . '/';
+        $base_url .= '/' . str_replace($root_dir, '', $base_dir);
+        $base_url = str_replace(DIRECTORY_SEPARATOR, '/', $base_url);
+        $base_url = trim($base_url, '/') . '/';
 
-        if ( defined( 'PATH_PUBLIC' ) ) {
-            $path_url = str_replace( PATH_PUBLIC, '', $path );
+        if (defined('PATH_PUBLIC')) {
+            $path_url = str_replace(PATH_PUBLIC, '', $path);
         } else {
-            $path_url = str_replace( $base_dir, '', $path );
+            $path_url = str_replace($base_dir, '', $path);
         }
 
-        return $base_url . str_replace( DIRECTORY_SEPARATOR, '/', $path_url );
+        return $base_url . str_replace(DIRECTORY_SEPARATOR, '/', $path_url);
     }
 }
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists( 'get_namespace' ) ) {
+if ( ! function_exists('get_namespace')) {
     /**
      * get_namespace
      *
@@ -360,20 +360,20 @@ if ( ! function_exists( 'get_namespace' ) ) {
      *
      * @return string
      */
-    function get_namespace( $class )
+    function get_namespace($class)
     {
-        $class = is_object( $class ) ? get_class( $class ) : prepare_class_name( $class );
+        $class = is_object($class) ? get_class($class) : prepare_class_name($class);
 
-        $x_class = explode( '\\', $class );
-        array_pop( $x_class );
+        $x_class = explode('\\', $class);
+        array_pop($x_class);
 
-        return trim( implode( '\\', $x_class ), '\\' ) . '\\';
+        return trim(implode('\\', $x_class), '\\') . '\\';
     }
 }
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists( 'get_class_name' ) ) {
+if ( ! function_exists('get_class_name')) {
     /**
      * get_class_name
      *
@@ -381,23 +381,23 @@ if ( ! function_exists( 'get_class_name' ) ) {
      *
      * @return mixed|string
      */
-    function get_class_name( $class )
+    function get_class_name($class)
     {
-        $class = is_object( $class ) ? get_class( $class ) : prepare_class_name( $class );
+        $class = is_object($class) ? get_class($class) : prepare_class_name($class);
 
-        if ( strpos( $class, 'anonymous' ) !== false ) {
+        if (strpos($class, 'anonymous') !== false) {
             return $class;
         } else {
-            $x_class = explode( '\\', $class );
+            $x_class = explode('\\', $class);
 
-            return end( $x_class );
+            return end($x_class);
         }
     }
 }
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists( 'prepare_class_name' ) ) {
+if ( ! function_exists('prepare_class_name')) {
     /**
      * prepare_class_name
      *
@@ -405,28 +405,28 @@ if ( ! function_exists( 'prepare_class_name' ) ) {
      *
      * @return string
      */
-    function prepare_class_name( $class )
+    function prepare_class_name($class)
     {
-        $class = str_replace( [ '/', DIRECTORY_SEPARATOR, '.php' ], [ '\\', '\\', '' ], $class );
-        $class = trim( $class );
+        $class = str_replace(['/', DIRECTORY_SEPARATOR, '.php'], ['\\', '\\', ''], $class);
+        $class = trim($class);
 
-        $segments = explode( '\\', $class );
+        $segments = explode('\\', $class);
 
-        if ( count( $segments ) > 1 ) {
-            if ( $segments[ 0 ] === $segments[ 1 ] ) {
-                array_shift( $segments );
+        if (count($segments) > 1) {
+            if ($segments[ 0 ] === $segments[ 1 ]) {
+                array_shift($segments);
             }
         }
 
-        $segments = array_map( 'studlycase', $segments );
+        $segments = array_map('studlycase', $segments);
 
-        return implode( '\\', $segments );
+        return implode('\\', $segments);
     }
 }
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists( 'prepare_filename' ) ) {
+if ( ! function_exists('prepare_filename')) {
     /**
      * prepare_filename
      *
@@ -435,22 +435,22 @@ if ( ! function_exists( 'prepare_filename' ) ) {
      *
      * @return string
      */
-    function prepare_filename( $filename, $ext = null )
+    function prepare_filename($filename, $ext = null)
     {
-        $filename = str_replace( [ '/', '\\' ], DIRECTORY_SEPARATOR, $filename );
-        $filename = trim( $filename, DIRECTORY_SEPARATOR );
+        $filename = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $filename);
+        $filename = trim($filename, DIRECTORY_SEPARATOR);
 
-        $segments = explode( DIRECTORY_SEPARATOR, $filename );
-        $segments = array_map( 'studlycase', $segments );
+        $segments = explode(DIRECTORY_SEPARATOR, $filename);
+        $segments = array_map('studlycase', $segments);
 
-        return implode( DIRECTORY_SEPARATOR, $segments ) . $ext;
+        return implode(DIRECTORY_SEPARATOR, $segments) . $ext;
     }
 }
 
 // ------------------------------------------------------------------------
 
 
-if ( ! function_exists( 'prepare_namespace' ) ) {
+if ( ! function_exists('prepare_namespace')) {
 
     /**
      * prepare_namespace
@@ -461,15 +461,15 @@ if ( ! function_exists( 'prepare_namespace' ) ) {
      *
      * @return   string     valid string namespace
      */
-    function prepare_namespace( $class, $get_namespace = true )
+    function prepare_namespace($class, $get_namespace = true)
     {
-        return ( $get_namespace === true ? get_namespace( $class ) : prepare_class_name( $class ) );
+        return ($get_namespace === true ? get_namespace($class) : prepare_class_name($class));
     }
 }
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists( 'http_parse_headers' ) ) {
+if ( ! function_exists('http_parse_headers')) {
 
     /**
      * http_parse_headers
@@ -478,35 +478,35 @@ if ( ! function_exists( 'http_parse_headers' ) ) {
      *
      * @return array
      */
-    function http_parse_headers( $raw_headers )
+    function http_parse_headers($raw_headers)
     {
         $headers = [];
         $key = ''; // [+]
 
-        foreach ( explode( "\n", $raw_headers ) as $i => $h ) {
-            $h = explode( ':', $h, 2 );
+        foreach (explode("\n", $raw_headers) as $i => $h) {
+            $h = explode(':', $h, 2);
 
-            if ( isset( $h[ 1 ] ) ) {
-                if ( ! isset( $headers[ $h[ 0 ] ] ) ) {
-                    $headers[ $h[ 0 ] ] = trim( $h[ 1 ] );
-                } elseif ( is_array( $headers[ $h[ 0 ] ] ) ) {
-                    $headers[ $h[ 0 ] ] = array_merge( $headers[ $h[ 0 ] ], [ trim( $h[ 1 ] ) ] ); // [+]
+            if (isset($h[ 1 ])) {
+                if ( ! isset($headers[ $h[ 0 ] ])) {
+                    $headers[ $h[ 0 ] ] = trim($h[ 1 ]);
+                } elseif (is_array($headers[ $h[ 0 ] ])) {
+                    $headers[ $h[ 0 ] ] = array_merge($headers[ $h[ 0 ] ], [trim($h[ 1 ])]); // [+]
                 } else {
-                    $headers[ $h[ 0 ] ] = array_merge( [ $headers[ $h[ 0 ] ] ], [ trim( $h[ 1 ] ) ] ); // [+]
+                    $headers[ $h[ 0 ] ] = array_merge([$headers[ $h[ 0 ] ]], [trim($h[ 1 ])]); // [+]
                 }
 
                 $key = $h[ 0 ]; // [+]
             } else // [+]
             { // [+]
-                if ( substr( $h[ 0 ], 0, 1 ) == "\t" ) // [+]
+                if (substr($h[ 0 ], 0, 1) == "\t") // [+]
                 {
-                    $headers[ $key ] .= "\r\n\t" . trim( $h[ 0 ] );
+                    $headers[ $key ] .= "\r\n\t" . trim($h[ 0 ]);
                 } // [+]
-                elseif ( ! $key ) // [+]
+                elseif ( ! $key) // [+]
                 {
-                    $headers[ 0 ] = trim( $h[ 0 ] );
+                    $headers[ 0 ] = trim($h[ 0 ]);
                 }
-                trim( $h[ 0 ] ); // [+]
+                trim($h[ 0 ]); // [+]
             } // [+]
         }
 
@@ -516,7 +516,7 @@ if ( ! function_exists( 'http_parse_headers' ) ) {
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists( 'is_html' ) ) {
+if ( ! function_exists('is_html')) {
     /**
      * is_html
      *
@@ -526,15 +526,15 @@ if ( ! function_exists( 'is_html' ) ) {
      *
      * @return bool
      */
-    function is_html( $string )
+    function is_html($string)
     {
-        return (bool) ( $string !== strip_tags( $string ) ? true : false );
+        return (bool)($string !== strip_tags($string) ? true : false);
     }
 }
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists( 'is_serialized' ) ) {
+if ( ! function_exists('is_serialized')) {
     /**
      * is_serialized
      *
@@ -544,18 +544,18 @@ if ( ! function_exists( 'is_serialized' ) ) {
      *
      * @return  bool
      */
-    function is_serialized( $string )
+    function is_serialized($string)
     {
-        if ( ! is_string( $string ) ) {
+        if ( ! is_string($string)) {
             return false;
         }
-        if ( trim( $string ) == '' ) {
+        if (trim($string) == '') {
             return false;
         }
-        if ( preg_match( "/^(i|s|a|o|d)(.*);/si", $string ) ) {
-            $is_valid = @unserialize( $string );
+        if (preg_match("/^(i|s|a|o|d)(.*);/si", $string)) {
+            $is_valid = @unserialize($string);
 
-            if ( empty( $is_valid ) ) {
+            if (empty($is_valid)) {
                 return false;
             }
 
@@ -567,7 +567,7 @@ if ( ! function_exists( 'is_serialized' ) ) {
 }
 // ------------------------------------------------------------------------
 
-if ( ! function_exists( 'is_json' ) ) {
+if ( ! function_exists('is_json')) {
     /**
      * is_json
      *
@@ -576,33 +576,33 @@ if ( ! function_exists( 'is_json' ) ) {
      * @item    string or array
      * @return  boolean (true or false)
      */
-    function is_json( $string )
+    function is_json($string)
     {
         // make sure provided input is of type string
-        if ( ! is_string( $string ) ) {
+        if ( ! is_string($string)) {
             return false;
         }
         // trim white spaces
-        $string = trim( $string );
+        $string = trim($string);
         // get first character
-        $first_char = substr( $string, 0, 1 );
+        $first_char = substr($string, 0, 1);
         // get last character
-        $last_char = substr( $string, -1 );
+        $last_char = substr($string, -1);
         // check if there is a first and last character
-        if ( ! $first_char || ! $last_char ) {
+        if ( ! $first_char || ! $last_char) {
             return false;
         }
         // make sure first character is either { or [
-        if ( $first_char !== '{' && $first_char !== '[' ) {
+        if ($first_char !== '{' && $first_char !== '[') {
             return false;
         }
         // make sure last character is either } or ]
-        if ( $last_char !== '}' && $last_char !== ']' ) {
+        if ($last_char !== '}' && $last_char !== ']') {
             return false;
         }
         // let's leave the rest to PHP.
         // try to decode string
-        json_decode( $string );
+        json_decode($string);
         // check if error occurred
         $is_valid = json_last_error() === JSON_ERROR_NONE;
 
@@ -612,7 +612,7 @@ if ( ! function_exists( 'is_json' ) ) {
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists( 'is_parse_string' ) ) {
+if ( ! function_exists('is_parse_string')) {
     /**
      * is_parse_string
      *
@@ -620,9 +620,9 @@ if ( ! function_exists( 'is_parse_string' ) ) {
      *
      * @params string $string
      */
-    function is_parse_string( $string )
+    function is_parse_string($string)
     {
-        if ( preg_match( '[=]', $string ) ) {
+        if (preg_match('[=]', $string)) {
             return true;
         }
 
@@ -632,7 +632,7 @@ if ( ! function_exists( 'is_parse_string' ) ) {
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists( 'is_multidimensional_array' ) ) {
+if ( ! function_exists('is_multidimensional_array')) {
     /**
      * is_multidimensional_array
      *
@@ -642,9 +642,9 @@ if ( ! function_exists( 'is_multidimensional_array' ) ) {
      *
      * @return bool
      */
-    function is_multidimensional_array( array $array )
+    function is_multidimensional_array(array $array)
     {
-        if ( count( $array ) != count( $array, COUNT_RECURSIVE ) ) {
+        if (count($array) != count($array, COUNT_RECURSIVE)) {
             return true;
         }
 
@@ -654,7 +654,7 @@ if ( ! function_exists( 'is_multidimensional_array' ) ) {
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists( 'is_associative_array' ) ) {
+if ( ! function_exists('is_associative_array')) {
     /**
      * is_associative_array
      *
@@ -664,15 +664,15 @@ if ( ! function_exists( 'is_associative_array' ) ) {
      *
      * @return bool
      */
-    function is_associative_array( array $array )
+    function is_associative_array(array $array)
     {
-        if ( $array == [] ) {
+        if ($array == []) {
             return true;
         }
-        $keys = array_keys( $array );
-        if ( array_keys( $keys ) !== $keys ) {
-            foreach ( $keys as $key ) {
-                if ( ! is_numeric( $key ) ) {
+        $keys = array_keys($array);
+        if (array_keys($keys) !== $keys) {
+            foreach ($keys as $key) {
+                if ( ! is_numeric($key)) {
                     return true;
                 }
             }
@@ -684,7 +684,7 @@ if ( ! function_exists( 'is_associative_array' ) ) {
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists( 'is_indexed_array' ) ) {
+if ( ! function_exists('is_indexed_array')) {
     /**
      * is_indexed_array
      *
@@ -694,19 +694,19 @@ if ( ! function_exists( 'is_indexed_array' ) ) {
      *
      * @return bool
      */
-    function is_indexed_array( array $array )
+    function is_indexed_array(array $array)
     {
-        if ( $array == [] ) {
+        if ($array == []) {
             return true;
         }
 
-        return ! is_associative_array( $array );
+        return ! is_associative_array($array);
     }
 }
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists( 'error_code_string' ) ) {
+if ( ! function_exists('error_code_string')) {
     /**
      * error_code_string
      *
@@ -714,20 +714,20 @@ if ( ! function_exists( 'error_code_string' ) ) {
      *
      * @return string
      */
-    function error_code_string( $code )
+    function error_code_string($code)
     {
         static $errors = [];
 
-        if ( empty( $errors ) ) {
-            $errors = require( str_replace( 'Helpers', 'Config', __DIR__ ) . DIRECTORY_SEPARATOR . 'Errors.php' );
+        if (empty($errors)) {
+            $errors = require(str_replace('Helpers', 'Config', __DIR__) . DIRECTORY_SEPARATOR . 'Errors.php');
         }
 
         $string = null;
 
-        if ( isset( $errors[ $code ] ) ) {
+        if (isset($errors[ $code ])) {
             $string = $errors[ $code ];
         }
 
-        return strtoupper( $string );
+        return strtoupper($string);
     }
 }

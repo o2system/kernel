@@ -8,6 +8,7 @@
  * @author         Steeve Andrian Salim
  * @copyright      Copyright (c) Steeve Andrian Salim
  */
+
 // ------------------------------------------------------------------------
 
 namespace O2System\Kernel\Services;
@@ -24,8 +25,8 @@ class Shutdown extends SplClosureContainer
 {
     public function execute()
     {
-        foreach ( $this as $offset => $closure ) {
-            call_user_func( $closure );
+        foreach ($this as $offset => $closure) {
+            call_user_func($closure);
         }
     }
 }

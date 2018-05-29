@@ -8,6 +8,7 @@
  * @author         Steeve Andrian Salim
  * @copyright      Copyright (c) Steeve Andrian Salim
  */
+
 // ------------------------------------------------------------------------
 
 namespace O2System\Kernel\Cli\Writers\ProgressBar;
@@ -53,9 +54,9 @@ class Limiter
      *
      * @param $frequency
      */
-    public function __construct( $frequency )
+    public function __construct($frequency)
     {
-        $this->setFrequency( $frequency );
+        $this->setFrequency($frequency);
         $this->timer = new Timer();
         $this->timer->start();
     }
@@ -71,7 +72,7 @@ class Limiter
      *
      * @return static
      */
-    public function setFrequency( $frequency )
+    public function setFrequency($frequency)
     {
         $this->frequency = $frequency;
         $this->limit = 1.0 / $frequency;
@@ -94,8 +95,8 @@ class Limiter
     {
         $timeLimit = $this->timer->getSeconds();
 
-        if ( $timeLimit > $this->limit ) {
-            $this->timer->start( $timeLimit - $this->limit );
+        if ($timeLimit > $this->limit) {
+            $this->timer->start($timeLimit - $this->limit);
 
             return true;
         }

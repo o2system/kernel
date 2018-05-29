@@ -8,6 +8,7 @@
  * @author         Steeve Andrian Salim
  * @copyright      Copyright (c) Steeve Andrian Salim
  */
+
 // ------------------------------------------------------------------------
 
 namespace O2System\Kernel\Http\Message;
@@ -53,7 +54,7 @@ class Request extends AbstractMessage implements
 
     public function getClientIpAddress()
     {
-        return input()->ipAddress( config()->getItem( 'ipAddresses' )->proxy );
+        return input()->ipAddress(config()->getItem('ipAddresses')->proxy);
     }
 
     // ------------------------------------------------------------------------
@@ -72,7 +73,7 @@ class Request extends AbstractMessage implements
      */
     public function isCli()
     {
-        return ( PHP_SAPI === 'cli' || defined( 'STDIN' ) );
+        return (PHP_SAPI === 'cli' || defined('STDIN'));
     }
 
     // ------------------------------------------------------------------------
@@ -84,8 +85,8 @@ class Request extends AbstractMessage implements
      */
     public function isAjax()
     {
-        return ( ! empty( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) &&
-            strtolower( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) === 'xmlhttprequest' );
+        return ( ! empty($_SERVER[ 'HTTP_X_REQUESTED_WITH' ]) &&
+            strtolower($_SERVER[ 'HTTP_X_REQUESTED_WITH' ]) === 'xmlhttprequest');
     }
 
     //--------------------------------------------------------------------
@@ -98,11 +99,11 @@ class Request extends AbstractMessage implements
      */
     public function isSecure()
     {
-        if ( ! empty( $_SERVER[ 'HTTPS' ] ) && strtolower( $_SERVER[ 'HTTPS' ] ) !== 'off' ) {
+        if ( ! empty($_SERVER[ 'HTTPS' ]) && strtolower($_SERVER[ 'HTTPS' ]) !== 'off') {
             return true;
-        } elseif ( isset( $_SERVER[ 'HTTP_X_FORWARDED_PROTO' ] ) && $_SERVER[ 'HTTP_X_FORWARDED_PROTO' ] === 'https' ) {
+        } elseif (isset($_SERVER[ 'HTTP_X_FORWARDED_PROTO' ]) && $_SERVER[ 'HTTP_X_FORWARDED_PROTO' ] === 'https') {
             return true;
-        } elseif ( ! empty( $_SERVER[ 'HTTP_FRONT_END_HTTPS' ] ) && strtolower(
+        } elseif ( ! empty($_SERVER[ 'HTTP_FRONT_END_HTTPS' ]) && strtolower(
                 $_SERVER[ 'HTTP_FRONT_END_HTTPS' ]
             ) !== 'off'
         ) {
@@ -121,10 +122,10 @@ class Request extends AbstractMessage implements
      *
      * @return bool|mixed|string
      */
-    public function getTime( $format = null )
+    public function getTime($format = null)
     {
-        return isset( $format )
-            ? date( $format, $_SERVER[ 'REQUEST_TIME' ] )
+        return isset($format)
+            ? date($format, $_SERVER[ 'REQUEST_TIME' ])
             : $_SERVER[ 'REQUEST_TIME' ];
     }
 
@@ -139,7 +140,7 @@ class Request extends AbstractMessage implements
     {
         static $serverRequest;
 
-        if ( empty( $serverRequest ) ) {
+        if (empty($serverRequest)) {
             $serverRequest = new ServerRequest();
         }
 
@@ -170,11 +171,11 @@ class Request extends AbstractMessage implements
     {
         $requestTarget = '/';
 
-        if ( empty( $this->target ) ) {
-            if ( $this->uri instanceof Uri ) {
+        if (empty($this->target)) {
+            if ($this->uri instanceof Uri) {
                 $requestTarget = $this->uri->getPath();
 
-                if ( null !== ( $query = $this->uri->getQuery() ) ) {
+                if (null !== ($query = $this->uri->getQuery())) {
                     $requestTarget .= '?' . $query;
                 }
             }
@@ -206,19 +207,19 @@ class Request extends AbstractMessage implements
      *
      * @return static
      */
-    public function withRequestTarget( $requestTarget )
+    public function withRequestTarget($requestTarget)
     {
-        $requestTarget = trim( $requestTarget );
-        $parseTarget = parse_url( $requestTarget );
+        $requestTarget = trim($requestTarget);
+        $parseTarget = parse_url($requestTarget);
 
         $uri = $this->uri;
 
-        if ( isset( $parseTarget[ 'path' ] ) ) {
-            $uri = $this->uri->withPath( $parseTarget[ 'path' ] );
+        if (isset($parseTarget[ 'path' ])) {
+            $uri = $this->uri->withPath($parseTarget[ 'path' ]);
         }
 
-        if ( isset( $parseTarget[ 'query' ] ) ) {
-            $uri = $this->uri->withPath( $parseTarget[ 'query' ] );
+        if (isset($parseTarget[ 'query' ])) {
+            $uri = $this->uri->withPath($parseTarget[ 'query' ]);
         }
 
         $this->uri = $uri;
@@ -260,11 +261,11 @@ class Request extends AbstractMessage implements
      * @return static
      * @throws \InvalidArgumentException for invalid HTTP methods.
      */
-    public function withMethod( $method )
+    public function withMethod($method)
     {
-        $method = strtoupper( $method );
+        $method = strtoupper($method);
 
-        if ( in_array(
+        if (in_array(
             $method,
             [
                 'OPTIONS',
@@ -277,20 +278,13 @@ class Request extends AbstractMessage implements
                 'TRACE',
                 'CONNECT',
             ]
-        ) ) {
+        )) {
             $this->method = $method;
 
             return $this;
         }
 
-        throw new \InvalidArgumentException( 'Invalid HTTP Method' );
-    }
-
-    // ------------------------------------------------------------------------
-
-    public function setUri( UriInterface $uri )
-    {
-        $this->uri = $uri;
+        throw new \InvalidArgumentException('Invalid HTTP Method');
     }
 
     // ------------------------------------------------------------------------
@@ -308,11 +302,18 @@ class Request extends AbstractMessage implements
      */
     public function &getUri()
     {
-        if ( empty( $this->uri ) ) {
+        if (empty($this->uri)) {
             $this->uri = new Uri();
         }
 
         return $this->uri;
+    }
+
+    // ------------------------------------------------------------------------
+
+    public function setUri(UriInterface $uri)
+    {
+        $this->uri = $uri;
     }
 
     // ------------------------------------------------------------------------
@@ -351,18 +352,18 @@ class Request extends AbstractMessage implements
      *
      * @return static
      */
-    public function withUri( UriInterface $uri, $preserveHost = false )
+    public function withUri(UriInterface $uri, $preserveHost = false)
     {
         $message = clone $this;
         $message->uri = $uri;
 
-        if ( $preserveHost ) {
-            if ( null !== ( $host = $uri->getHost() ) ) {
-                if ( null !== ( $port = $uri->getPort() ) ) {
+        if ($preserveHost) {
+            if (null !== ($host = $uri->getHost())) {
+                if (null !== ($port = $uri->getPort())) {
                     $host .= ':' . $port;
                 }
 
-                $message->withHeader( 'Host', $host );
+                $message->withHeader('Host', $host);
             }
         }
 
@@ -381,7 +382,7 @@ class Request extends AbstractMessage implements
      */
     public function getIterator()
     {
-        return new \ArrayIterator( $_REQUEST );
+        return new \ArrayIterator($_REQUEST);
     }
 
     //--------------------------------------------------------------------
@@ -398,6 +399,6 @@ class Request extends AbstractMessage implements
      */
     public function count()
     {
-        return count( $_REQUEST );
+        return count($_REQUEST);
     }
 }

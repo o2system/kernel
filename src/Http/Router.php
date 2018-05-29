@@ -30,7 +30,8 @@ class Router
 
     // ------------------------------------------------------------------------
 
-    public function setAddresses( Router\Addresses $addresses ) {
+    public function setAddresses(Router\Addresses $addresses)
+    {
         $this->addresses = $addresses;
 
         return $this;
@@ -38,23 +39,23 @@ class Router
 
     // ------------------------------------------------------------------------
 
-    public function parseRequest( Message\Uri $uri = null )
+    public function parseRequest(Message\Uri $uri = null)
     {
-        $uri = is_null( $uri ) ? request()->getUri() : $uri;
+        $uri = is_null($uri) ? server_request()->getUri() : $uri;
         $uriSegments = $uri->getSegments()->getParts();
         $uriString = $uri->getSegments()->getString();
 
-        if ( empty( $uriSegments ) ) {
+        if (empty($uriSegments)) {
             $uriPath = urldecode(
-                parse_url( $_SERVER[ 'REQUEST_URI' ], PHP_URL_PATH )
+                parse_url($_SERVER[ 'REQUEST_URI' ], PHP_URL_PATH)
             );
 
             $uriPathParts = explode('public/', $uriPath);
             $uriPath = end($uriPathParts);
 
-            if( $uriPath !== '/' ) {
+            if ($uriPath !== '/') {
                 $uriString = $uriPath;
-                $uriSegments = array_filter( explode( '/', $uriString ) );
+                $uriSegments = array_filter(explode('/', $uriString));
             }
         }
 
@@ -75,7 +76,7 @@ class Router
 
         // Try to translate from uri string
         if (false !== ($action = $this->addresses->getTranslation($uriString))) {
-            if ( ! $action->isValidHttpMethod(request()->getMethod()) && ! $action->isAnyHttpMethod()) {
+            if ( ! $action->isValidHttpMethod(server_request()->getMethod()) && ! $action->isAnyHttpMethod()) {
                 output()->sendError(405);
             } else {
                 if (false !== ($parseSegments = $action->getParseUriString($uriString))) {

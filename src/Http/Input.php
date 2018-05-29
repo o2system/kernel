@@ -8,6 +8,7 @@
  * @author         Steeve Andrian Salim
  * @copyright      Copyright (c) Steeve Andrian Salim
  */
+
 // ------------------------------------------------------------------------
 
 namespace O2System\Kernel\Http;
@@ -48,14 +49,14 @@ class Input
      *
      * @return mixed
      */
-    final public function getPost( $offset, $filter = null )
+    final public function getPost($offset, $filter = null)
     {
         // Use $_GET directly here, since filter_has_var only
         // checks the initial GET data, not anything that might
         // have been added since.
-        return isset( $_GET[ $offset ] )
-            ? $this->get( $offset, $filter )
-            : $this->post( $offset, $filter );
+        return isset($_GET[ $offset ])
+            ? $this->get($offset, $filter)
+            : $this->post($offset, $filter);
     }
 
     // ------------------------------------------------------------------------
@@ -74,9 +75,9 @@ class Input
      *
      * @return mixed
      */
-    final public function get( $offset = null, $filter = null )
+    final public function get($offset = null, $filter = null)
     {
-        return $this->filter( INPUT_GET, $offset, $filter );
+        return $this->filter(INPUT_GET, $offset, $filter);
     }
 
     // ------------------------------------------------------------------------
@@ -97,13 +98,13 @@ class Input
      *
      * @return mixed|\O2System\Spl\Datastructures\SplArrayObject
      */
-    protected function filter( $type, $offset = null, $filter = FILTER_DEFAULT )
+    protected function filter($type, $offset = null, $filter = FILTER_DEFAULT)
     {
         // If $offset is null, it means that the whole input type array is requested
-        if ( is_null( $offset ) ) {
+        if (is_null($offset)) {
             $loopThrough = [];
 
-            switch ( $type ) {
+            switch ($type) {
                 case INPUT_GET    :
                     $loopThrough = $_GET;
                     break;
@@ -127,63 +128,63 @@ class Input
                     break;
             }
 
-            $loopThrough = $this->filterRecursive( $loopThrough, $filter );
+            $loopThrough = $this->filterRecursive($loopThrough, $filter);
 
-            if ( empty( $loopThrough ) ) {
+            if (empty($loopThrough)) {
                 return false;
             }
 
-            return new SplArrayObject( $loopThrough );
+            return new SplArrayObject($loopThrough);
         } // allow fetching multiple keys at once
-        elseif ( is_array( $offset ) ) {
+        elseif (is_array($offset)) {
             $loopThrough = [];
 
-            foreach ( $offset as $key ) {
-                $loopThrough[ $key ] = $this->filter( $type, $key, $filter );
+            foreach ($offset as $key) {
+                $loopThrough[ $key ] = $this->filter($type, $key, $filter);
             }
 
-            if ( empty( $loopThrough ) ) {
+            if (empty($loopThrough)) {
                 return false;
             }
 
-            return new SplArrayObject( $loopThrough );
-        } elseif ( isset( $offset ) ) {
+            return new SplArrayObject($loopThrough);
+        } elseif (isset($offset)) {
             // Due to issues with FastCGI and testing,
             // we need to do these all manually instead
             // of the simpler filter_input();
-            switch ( $type ) {
+            switch ($type) {
                 case INPUT_GET:
-                    $value = isset( $_GET[ $offset ] )
+                    $value = isset($_GET[ $offset ])
                         ? $_GET[ $offset ]
                         : null;
                     break;
                 case INPUT_POST:
-                    $value = isset( $_POST[ $offset ] )
+                    $value = isset($_POST[ $offset ])
                         ? $_POST[ $offset ]
                         : null;
                     break;
                 case INPUT_SERVER:
-                    $value = isset( $_SERVER[ $offset ] )
+                    $value = isset($_SERVER[ $offset ])
                         ? $_SERVER[ $offset ]
                         : null;
                     break;
                 case INPUT_ENV:
-                    $value = isset( $_ENV[ $offset ] )
+                    $value = isset($_ENV[ $offset ])
                         ? $_ENV[ $offset ]
                         : null;
                     break;
                 case INPUT_COOKIE:
-                    $value = isset( $_COOKIE[ $offset ] )
+                    $value = isset($_COOKIE[ $offset ])
                         ? $_COOKIE[ $offset ]
                         : null;
                     break;
                 case INPUT_REQUEST:
-                    $value = isset( $_REQUEST[ $offset ] )
+                    $value = isset($_REQUEST[ $offset ])
                         ? $_REQUEST[ $offset ]
                         : null;
                     break;
                 case INPUT_SESSION:
-                    $value = isset( $_SESSION[ $offset ] )
+                    $value = isset($_SESSION[ $offset ])
                         ? $_SESSION[ $offset ]
                         : null;
                     break;
@@ -191,20 +192,20 @@ class Input
                     $value = '';
             }
 
-            if ( is_array( $value ) ) {
-                $value = $this->filterRecursive( $value, $filter );
+            if (is_array($value)) {
+                $value = $this->filterRecursive($value, $filter);
 
-                if ( is_string( key( $value ) ) ) {
-                    return new SplArrayObject( $value );
+                if (is_string(key($value))) {
+                    return new SplArrayObject($value);
                 } else {
                     return $value;
                 }
-            } elseif ( is_object( $value ) ) {
+            } elseif (is_object($value)) {
                 return $value;
             }
 
-            if ( isset( $filter ) ) {
-                return filter_var( $value, $filter );
+            if (isset($filter)) {
+                return filter_var($value, $filter);
             }
 
             return $value;
@@ -239,15 +240,15 @@ class Input
      *
      * @return mixed
      */
-    protected function filterRecursive( array $data, $filter = FILTER_DEFAULT )
+    protected function filterRecursive(array $data, $filter = FILTER_DEFAULT)
     {
-        foreach ( $data as $key => $value ) {
-            if ( is_array( $value ) AND is_array( $filter ) ) {
-                $data[ $key ] = filter_var_array( $value, $filter );
-            } elseif ( is_array( $value ) ) {
-                $data[ $key ] = $this->filterRecursive( $value, $filter );
-            } elseif ( isset( $filter ) ) {
-                $data[ $key ] = filter_var( $value, $filter );
+        foreach ($data as $key => $value) {
+            if (is_array($value) AND is_array($filter)) {
+                $data[ $key ] = filter_var_array($value, $filter);
+            } elseif (is_array($value)) {
+                $data[ $key ] = $this->filterRecursive($value, $filter);
+            } elseif (isset($filter)) {
+                $data[ $key ] = filter_var($value, $filter);
             } else {
                 $data[ $key ] = $value;
             }
@@ -272,9 +273,9 @@ class Input
      *
      * @return mixed
      */
-    final public function post( $offset = null, $filter = null )
+    final public function post($offset = null, $filter = null)
     {
-        return $this->filter( INPUT_POST, $offset, $filter );
+        return $this->filter(INPUT_POST, $offset, $filter);
     }
 
     // ------------------------------------------------------------------------
@@ -293,14 +294,14 @@ class Input
      *
      * @return mixed
      */
-    final public function postGet( $offset, $filter = null )
+    final public function postGet($offset, $filter = null)
     {
         // Use $_POST directly here, since filter_has_var only
         // checks the initial POST data, not anything that might
         // have been added since.
-        return isset( $_POST[ $offset ] )
-            ? $this->post( $offset, $filter )
-            : $this->get( $offset, $filter );
+        return isset($_POST[ $offset ])
+            ? $this->post($offset, $filter)
+            : $this->get($offset, $filter);
     }
 
     //--------------------------------------------------------------------
@@ -316,18 +317,18 @@ class Input
      *
      * @return array|UploadedFileInterface
      */
-    final public function files( $offset = null )
+    final public function files($offset = null)
     {
         static $serverRequest;
 
-        if ( empty( $serverRequest ) ) {
+        if (empty($serverRequest)) {
             $serverRequest = new ServerRequest();
         }
 
         $uploadFiles = $serverRequest->getUploadedFiles();
 
-        if ( isset( $offset ) ) {
-            if ( isset( $uploadFiles[ $offset ] ) ) {
+        if (isset($offset)) {
+            if (isset($uploadFiles[ $offset ])) {
                 return $uploadFiles[ $offset ];
             }
         }
@@ -351,9 +352,9 @@ class Input
      *
      * @return mixed
      */
-    final public function env( $offset = null, $filter = null )
+    final public function env($offset = null, $filter = null)
     {
-        return $this->filter( INPUT_ENV, $offset, $filter );
+        return $this->filter(INPUT_ENV, $offset, $filter);
     }
 
     //--------------------------------------------------------------------
@@ -372,9 +373,9 @@ class Input
      *
      * @return mixed
      */
-    final public function cookie( $offset = null, $filter = null )
+    final public function cookie($offset = null, $filter = null)
     {
-        return $this->filter( INPUT_COOKIE, $offset, $filter );
+        return $this->filter(INPUT_COOKIE, $offset, $filter);
     }
 
     //--------------------------------------------------------------------
@@ -393,9 +394,9 @@ class Input
      *
      * @return mixed
      */
-    final public function request( $offset = null, $filter = null )
+    final public function request($offset = null, $filter = null)
     {
-        return $this->filter( INPUT_REQUEST, $offset, $filter );
+        return $this->filter(INPUT_REQUEST, $offset, $filter);
     }
 
     //--------------------------------------------------------------------
@@ -414,9 +415,9 @@ class Input
      *
      * @return mixed
      */
-    final public function session( $offset = null, $filter = null )
+    final public function session($offset = null, $filter = null)
     {
-        return $this->filter( INPUT_SESSION, $offset, $filter );
+        return $this->filter(INPUT_SESSION, $offset, $filter);
     }
 
     //--------------------------------------------------------------------
@@ -431,38 +432,33 @@ class Input
      *
      * @return string
      */
-    public function ipAddress( $proxyIps = [] )
+    public function ipAddress($proxyIps = [])
     {
-        if ( ! empty( $proxyIps ) && ! is_array( $proxyIps ) ) {
-            $proxyIps = explode( ',', str_replace( ' ', '', $proxyIps ) );
+        if ( ! empty($proxyIps) && ! is_array($proxyIps)) {
+            $proxyIps = explode(',', str_replace(' ', '', $proxyIps));
         }
 
-        foreach ( [
-                      'HTTP_CLIENT_IP',
-                      'HTTP_FORWARDED',
-                      'HTTP_X_FORWARDED_FOR',
-                      'HTTP_X_CLIENT_IP',
-                      'HTTP_X_CLUSTER_CLIENT_IP',
-                      'REMOTE_ADDR',
-                  ] as $header ) {
-            if ( null !== ( $ipAddress = $this->server( $header ) ) ) {
-                if ( filter_var( $ipAddress, FILTER_VALIDATE_IP ) ) {
-                    if ( ! in_array( $ipAddress, $proxyIps ) ) {
+        foreach ([
+                     'HTTP_CLIENT_IP',
+                     'HTTP_FORWARDED',
+                     'HTTP_X_FORWARDED_FOR',
+                     'HTTP_X_CLIENT_IP',
+                     'HTTP_X_CLUSTER_CLIENT_IP',
+                     'REMOTE_ADDR',
+                 ] as $header) {
+            if (null !== ($ipAddress = $this->server($header))) {
+                if (filter_var($ipAddress, FILTER_VALIDATE_IP)) {
+                    if ( ! in_array($ipAddress, $proxyIps)) {
                         break;
                     }
                 }
             }
         }
 
-        return ( empty( $ipAddress ) ? '0.0.0.0' : $ipAddress );
+        return (empty($ipAddress) ? '0.0.0.0' : $ipAddress);
     }
 
     //--------------------------------------------------------------------
-
-    public function userAgent()
-    {
-        return $this->server('HTTP_USER_AGENT');
-    }
 
     /**
      * Input::server
@@ -478,13 +474,18 @@ class Input
      *
      * @return mixed
      */
-    final public function server( $offset = null, $filter = null )
+    final public function server($offset = null, $filter = null)
     {
-        return $this->filter( INPUT_SERVER, $offset, $filter );
+        return $this->filter(INPUT_SERVER, $offset, $filter);
+    }
+
+    public function userAgent()
+    {
+        return $this->server('HTTP_USER_AGENT');
     }
 
     final public function submit()
     {
-        return (bool) isset($_POST['submit']);
+        return (bool)isset($_POST[ 'submit' ]);
     }
 }

@@ -8,14 +8,13 @@
  * @author         Steeve Andrian Salim
  * @copyright      Copyright (c) Steeve Andrian Salim
  */
+
 // ------------------------------------------------------------------------
 
 namespace O2System;
 
 // ------------------------------------------------------------------------
 
-use O2System\Kernel\Containers\Globals;
-use O2System\Kernel\Containers\Environment;
 use O2System\Psr\Container\ContainerExceptionInterface;
 use O2System\Psr\Container\ContainerInterface;
 use O2System\Psr\NotFoundExceptionInterface;
@@ -29,8 +28,8 @@ use O2System\Psr\NotFoundExceptionInterface;
  *
  * WITH TRAILING SLASH!
  */
-if ( ! defined( 'PATH_KERNEL' ) ) {
-    define( 'PATH_KERNEL', __DIR__ . DIRECTORY_SEPARATOR );
+if ( ! defined('PATH_KERNEL')) {
+    define('PATH_KERNEL', __DIR__ . DIRECTORY_SEPARATOR);
 }
 
 require_once 'Helpers/Kernel.php';
@@ -58,31 +57,31 @@ class Kernel extends Psr\Patterns\Creational\Singleton\AbstractSingleton impleme
     {
         parent::__construct();
 
-        $this->addService( new Gear\Profiler() );
+        $this->addService(new Gear\Profiler());
 
-        $this->getService( 'profiler' )->watch( 'INSTANTIATE_KERNEL_SERVICES' );
+        $this->getService('profiler')->watch('INSTANTIATE_KERNEL_SERVICES');
 
-        foreach ( [ 'Language', 'Logger', 'Shutdown' ] as $serviceClassName ) {
-            if ( class_exists( 'O2System\Framework', false ) ) {
-                if ( class_exists( 'App\Kernel\Services\\' . $serviceClassName ) ) {
-                    $this->addService( new Kernel\Datastructures\Service( 'App\Kernel\Services\\' . $serviceClassName ) );
-                } elseif ( class_exists( 'O2System\Framework\Services\\' . $serviceClassName ) ) {
+        foreach (['Language', 'Logger', 'Shutdown'] as $serviceClassName) {
+            if (class_exists('O2System\Framework', false)) {
+                if (class_exists('App\Kernel\Services\\' . $serviceClassName)) {
+                    $this->addService(new Kernel\Datastructures\Service('App\Kernel\Services\\' . $serviceClassName));
+                } elseif (class_exists('O2System\Framework\Services\\' . $serviceClassName)) {
                     $this->addService(
-                        new Kernel\Datastructures\Service( 'O2System\Framework\Services\\' . $serviceClassName )
+                        new Kernel\Datastructures\Service('O2System\Framework\Services\\' . $serviceClassName)
                     );
-                } elseif ( class_exists( 'O2System\Kernel\Services\\' . $serviceClassName ) ) {
+                } elseif (class_exists('O2System\Kernel\Services\\' . $serviceClassName)) {
                     $this->addService(
-                        new Kernel\Datastructures\Service( 'O2System\Kernel\Services\\' . $serviceClassName )
+                        new Kernel\Datastructures\Service('O2System\Kernel\Services\\' . $serviceClassName)
                     );
                 }
-            } elseif ( class_exists( 'O2System\Kernel\Services\\' . $serviceClassName ) ) {
-                $this->addService( new Kernel\Datastructures\Service( 'O2System\Kernel\Services\\' . $serviceClassName ) );
+            } elseif (class_exists('O2System\Kernel\Services\\' . $serviceClassName)) {
+                $this->addService(new Kernel\Datastructures\Service('O2System\Kernel\Services\\' . $serviceClassName));
             }
         }
 
-        $this->getService( 'profiler' )->watch( 'INSTANTIATE_KERNEL_I/O_SERVICE' );
+        $this->getService('profiler')->watch('INSTANTIATE_KERNEL_I/O_SERVICE');
 
-        if ( is_cli() ) {
+        if (is_cli()) {
             $this->cliIO();
         } else {
             $this->httpIO();
@@ -97,28 +96,28 @@ class Kernel extends Psr\Patterns\Creational\Singleton\AbstractSingleton impleme
      * @param object|string $service
      * @param string|null   $offset
      */
-    public function addService( $service, $offset = null )
+    public function addService($service, $offset = null)
     {
-        if ( is_object( $service ) ) {
-            if ( ! $service instanceof Kernel\Datastructures\Service ) {
-                $service = new Kernel\Datastructures\Service( $service );
+        if (is_object($service)) {
+            if ( ! $service instanceof Kernel\Datastructures\Service) {
+                $service = new Kernel\Datastructures\Service($service);
             }
-        } elseif ( is_string( $service ) ) {
-            if ( strpos( $service, 'O2System\Framework\\' ) !== false ) {
-                $serviceExtends = str_replace( 'O2System\Framework\\', 'App\\', $service );
+        } elseif (is_string($service)) {
+            if (strpos($service, 'O2System\Framework\\') !== false) {
+                $serviceExtends = str_replace('O2System\Framework\\', 'App\\', $service);
 
-                if ( class_exists( $serviceExtends ) ) {
+                if (class_exists($serviceExtends)) {
                     $service = $serviceExtends;
                 }
             }
 
-            if ( class_exists( $service ) ) {
-                $service = new Kernel\Datastructures\Service( $service );
+            if (class_exists($service)) {
+                $service = new Kernel\Datastructures\Service($service);
             }
         }
 
-        if ( $service instanceof Kernel\Datastructures\Service ) {
-            $offset = isset( $offset )
+        if ($service instanceof Kernel\Datastructures\Service) {
+            $offset = isset($offset)
                 ? $offset
                 : $service->getClassParameter();
             $this->services[ $offset ] = $service;
@@ -135,12 +134,12 @@ class Kernel extends Psr\Patterns\Creational\Singleton\AbstractSingleton impleme
      *
      * @return mixed
      */
-    public function &getService( $offset, $getInstance = true )
+    public function &getService($offset, $getInstance = true)
     {
         $getService[ $offset ] = false;
 
-        if ( $this->hasService( $offset ) ) {
-            if ( $getInstance === true ) {
+        if ($this->hasService($offset)) {
+            if ($getInstance === true) {
                 return $this->services[ $offset ]->getInstance();
             }
 
@@ -159,9 +158,9 @@ class Kernel extends Psr\Patterns\Creational\Singleton\AbstractSingleton impleme
      *
      * @return bool
      */
-    public function hasService( $offset )
+    public function hasService($offset)
     {
-        return (bool)array_key_exists( $offset, $this->services );
+        return (bool)array_key_exists($offset, $this->services);
     }
 
     // ------------------------------------------------------------------------
@@ -173,10 +172,10 @@ class Kernel extends Psr\Patterns\Creational\Singleton\AbstractSingleton impleme
     private function cliIO()
     {
         // Instantiate Kernel Cli Input
-        $this->addService( new Kernel\Cli\Input() );
+        $this->addService(new Kernel\Cli\Input());
 
         // Instantiate Kernel Cli Browser
-        $this->addService( new Kernel\Cli\Output() );
+        $this->addService(new Kernel\Cli\Output());
     }
 
     // ------------------------------------------------------------------------
@@ -188,10 +187,10 @@ class Kernel extends Psr\Patterns\Creational\Singleton\AbstractSingleton impleme
     private function httpIO()
     {
         // Instantiate Kernel Http Input
-        $this->addService( new Kernel\Http\Input() );
+        $this->addService(new Kernel\Http\Input());
 
         // Instantiate Kernel Http Browser
-        $this->addService( new Kernel\Http\Output() );
+        $this->addService(new Kernel\Http\Output());
     }
 
     // ------------------------------------------------------------------------
@@ -202,11 +201,11 @@ class Kernel extends Psr\Patterns\Creational\Singleton\AbstractSingleton impleme
      * @param string      $service
      * @param string|null $offset
      */
-    public function loadService( $service, $offset = null )
+    public function loadService($service, $offset = null)
     {
-        if ( class_exists( $service ) ) {
-            $service = new Kernel\Datastructures\Service( $service );
-            $offset = isset( $offset )
+        if (class_exists($service)) {
+            $service = new Kernel\Datastructures\Service($service);
+            $offset = isset($offset)
                 ? $offset
                 : $service->getClassParameter();
             $this->services[ $offset ] = $service;
@@ -227,7 +226,7 @@ class Kernel extends Psr\Patterns\Creational\Singleton\AbstractSingleton impleme
      */
     public function get($id)
     {
-        if($this->has($id)) {
+        if ($this->has($id)) {
             return $this->getService($id);
         }
 
@@ -249,6 +248,6 @@ class Kernel extends Psr\Patterns\Creational\Singleton\AbstractSingleton impleme
      */
     public function has($id)
     {
-        return (bool) $this->hasService($id);
+        return (bool)$this->hasService($id);
     }
 }

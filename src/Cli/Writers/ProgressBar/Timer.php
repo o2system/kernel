@@ -8,6 +8,7 @@
  * @author         Steeve Andrian Salim
  * @copyright      Copyright (c) Steeve Andrian Salim
  */
+
 // ------------------------------------------------------------------------
 
 namespace O2System\Kernel\Cli\Writers\ProgressBar;
@@ -43,9 +44,9 @@ class Timer
      *
      * @param int $offset
      */
-    public function start( $offset = 0 )
+    public function start($offset = 0)
     {
-        $this->time = microtime( true ) + $offset;
+        $this->time = microtime(true) + $offset;
     }
 
     // ------------------------------------------------------------------------
@@ -57,6 +58,6 @@ class Timer
      */
     public function getSeconds()
     {
-        return microtime( true ) - $this->time;
+        return microtime(true) - $this->time;
     }
 }

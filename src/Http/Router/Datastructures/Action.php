@@ -176,9 +176,9 @@ class Action
 
             if (is_string(key($matches))) {
                 foreach ($closure->getParameters() as $index => $parameter) {
-                    if(($class = $parameter->getClass()) instanceof \ReflectionClass) {
+                    if (($class = $parameter->getClass()) instanceof \ReflectionClass) {
                         $className = $class->getName();
-                        if(class_exists($className)) {
+                        if (class_exists($className)) {
                             if (isset($matches[ $parameter->name ])) {
                                 $parameters[ $index ] = new $className($matches[ $parameter->name ]);
                             }
@@ -200,6 +200,7 @@ class Action
             }
 
             $this->closureParameters = $parameters;
+
             return true;
         }
 
@@ -211,7 +212,7 @@ class Action
     public function getParseUriString($uriString)
     {
         // Convert wildcards to RegEx
-        $regex = str_replace(['/(:any?)',':any', ':num'], ['/?([^/]+)?','[^/]+', '[0-9]+'], $this->path);
+        $regex = str_replace(['/(:any?)', ':any', ':num'], ['/?([^/]+)?', '[^/]+', '[0-9]+'], $this->path);
         $regex = str_replace('/', '\/', $regex);
 
         $uriString = '/' . ltrim($uriString, '/');
@@ -226,7 +227,7 @@ class Action
         }
 
         // Laravel Like Routing
-        if(preg_match("/{(.*)}/", $this->path)) {
+        if (preg_match("/{(.*)}/", $this->path)) {
             // Try to find from each parts
             $pathParts = explode('/', $this->path);
             $stringParts = explode('/', $uriString);

@@ -8,6 +8,7 @@
  * @author         Steeve Andrian Salim
  * @copyright      Copyright (c) Steeve Andrian Salim
  */
+
 // ------------------------------------------------------------------------
 
 namespace O2System\Kernel\Cli\Writers\Traits;
@@ -52,14 +53,14 @@ trait ContextualColorClassSetterTrait
      *
      * @return static
      */
-    public function setContextualClass( $class )
+    public function setContextualClass($class)
     {
-        $class = strtolower( $class );
+        $class = strtolower($class);
         $this->contextualClass = $class;
 
-        if ( property_exists( $this, 'contextualClassColorMap' ) ) {
-            if ( array_key_exists( $class, $this->contextualClassColorMap ) ) {
-                $this->setColor( new Color( $this->contextualClassColorMap[ $class ] ) );
+        if (property_exists($this, 'contextualClassColorMap')) {
+            if (array_key_exists($class, $this->contextualClassColorMap)) {
+                $this->setColor(new Color($this->contextualClassColorMap[ $class ]));
             }
         }
 
@@ -77,7 +78,7 @@ trait ContextualColorClassSetterTrait
      *
      * @return $this
      */
-    public function setColor( Color $color )
+    public function setColor(Color $color)
     {
         $this->color = $color;
 

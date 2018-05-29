@@ -8,6 +8,7 @@
  * @author         Steeve Andrian Salim
  * @copyright      Copyright (c) Steeve Andrian Salim
  */
+
 // ------------------------------------------------------------------------
 
 namespace O2System\Kernel\Cli\Writers;
@@ -54,10 +55,10 @@ class Text implements ContextualClassInterface
      * @param string $string
      * @param string $contextualClass
      */
-    public function __construct( $string = null, $contextualClass = 'default' )
+    public function __construct($string = null, $contextualClass = 'default')
     {
-        $this->setString( $string );
-        $this->setContextualClass( $contextualClass );
+        $this->setString($string);
+        $this->setContextualClass($contextualClass);
     }
 
     // ------------------------------------------------------------------------
@@ -71,7 +72,7 @@ class Text implements ContextualClassInterface
      */
     public function getLength()
     {
-        return (int)strlen( $this->string );
+        return (int)strlen($this->string);
     }
 
     // ------------------------------------------------------------------------
@@ -100,12 +101,12 @@ class Text implements ContextualClassInterface
      */
     public function render()
     {
-        if ( empty( $this->string ) ) {
+        if (empty($this->string)) {
             return '';
         }
 
-        $string = str_repeat( ' ', $this->indent ) . $this->string . str_repeat( ' ', $this->space );
+        $string = str_repeat(' ', $this->indent) . $this->string . str_repeat(' ', $this->space);
 
-        return $this->color->paint( $string );
+        return $this->color->paint($string);
     }
 }

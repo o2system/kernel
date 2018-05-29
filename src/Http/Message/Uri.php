@@ -8,6 +8,7 @@
  * @author         Steeve Andrian Salim
  * @copyright      Copyright (c) Steeve Andrian Salim
  */
+
 // ------------------------------------------------------------------------
 
 namespace O2System\Kernel\Http\Message;
@@ -142,59 +143,59 @@ class Uri implements UriInterface
      *
      * @param string|null $httpStringRequest
      */
-    public function __construct( $httpStringRequest = null )
+    public function __construct($httpStringRequest = null)
     {
-        if ( isset( $httpStringRequest ) ) {
-            $this->segments = new Segments( '' );
-            $httpStringRequest = ltrim( $httpStringRequest, '//' );
+        if (isset($httpStringRequest)) {
+            $this->segments = new Segments('');
+            $httpStringRequest = ltrim($httpStringRequest, '//');
 
-            if ( strpos( $httpStringRequest, 'http://' ) === false ) {
-                if ( strpos( $httpStringRequest, 'https://' ) === false ) {
+            if (strpos($httpStringRequest, 'http://') === false) {
+                if (strpos($httpStringRequest, 'https://') === false) {
                     $httpStringRequest = 'http://' . $httpStringRequest;
                 }
             }
 
-            $httpStringRequest = trim( $httpStringRequest, '/' );
-            $parseUrl = parse_url( $httpStringRequest );
+            $httpStringRequest = trim($httpStringRequest, '/');
+            $parseUrl = parse_url($httpStringRequest);
 
-            $this->host = isset( $parseUrl[ 'host' ] ) ? $parseUrl[ 'host' ] : null;
+            $this->host = isset($parseUrl[ 'host' ]) ? $parseUrl[ 'host' ] : null;
 
-            $this->scheme = isset( $parseUrl[ 'scheme' ] ) ? $parseUrl[ 'scheme' ] : ( is_https() ? 'https' : 'http' );
+            $this->scheme = isset($parseUrl[ 'scheme' ]) ? $parseUrl[ 'scheme' ] : (is_https() ? 'https' : 'http');
 
             /**
              * Define Uri Port
              */
-            if ( strpos( $this->scheme, 'https' ) !== false ) {
+            if (strpos($this->scheme, 'https') !== false) {
                 $this->port = 443;
             }
 
-            if ( isset( $parseUrl[ 'path' ] ) ) {
-                $xRequest = explode( '/', $parseUrl[ 'path' ] );
-                $this->path = implode( '/', array_slice( $xRequest, 1 ) );
+            if (isset($parseUrl[ 'path' ])) {
+                $xRequest = explode('/', $parseUrl[ 'path' ]);
+                $this->path = implode('/', array_slice($xRequest, 1));
             }
 
-            if ( strpos( $this->path, '.php' ) !== false ) {
-                $xPath = explode( '.php', $this->path );
-                $xPath = explode( '/', trim( $xPath[ 0 ], '/' ) );
-                array_pop( $xPath );
+            if (strpos($this->path, '.php') !== false) {
+                $xPath = explode('.php', $this->path);
+                $xPath = explode('/', trim($xPath[ 0 ], '/'));
+                array_pop($xPath);
 
-                $this->path = empty( $xPath ) ? null : implode( '/', $xPath );
+                $this->path = empty($xPath) ? null : implode('/', $xPath);
             }
 
-            $this->query = isset( $parseUrl[ 'query' ] ) ? $parseUrl[ 'query' ] : null;
-            $this->username = isset( $parseUrl[ 'user' ] ) ? $parseUrl[ 'user' ] : null;
-            $this->password = isset( $parseUrl[ 'pass' ] ) ? $parseUrl[ 'pass' ] : null;
-            $this->port = isset( $parseUrl[ 'port' ] ) ? $parseUrl[ 'port' ] : 80;
-            $this->fragment = isset( $parseUrl[ 'fragment' ] ) ? $parseUrl[ 'fragment' ] : null;
+            $this->query = isset($parseUrl[ 'query' ]) ? $parseUrl[ 'query' ] : null;
+            $this->username = isset($parseUrl[ 'user' ]) ? $parseUrl[ 'user' ] : null;
+            $this->password = isset($parseUrl[ 'pass' ]) ? $parseUrl[ 'pass' ] : null;
+            $this->port = isset($parseUrl[ 'port' ]) ? $parseUrl[ 'port' ] : 80;
+            $this->fragment = isset($parseUrl[ 'fragment' ]) ? $parseUrl[ 'fragment' ] : null;
         } else {
             $this->segments = new Segments();
 
             /**
              * Define Uri Host
              */
-            $this->host = isset( $_SERVER[ 'HTTP_HOST' ] )
-                ? str_replace('www.', '',$_SERVER[ 'HTTP_HOST' ] )
-                : str_replace('www.','', $_SERVER[ 'SERVER_NAME' ]);
+            $this->host = isset($_SERVER[ 'HTTP_HOST' ])
+                ? str_replace('www.', '', $_SERVER[ 'HTTP_HOST' ])
+                : str_replace('www.', '', $_SERVER[ 'SERVER_NAME' ]);
 
             /**
              * Define Uri Scheme
@@ -204,13 +205,13 @@ class Uri implements UriInterface
             /**
              * Define Uri Attribute
              */
-            if ( strpos( $_SERVER[ 'PHP_SELF' ], '/@' ) !== false ) {
-                $xPhpSelf = explode( '/@', $_SERVER[ 'PHP_SELF' ] );
+            if (strpos($_SERVER[ 'PHP_SELF' ], '/@') !== false) {
+                $xPhpSelf = explode('/@', $_SERVER[ 'PHP_SELF' ]);
 
                 $this->attribute = '@' . $xPhpSelf[ 1 ];
 
-                if ( strpos( $this->attribute, '/' ) !== false ) {
-                    $xAttribute = explode( '/', $this->attribute );
+                if (strpos($this->attribute, '/') !== false) {
+                    $xAttribute = explode('/', $this->attribute);
 
                     $this->attribute = $xAttribute[ 0 ];
                 }
@@ -219,8 +220,8 @@ class Uri implements UriInterface
             /**
              * Define Uri User and Password
              */
-            if ( preg_match( "/[a-zA-Z0-9]+[@][a-zA-Z0-9]+/", $_SERVER[ 'PHP_SELF' ], $usernamePassword ) ) {
-                $xUsernamePassword = explode( '@', $usernamePassword[ 0 ] );
+            if (preg_match("/[a-zA-Z0-9]+[@][a-zA-Z0-9]+/", $_SERVER[ 'PHP_SELF' ], $usernamePassword)) {
+                $xUsernamePassword = explode('@', $usernamePassword[ 0 ]);
                 $this->username = $xUsernamePassword[ 0 ];
                 $this->password = $xUsernamePassword[ 1 ];
             }
@@ -230,69 +231,69 @@ class Uri implements UriInterface
              */
             $this->port = is_https() ? 443 : 80;
 
-            if ( strpos( $this->host, ':' ) !== false ) {
-                $xHost = explode( ':', $this->host );
-                $this->host = reset( $xHost );
-                $this->port = end( $xHost );
+            if (strpos($this->host, ':') !== false) {
+                $xHost = explode(':', $this->host);
+                $this->host = reset($xHost);
+                $this->port = end($xHost);
             }
 
             /**
              * Define Uri Path
              */
-            $xPath = explode( '.php', $_SERVER[ 'PHP_SELF' ] );
-            $xPath = explode( '/', trim( $xPath[ 0 ], '/' ) );
-            array_pop( $xPath );
+            $xPath = explode('.php', $_SERVER[ 'PHP_SELF' ]);
+            $xPath = explode('/', trim($xPath[ 0 ], '/'));
+            array_pop($xPath);
 
-            $this->path = empty( $xPath ) ? null : implode( '/', $xPath ) . '/';
+            $this->path = empty($xPath) ? null : implode('/', $xPath) . '/';
 
-            $this->query = isset( $_SERVER[ 'QUERY_STRING' ] ) ? $_SERVER[ 'QUERY_STRING' ] : null;
+            $this->query = isset($_SERVER[ 'QUERY_STRING' ]) ? $_SERVER[ 'QUERY_STRING' ] : null;
 
         }
 
-        if ( filter_var( $this->host, FILTER_VALIDATE_IP ) !== false OR strpos( $this->host, '.' ) === false ) {
-            $xHost = [ $this->host ];
+        if (filter_var($this->host, FILTER_VALIDATE_IP) !== false OR strpos($this->host, '.') === false) {
+            $xHost = [$this->host];
         } else {
-            $xHost = explode( '.', str_replace( 'www.', '', $this->host ) );
+            $xHost = explode('.', str_replace('www.', '', $this->host));
         }
 
         /**
          * Define Uri Tld
          */
-        if ( count( $xHost ) > 1 ) {
+        if (count($xHost) > 1) {
             $this->tlds = [];
 
-            foreach ( $xHost as $key => $hostname ) {
-                if ( strlen( $hostname ) <= 3 AND $key >= 1 AND $hostname !== 'www' ) {
+            foreach ($xHost as $key => $hostname) {
+                if (strlen($hostname) <= 3 AND $key >= 1 AND $hostname !== 'www') {
                     $this->tlds[] = $hostname;
                 }
             }
 
-            if ( empty( $this->tlds ) ) {
-                $this->tlds[] = end( $xHost );
+            if (empty($this->tlds)) {
+                $this->tlds[] = end($xHost);
             }
 
-            $this->tld = '.' . implode( '.', $this->tlds );
+            $this->tld = '.' . implode('.', $this->tlds);
 
-            $this->subDomains = array_diff( $xHost, $this->tlds );
-            $this->subDomains = count( $this->subDomains ) == 0 ? $this->tlds : $this->subDomains;
+            $this->subDomains = array_diff($xHost, $this->tlds);
+            $this->subDomains = count($this->subDomains) == 0 ? $this->tlds : $this->subDomains;
 
-            $this->host = end( $this->subDomains );
-            array_pop( $this->subDomains );
+            $this->host = end($this->subDomains);
+            array_pop($this->subDomains);
 
-            $this->host = implode( '.', array_slice( $this->subDomains, 1 ) ) . '.' . $this->host . $this->tld;
-            $this->host = ltrim( $this->host, '.' );
+            $this->host = implode('.', array_slice($this->subDomains, 1)) . '.' . $this->host . $this->tld;
+            $this->host = ltrim($this->host, '.');
 
-            if ( count( $this->subDomains ) > 0 ) {
-                $this->subDomain = reset( $this->subDomains );
+            if (count($this->subDomains) > 0) {
+                $this->subDomain = reset($this->subDomains);
             }
         }
 
-        $ordinalEnds = [ 'th', 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th' ];
+        $ordinalEnds = ['th', 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th'];
 
-        foreach ( $this->subDomains as $key => $subdomain ) {
-            $ordinalNumber = count( $xHost ) - $key;
+        foreach ($this->subDomains as $key => $subdomain) {
+            $ordinalNumber = count($xHost) - $key;
 
-            if ( ( ( $ordinalNumber % 100 ) >= 11 ) && ( ( $ordinalNumber % 100 ) <= 13 ) ) {
+            if ((($ordinalNumber % 100) >= 11) && (($ordinalNumber % 100) <= 13)) {
                 $ordinalKey = $ordinalNumber . 'th';
             } else {
                 $ordinalKey = $ordinalNumber . $ordinalEnds[ $ordinalNumber % 10 ];
@@ -300,13 +301,13 @@ class Uri implements UriInterface
 
             $this->subDomains[ $ordinalKey ] = $subdomain;
 
-            unset( $this->subDomains[ $key ] );
+            unset($this->subDomains[ $key ]);
         }
 
-        foreach ( $this->tlds as $key => $tld ) {
-            $ordinalNumber = count( $this->tlds ) - $key;
+        foreach ($this->tlds as $key => $tld) {
+            $ordinalNumber = count($this->tlds) - $key;
 
-            if ( ( ( $ordinalNumber % 100 ) >= 11 ) && ( ( $ordinalNumber % 100 ) <= 13 ) ) {
+            if ((($ordinalNumber % 100) >= 11) && (($ordinalNumber % 100) <= 13)) {
                 $ordinalKey = $ordinalNumber . 'th';
             } else {
                 $ordinalKey = $ordinalNumber . $ordinalEnds[ $ordinalNumber % 10 ];
@@ -314,12 +315,12 @@ class Uri implements UriInterface
 
             $this->tlds[ $ordinalKey ] = $tld;
 
-            unset( $this->tlds[ $key ] );
+            unset($this->tlds[ $key ]);
         }
 
-        if(function_exists('config')) {
-            if(config()->offsetExists('uri')) {
-                $this->setSuffix( config( 'uri' )->offsetGet( 'suffix' ) );
+        if (function_exists('config')) {
+            if (config()->offsetExists('uri')) {
+                $this->setSuffix(config('uri')->offsetGet('suffix'));
             }
         }
     }
@@ -345,7 +346,7 @@ class Uri implements UriInterface
      *
      * @return Uri
      */
-    public function withSegments( Segments $segments )
+    public function withSegments(Segments $segments)
     {
         $uri = clone $this;
         $uri->segments = $segments;
@@ -355,17 +356,17 @@ class Uri implements UriInterface
 
     // ------------------------------------------------------------------------
 
-    public function addSegments( $segments )
+    public function addSegments($segments)
     {
-        if( ! $segments instanceof Segments ) {
-            $segments = new Segments( $segments );
+        if ( ! $segments instanceof Segments) {
+            $segments = new Segments($segments);
         }
 
         $currentSegments = $this->segments->getParts();
         $addSegments = $segments->getParts();
 
         $uri = clone $this;
-        $uri->segments = new Segments( array_merge( $currentSegments, $addSegments ) );
+        $uri->segments = new Segments(array_merge($currentSegments, $addSegments));
 
         return $uri;
     }
@@ -417,18 +418,18 @@ class Uri implements UriInterface
      */
     public function getAuthority()
     {
-        if ( empty( $this->host ) ) {
+        if (empty($this->host)) {
             return null;
         }
 
         $authority = $this->host;
 
-        if ( ! empty( $this->getUserInfo() ) ) {
+        if ( ! empty($this->getUserInfo())) {
             $authority = $this->getUserInfo() . '@' . $authority;
         }
 
-        if ( ! empty( $this->port ) ) {
-            if ( $this->port != 80 ) {
+        if ( ! empty($this->port)) {
+            if ($this->port != 80) {
                 $authority .= ':' . $this->port;
             }
         }
@@ -459,7 +460,7 @@ class Uri implements UriInterface
     {
         $userInfo = $this->username;
 
-        if ( ! empty( $this->password ) ) {
+        if ( ! empty($this->password)) {
             $userInfo .= ':' . $this->password;
         }
 
@@ -600,9 +601,9 @@ class Uri implements UriInterface
 
     // ------------------------------------------------------------------------
 
-    public function getSubDomain( $level = '3rd' )
+    public function getSubDomain($level = '3rd')
     {
-        if ( isset( $this->subDomains[ $level ] ) ) {
+        if (isset($this->subDomains[ $level ])) {
             return $this->subDomains[ $level ];
         }
 
@@ -611,16 +612,16 @@ class Uri implements UriInterface
 
     // ------------------------------------------------------------------------
 
-    public function withSubDomain( $subDomain )
+    public function withSubDomain($subDomain)
     {
         $uri = clone $this;
 
-        if(is_null($subDomain)) {
+        if (is_null($subDomain)) {
             $uri->subDomain = null;
             $uri->subDomains = [];
         } else {
             $uri->subDomain = $subDomain;
-            $uri->subDomains = [ $subDomain ];
+            $uri->subDomains = [$subDomain];
         }
 
         return $uri;
@@ -635,7 +636,7 @@ class Uri implements UriInterface
 
     // ------------------------------------------------------------------------
 
-    public function withSubDomains( array $subDomains )
+    public function withSubDomains(array $subDomains)
     {
         $uri = clone $this;
         $uri->subDomain = reset($subDomains);
@@ -665,11 +666,11 @@ class Uri implements UriInterface
      * @throws \InvalidArgumentException for invalid schemes.
      * @throws \InvalidArgumentException for unsupported schemes.
      */
-    public function withScheme( $scheme )
+    public function withScheme($scheme)
     {
         $uri = clone $this;
 
-        if ( in_array( $scheme, [ 'http', 'https' ] ) ) {
+        if (in_array($scheme, ['http', 'https'])) {
             $uri->scheme = $scheme;
         }
 
@@ -695,7 +696,7 @@ class Uri implements UriInterface
      *
      * @return static|\O2System\Kernel\Http\Message\Uri A new instance with the specified user information.
      */
-    public function withUserInfo( $user, $password = null )
+    public function withUserInfo($user, $password = null)
     {
         $userInfo = clone $this;
         $userInfo->username = $user;
@@ -720,7 +721,7 @@ class Uri implements UriInterface
      * @return static|\O2System\Kernel\Http\Message\Uri A new instance with the specified host.
      * @throws \InvalidArgumentException for invalid hostnames.
      */
-    public function withHost( $host )
+    public function withHost($host)
     {
         $uri = clone $this;
         $uri->host = $host;
@@ -750,7 +751,7 @@ class Uri implements UriInterface
      * @return static|\O2System\Kernel\Http\Message\Uri A new instance with the specified port.
      * @throws \InvalidArgumentException for invalid ports.
      */
-    public function withPort( $port )
+    public function withPort($port)
     {
         $uri = clone $this;
         $uri->port = $port;
@@ -785,20 +786,20 @@ class Uri implements UriInterface
      * @return static|\O2System\Kernel\Http\Message\Uri A new instance with the specified path.
      * @throws \InvalidArgumentException for invalid paths.
      */
-    public function withPath( $path )
+    public function withPath($path)
     {
         $uri = clone $this;
-        $uri->path = ltrim( $path, '/' );
+        $uri->path = ltrim($path, '/');
 
         return $uri;
     }
 
     // ------------------------------------------------------------------------
 
-    public function addPath( $path )
+    public function addPath($path)
     {
         $uri = clone $this;
-        $uri->path .= '/' . ltrim( $path, '/' );
+        $uri->path .= '/' . ltrim($path, '/');
 
         return $uri;
     }
@@ -823,32 +824,32 @@ class Uri implements UriInterface
      * @return static|\O2System\Kernel\Http\Message\Uri A new instance with the specified query string.
      * @throws \InvalidArgumentException for invalid query strings.
      */
-    public function withQuery( $query )
+    public function withQuery($query)
     {
         $uri = clone $this;
-        $uri->query = is_array( $query ) ? http_build_query( $query, null,null,PHP_QUERY_RFC3986 ) : $query;
+        $uri->query = is_array($query) ? http_build_query($query, null, null, PHP_QUERY_RFC3986) : $query;
 
         return $uri;
     }
 
     // ------------------------------------------------------------------------
 
-    public function addQuery( $query )
+    public function addQuery($query)
     {
         $uri = clone $this;
-        $query = is_array( $query ) ? http_build_query( $query, PHP_QUERY_RFC3986 ) : $query;
+        $query = is_array($query) ? http_build_query($query, PHP_QUERY_RFC3986) : $query;
 
-        parse_str( $query, $newQuery );
+        parse_str($query, $newQuery);
 
-        if( ! empty( $uri->query ) ) {
-            parse_str( $uri->query, $oldQuery );
-            $query = array_merge( $oldQuery, $newQuery );
+        if ( ! empty($uri->query)) {
+            parse_str($uri->query, $oldQuery);
+            $query = array_merge($oldQuery, $newQuery);
         } else {
             $query = $newQuery;
         }
 
-        if( is_array( $query ) ) {
-            $uri->query = http_build_query( $query, PHP_QUERY_RFC3986 );
+        if (is_array($query)) {
+            $uri->query = http_build_query($query, PHP_QUERY_RFC3986);
         }
 
         return $uri;
@@ -873,7 +874,7 @@ class Uri implements UriInterface
      *
      * @return static|\O2System\Kernel\Http\Message\Uri A new instance with the specified fragment.
      */
-    public function withFragment( $fragment )
+    public function withFragment($fragment)
     {
         $uri = clone $this;
         $uri->fragment = $fragment;
@@ -890,23 +891,23 @@ class Uri implements UriInterface
 
     // ------------------------------------------------------------------------
 
-    protected function setSuffix( $suffix )
+    protected function setSuffix($suffix)
     {
-        if ( is_null( $suffix ) or is_bool( $suffix ) ) {
+        if (is_null($suffix) or is_bool($suffix)) {
             $this->suffix = null;
-        } elseif ( $suffix === '/' ) {
+        } elseif ($suffix === '/') {
             $this->suffix = $suffix;
         } else {
-            $this->suffix = '.' . trim( $suffix, '.' );
+            $this->suffix = '.' . trim($suffix, '.');
         }
     }
 
     // ------------------------------------------------------------------------
 
-    public function withSuffix( $suffix )
+    public function withSuffix($suffix)
     {
         $uri = clone $this;
-        $uri->setSuffix( $suffix );
+        $uri->setSuffix($suffix);
 
         return $uri;
     }
@@ -942,48 +943,48 @@ class Uri implements UriInterface
     {
         $uriString = $this->scheme . '://';
 
-        if ( empty( $this->subDomains ) ) {
+        if (empty($this->subDomains)) {
             $uriString .= $this->host;
         } else {
-            $uriString .= implode( '.', $this->subDomains ) . '.' . $this->host;
+            $uriString .= implode('.', $this->subDomains) . '.' . $this->host;
         }
 
-        if ( ! in_array( $this->port, [ 80, 443 ] ) ) {
+        if ( ! in_array($this->port, [80, 443])) {
             $uriString .= ':' . $this->port;
         }
 
-        $uriPath = empty( $this->path )
+        $uriPath = empty($this->path)
             ? '/'
-            : '/' . trim( $this->path, '/' ) . '/';
+            : '/' . trim($this->path, '/') . '/';
 
-        $uriPath .= empty( $this->string )
+        $uriPath .= empty($this->string)
             ? ''
-            : '/' . trim( $this->string, '/' ) . '/';
+            : '/' . trim($this->string, '/') . '/';
 
         $uriPath .= $this->segments->getTotalParts() == 0
             ? ''
-            : '/' . trim( $this->segments->getString(), '/' );
+            : '/' . trim($this->segments->getString(), '/');
 
-        if ( $uriPath !== '/' &&
+        if ($uriPath !== '/' &&
             substr($uriPath, strlen($uriPath) - 1) !== '/' &&
             $this->suffix !== '' && $this->suffix !== '.' &&
-            ( $uriPath . '/' !== $_SERVER['REQUEST_URI'] ) &&
-            pathinfo( $uriPath, PATHINFO_EXTENSION ) === '' &&
-            strpos( $uriPath, '#' ) === false &&
-            empty( $this->query )
+            ($uriPath . '/' !== $_SERVER[ 'REQUEST_URI' ]) &&
+            pathinfo($uriPath, PATHINFO_EXTENSION) === '' &&
+            strpos($uriPath, '#') === false &&
+            empty($this->query)
         ) {
             $uriPath .= $this->suffix;
-        } elseif( pathinfo( $uriPath, PATHINFO_EXTENSION ) === '' ) {
+        } elseif (pathinfo($uriPath, PATHINFO_EXTENSION) === '') {
             $uriPath .= '/';
         }
 
-        $uriPath = rtrim( $uriPath, '/' );
+        $uriPath = rtrim($uriPath, '/');
 
-        $uriString .= str_replace( '//', '/', $uriPath );
-        $uriString .= empty( $this->query )
+        $uriString .= str_replace('//', '/', $uriPath);
+        $uriString .= empty($this->query)
             ? ''
             : '/?' . $this->query;
-        $uriString .= empty( $this->fragment )
+        $uriString .= empty($this->fragment)
             ? ''
             : $this->fragment;
 

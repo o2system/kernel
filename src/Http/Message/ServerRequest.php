@@ -59,8 +59,7 @@ class ServerRequest extends Request implements ServerRequestInterface
      */
     public function __construct()
     {
-        // Set Uri
-        $this->uri = new Uri();
+        parent::__construct();
 
         // Set Cookie Params
         $this->cookieParams = $_COOKIE;

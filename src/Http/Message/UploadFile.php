@@ -9,6 +9,7 @@
  *                 Mohamad Rafi Randoni
  * @copyright      Copyright (c) Steeve Andrian Salim
  */
+
 // ------------------------------------------------------------------------
 
 namespace O2System\Kernel\Http\Message;
@@ -46,10 +47,10 @@ class UploadFile implements UploadedFileInterface
      *
      * @param array $uploadedFile
      */
-    public function __construct( array $uploadedFile )
+    public function __construct(array $uploadedFile)
     {
-        if ( ! class_exists( 'finfo' ) ) {
-            throw new BadPhpExtensionCallException( 'E_HEADER_BADPHPEXTENSIONCALLEXCEPTION', 1 );
+        if ( ! class_exists('finfo')) {
+            throw new BadPhpExtensionCallException('E_HEADER_BADPHPEXTENSIONCALLEXCEPTION', 1);
         }
 
         $this->name = $uploadedFile[ 'name' ];
@@ -81,17 +82,17 @@ class UploadFile implements UploadedFileInterface
      */
     public function getStream()
     {
-        if ( $this->isMoved ) {
-            throw new \RuntimeException( 'File Has Been Already Moved' );
+        if ($this->isMoved) {
+            throw new \RuntimeException('File Has Been Already Moved');
         }
 
-        if ( $this->stream === null ) {
-            $context = fopen( $this->tmpName, 'r' );
+        if ($this->stream === null) {
+            $context = fopen($this->tmpName, 'r');
 
-            if ( is_resource( $context ) ) {
+            if (is_resource($context)) {
                 $this->stream = new Stream();
             } else {
-                throw new \RuntimeException( 'Cannot create stream context' );
+                throw new \RuntimeException('Cannot create stream context');
             }
         }
 
@@ -136,36 +137,36 @@ class UploadFile implements UploadedFileInterface
      * @throws \RuntimeException on any errors during the move operation.
      * @throws \RuntimeException on the second or subsequent call to the method.
      */
-    public function moveTo( $targetPath )
+    public function moveTo($targetPath)
     {
-        if ( $this->isMoved ) {
-            throw new \RuntimeException( 'Uploaded File Has Been Moved' );
+        if ($this->isMoved) {
+            throw new \RuntimeException('Uploaded File Has Been Moved');
         }
 
-        if ( ! is_dir( dirname( $targetPath ) ) ) {
-            @mkdir( dirname( $targetPath ) );
+        if ( ! is_dir(dirname($targetPath))) {
+            @mkdir(dirname($targetPath));
         }
 
-        $targetIsStream = strpos( $targetPath, '://' ) > 0;
-        if ( ! $targetIsStream && ! is_writable( dirname( $targetPath ) ) ) {
-            throw new \InvalidArgumentException( 'Target Path Is Invalid' );
+        $targetIsStream = strpos($targetPath, '://') > 0;
+        if ( ! $targetIsStream && ! is_writable(dirname($targetPath))) {
+            throw new \InvalidArgumentException('Target Path Is Invalid');
         }
 
-        if ( $targetIsStream ) {
-            if ( ! copy( $this->tmpName, $targetPath ) ) {
-                throw new \RuntimeException( sprintf( 'Cant Move Uploaded File %1 to %2', $this->name, $targetPath ) );
+        if ($targetIsStream) {
+            if ( ! copy($this->tmpName, $targetPath)) {
+                throw new \RuntimeException(sprintf('Cant Move Uploaded File %1 to %2', $this->name, $targetPath));
             }
 
-            if ( ! unlink( $this->tmpName ) ) {
-                throw new \RuntimeException( 'Failed To Remove Uploaded Temp File' );
+            if ( ! unlink($this->tmpName)) {
+                throw new \RuntimeException('Failed To Remove Uploaded Temp File');
             }
         } else {
-            if ( ! is_uploaded_file( $this->tmpName ) ) {
-                throw new \RuntimeException( 'File Is Not Valid Uploaded File' );
+            if ( ! is_uploaded_file($this->tmpName)) {
+                throw new \RuntimeException('File Is Not Valid Uploaded File');
             }
 
-            if ( ! move_uploaded_file( $this->tmpName, $targetPath ) ) {
-                throw new \RuntimeException( sprintf( 'Cant Move Uploaded File %1 to %2', $this->name, $targetPath ) );
+            if ( ! move_uploaded_file($this->tmpName, $targetPath)) {
+                throw new \RuntimeException(sprintf('Cant Move Uploaded File %1 to %2', $this->name, $targetPath));
             }
         }
 
@@ -266,7 +267,7 @@ class UploadFile implements UploadedFileInterface
      */
     public function getFileMime()
     {
-        $mime = finfo_file( finfo_open( FILEINFO_MIME_TYPE ), $this->tmpName );
+        $mime = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $this->tmpName);
 
         return $mime;
     }
@@ -280,7 +281,7 @@ class UploadFile implements UploadedFileInterface
      */
     public function getExtension()
     {
-        return pathinfo( $this->name, PATHINFO_EXTENSION );
+        return pathinfo($this->name, PATHINFO_EXTENSION);
     }
 
     public function getFileTemp()

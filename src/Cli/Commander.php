@@ -8,6 +8,7 @@
  * @author         Steeve Andrian Salim
  * @copyright      Copyright (c) Steeve Andrian Salim
  */
+
 // ------------------------------------------------------------------------
 
 namespace O2System\Kernel\Cli;
@@ -40,7 +41,7 @@ abstract class Commander extends AbstractCommander
      *
      * @param \O2System\Framework\Cli\App $app
      */
-    public function setApp( App $app )
+    public function setApp(App $app)
     {
         $this->app = $app;
     }
@@ -54,13 +55,13 @@ abstract class Commander extends AbstractCommander
      */
     public function optionVersion()
     {
-        if ( property_exists( $this, 'commandVersion' ) ) {
-            if ( ! empty( $this->commandVersion ) ) {
+        if (property_exists($this, 'commandVersion')) {
+            if ( ! empty($this->commandVersion)) {
                 // Show Name & Version Line
                 output()->write(
-                    ( new Format() )
-                        ->setString( $this->optionVersion() . ucfirst( $this->commandName ) . ' v' . $this->commandVersion )
-                        ->setNewLinesAfter( 1 )
+                    (new Format())
+                        ->setString($this->optionVersion() . ucfirst($this->commandName) . ' v' . $this->commandVersion)
+                        ->setNewLinesAfter(1)
                 );
             }
         }

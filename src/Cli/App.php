@@ -8,6 +8,7 @@
  * @author         Steeve Andrian Salim
  * @copyright      Copyright (c) Steeve Andrian Salim
  */
+
 // ------------------------------------------------------------------------
 
 namespace O2System\Kernel\Cli;
@@ -74,7 +75,7 @@ class App extends AbstractCommandersPool
      */
     public function __construct()
     {
-        language()->loadFile( 'cli' );
+        language()->loadFile('cli');
     }
 
     // ------------------------------------------------------------------------
@@ -86,10 +87,10 @@ class App extends AbstractCommandersPool
      *
      * @param AbstractCommander $commander
      */
-    public function addCommander( AbstractCommander $commander )
+    public function addCommander(AbstractCommander $commander)
     {
-        if ( method_exists( $commander, 'setApp' ) ) {
-            $commander->setApp( $this );
+        if (method_exists($commander, 'setApp')) {
+            $commander->setApp($this);
         }
 
         $this->commandersPool[ $commander->getCommandName() ] = $commander;
@@ -113,7 +114,7 @@ class App extends AbstractCommandersPool
      *
      * @return static
      */
-    public function setWelcomeNote( $welcomeNote )
+    public function setWelcomeNote($welcomeNote)
     {
         $this->welcomeNote = $welcomeNote;
 
@@ -136,9 +137,9 @@ class App extends AbstractCommandersPool
      *
      * @return static
      */
-    public function setName( $name )
+    public function setName($name)
     {
-        $this->name = trim( $name );
+        $this->name = trim($name);
 
         return $this;
     }
@@ -166,9 +167,9 @@ class App extends AbstractCommandersPool
      *
      * @return static
      */
-    public function setVersion( $version )
+    public function setVersion($version)
     {
-        $this->version = trim( $version );
+        $this->version = trim($version);
 
         return $this;
     }
@@ -182,9 +183,9 @@ class App extends AbstractCommandersPool
      *
      * @return static
      */
-    public function setDescription( $description )
+    public function setDescription($description)
     {
-        $this->description = trim( $description );
+        $this->description = trim($description);
 
         return $this;
     }
@@ -200,55 +201,55 @@ class App extends AbstractCommandersPool
      */
     public function run()
     {
-        $command = new \ReflectionClass( $this );
+        $command = new \ReflectionClass($this);
         $options = input()->get();
 
-        if ( empty( $options ) ) {
-            if ( $this->welcomeNote instanceof Format or $this->welcomeNote instanceof Text ) {
-                output()->write( $this->welcomeNote );
-            } elseif ( is_string( $this->welcomeNote ) and $this->welcomeNote !== '' ) {
+        if (empty($options)) {
+            if ($this->welcomeNote instanceof Format or $this->welcomeNote instanceof Text) {
+                output()->write($this->welcomeNote);
+            } elseif (is_string($this->welcomeNote) and $this->welcomeNote !== '') {
                 output()->write(
-                    ( new Format() )
-                        ->setString( language()->getLine( $this->welcomeNote ) )
-                        ->setNewLinesAfter( 1 )
+                    (new Format())
+                        ->setString(language()->getLine($this->welcomeNote))
+                        ->setNewLinesAfter(1)
                 );
             }
 
             output()->write(
-                ( new Format() )
-                    ->setString( $this->name . ' v' . $this->version )
-                    ->setNewLinesBefore( 2 )
-                    ->setNewLinesAfter( 1 )
+                (new Format())
+                    ->setString($this->name . ' v' . $this->version)
+                    ->setNewLinesBefore(2)
+                    ->setNewLinesAfter(1)
             );
 
             // Run help option
             $this->optionHelp();
         } else {
 
-            foreach ( $options as $method => $arguments ) {
+            foreach ($options as $method => $arguments) {
 
-                if ( $method === 'h' ) {
+                if ($method === 'h') {
                     $method = 'help';
-                } elseif ( $method === 'v' ) {
+                } elseif ($method === 'v') {
                     $method = 'version';
-                } elseif ( $method === 'vv' ) {
+                } elseif ($method === 'vv') {
                     $method = 'verbose';
                 }
 
-                $optionMethod = camelcase( 'option-' . $method );
+                $optionMethod = camelcase('option-' . $method);
 
-                if ( $command->hasMethod( $optionMethod ) ) {
+                if ($command->hasMethod($optionMethod)) {
 
-                    $commandMethod = $command->getMethod( $optionMethod );
+                    $commandMethod = $command->getMethod($optionMethod);
 
-                    if ( $commandMethod->getNumberOfRequiredParameters() == 0 ) {
-                        call_user_func( [ &$this, $optionMethod ] );
+                    if ($commandMethod->getNumberOfRequiredParameters() == 0) {
+                        call_user_func([&$this, $optionMethod]);
                     } else {
-                        $optionArguments = is_array( $arguments )
+                        $optionArguments = is_array($arguments)
                             ? $arguments
-                            : [ $arguments ];
+                            : [$arguments];
 
-                        call_user_func_array( [ &$this, $optionMethod ], $optionArguments );
+                        call_user_func_array([&$this, $optionMethod], $optionArguments);
                     }
                 }
             }
@@ -266,55 +267,55 @@ class App extends AbstractCommandersPool
     {
         // Show Usage
         output()->write(
-            ( new Format() )
-                ->setContextualClass( Format::INFO )
-                ->setString( language()->getLine( 'CLI_USAGE' ) . ':' )
-                ->setNewLinesBefore( 1 )
-                ->setNewLinesAfter( 1 )
+            (new Format())
+                ->setContextualClass(Format::INFO)
+                ->setString(language()->getLine('CLI_USAGE') . ':')
+                ->setNewLinesBefore(1)
+                ->setNewLinesAfter(1)
         );
 
         output()->write(
-            ( new Format() )
-                ->setContextualClass( Format::INFO )
-                ->setString( 'command:action --option=value' )
-                ->setNewLinesAfter( 2 )
+            (new Format())
+                ->setContextualClass(Format::INFO)
+                ->setString('command:action --option=value')
+                ->setNewLinesAfter(2)
         );
 
         // Show Commanders
         $this->loadCommanders();
 
-        if ( count( $this->commandersPool ) ) {
+        if (count($this->commandersPool)) {
             output()->write(
-                ( new Format() )
-                    ->setString( language()->getLine( 'CLI_COMMANDS' ) . ':' )
-                    ->setNewLinesAfter( 1 )
+                (new Format())
+                    ->setString(language()->getLine('CLI_COMMANDS') . ':')
+                    ->setNewLinesAfter(1)
             );
 
             $table = new Table();
             $table->isShowBorder = false;
 
-            foreach ( $this->commandersPool as $commander ) {
+            foreach ($this->commandersPool as $commander) {
 
-                if ( $commander instanceof AbstractCommander ) {
+                if ($commander instanceof AbstractCommander) {
                     $table
                         ->addRow()
-                        ->addColumn( $commander->getCommandName() )
-                        ->addColumn( language()->getLine( $commander->getCommandDescription() ) );
+                        ->addColumn($commander->getCommandName())
+                        ->addColumn(language()->getLine($commander->getCommandDescription()));
                 }
             }
 
             output()->write(
-                ( new Format() )
-                    ->setString( $table->render() )
-                    ->setNewLinesAfter( 2 )
+                (new Format())
+                    ->setString($table->render())
+                    ->setNewLinesAfter(2)
             );
         }
 
         // Show Options
         output()->write(
-            ( new Format() )
-                ->setString( language()->getLine( 'CLI_OPTIONS' ) . ':' )
-                ->setNewLinesAfter( 1 )
+            (new Format())
+                ->setString(language()->getLine('CLI_OPTIONS') . ':')
+                ->setNewLinesAfter(1)
         );
 
         $table = new Table();
@@ -322,25 +323,25 @@ class App extends AbstractCommandersPool
 
         $table
             ->addRow()
-            ->addColumn( '--version' )
-            ->addColumn( '-v' )
-            ->addColumn( language()->getLine( 'CLI_HELP_SHOW_OPTION_VERSION' ) )
+            ->addColumn('--version')
+            ->addColumn('-v')
+            ->addColumn(language()->getLine('CLI_HELP_SHOW_OPTION_VERSION'))
             ->addRow()
-            ->addColumn( '--help' )
-            ->addColumn( '-h' )
-            ->addColumn( language()->getLine( 'CLI_HELP_SHOW_OPTION_HELP' ) )
+            ->addColumn('--help')
+            ->addColumn('-h')
+            ->addColumn(language()->getLine('CLI_HELP_SHOW_OPTION_HELP'))
             ->addRow()
-            ->addColumn( '--verbose' )
-            ->addColumn( '-vv' )
-            ->addColumn( language()->getLine( 'CLI_HELP_SHOW_OPTION_VERBOSE' ) );
+            ->addColumn('--verbose')
+            ->addColumn('-vv')
+            ->addColumn(language()->getLine('CLI_HELP_SHOW_OPTION_VERBOSE'));
 
         output()->write(
-            ( new Format() )
-                ->setString( $table->render() )
-                ->setNewLinesAfter( 2 )
+            (new Format())
+                ->setString($table->render())
+                ->setNewLinesAfter(2)
         );
 
-        exit( EXIT_SUCCESS );
+        exit(EXIT_SUCCESS);
     }
 
     // ------------------------------------------------------------------------
@@ -352,19 +353,19 @@ class App extends AbstractCommandersPool
      */
     public function optionVersion()
     {
-        if ( property_exists( $this, 'version' ) ) {
-            if ( ! empty( $this->version ) ) {
+        if (property_exists($this, 'version')) {
+            if ( ! empty($this->version)) {
                 output()->write(
-                    ( new Format() )
-                        ->setString( $this->name . ' v' . $this->version . ' Copyright (c) 2011 - ' . date( 'Y' ) . ' Steeve Andrian Salim' )
-                        ->setNewLinesAfter( 1 )
+                    (new Format())
+                        ->setString($this->name . ' v' . $this->version . ' Copyright (c) 2011 - ' . date('Y') . ' Steeve Andrian Salim')
+                        ->setNewLinesAfter(1)
                 );
 
                 output()->write(
-                    ( new Format() )
-                        ->setIndent( 2 )
-                        ->setString( 'this framework is trademark of Steeve Andrian Salim' )
-                        ->setNewLinesAfter( 1 )
+                    (new Format())
+                        ->setIndent(2)
+                        ->setString('this framework is trademark of Steeve Andrian Salim')
+                        ->setNewLinesAfter(1)
                 );
             }
         }

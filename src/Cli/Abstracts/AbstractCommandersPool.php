@@ -8,6 +8,7 @@
  * @author         Steeve Andrian Salim
  * @copyright      Copyright (c) Steeve Andrian Salim
  */
+
 // ------------------------------------------------------------------------
 
 namespace O2System\Kernel\Cli\Abstracts;
@@ -59,9 +60,9 @@ abstract class AbstractCommandersPool
      *
      * @return static
      */
-    public function setCommandersNamespace( $namespace )
+    public function setCommandersNamespace($namespace)
     {
-        $this->commandersNamespace = '\\' . trim( $namespace, '\\' ) . '\\';
+        $this->commandersNamespace = '\\' . trim($namespace, '\\') . '\\';
 
         return $this;
     }
@@ -77,12 +78,12 @@ abstract class AbstractCommandersPool
      *
      * @return static
      */
-    public function setCommandersPath( $path )
+    public function setCommandersPath($path)
     {
-        $path = str_replace( [ '\\' . '/' ], DIRECTORY_SEPARATOR, $path );
-        $path = rtrim( $path, DIRECTORY_SEPARATOR ) . DIRECTORY_SEPARATOR;
+        $path = str_replace(['\\' . '/'], DIRECTORY_SEPARATOR, $path);
+        $path = rtrim($path, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
 
-        if ( is_dir( $path ) ) {
+        if (is_dir($path)) {
             $this->commandersPath = $path;
         }
 
@@ -100,9 +101,9 @@ abstract class AbstractCommandersPool
      *
      * @return bool
      */
-    public function hasCommand( $command )
+    public function hasCommand($command)
     {
-        return (bool)array_key_exists( $command, $this->commandersPool );
+        return (bool)array_key_exists($command, $this->commandersPool);
     }
 
     // ------------------------------------------------------------------------
@@ -117,12 +118,12 @@ abstract class AbstractCommandersPool
      */
     protected function loadCommanders()
     {
-        if ( isset( $this->commandersPath ) and isset( $this->commandersNamespace ) ) {
+        if (isset($this->commandersPath) and isset($this->commandersNamespace)) {
 
-            foreach ( glob( $this->commandersPath . '*.php' ) as $filePath ) {
-                if ( is_file( $filePath ) ) {
-                    $commandClassName = $this->commandersNamespace . pathinfo( $filePath, PATHINFO_FILENAME );
-                    $this->addCommander( new $commandClassName );
+            foreach (glob($this->commandersPath . '*.php') as $filePath) {
+                if (is_file($filePath)) {
+                    $commandClassName = $this->commandersNamespace . pathinfo($filePath, PATHINFO_FILENAME);
+                    $this->addCommander(new $commandClassName);
                 }
             }
         }
@@ -137,7 +138,7 @@ abstract class AbstractCommandersPool
      *
      * @param AbstractCommander $commander
      */
-    public function addCommander( AbstractCommander $commander )
+    public function addCommander(AbstractCommander $commander)
     {
         $this->commandersPool[ $commander->getCommandName() ] = $commander;
     }

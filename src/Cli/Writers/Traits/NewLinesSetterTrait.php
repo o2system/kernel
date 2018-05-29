@@ -8,6 +8,7 @@
  * @author         Steeve Andrian Salim
  * @copyright      Copyright (c) Steeve Andrian Salim
  */
+
 // ------------------------------------------------------------------------
 
 namespace O2System\Kernel\Cli\Writers\Traits;
@@ -50,7 +51,7 @@ trait NewLinesSetterTrait
      *
      * @return static
      */
-    public function setNewLinesBefore( $lines )
+    public function setNewLinesBefore($lines)
     {
         $this->newLinesBefore = (int)$lines;
 
@@ -68,7 +69,7 @@ trait NewLinesSetterTrait
      *
      * @return static
      */
-    public function setNewLinesAfter( $lines )
+    public function setNewLinesAfter($lines)
     {
         $this->newLinesAfter = (int)$lines;
 

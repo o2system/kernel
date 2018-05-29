@@ -8,6 +8,7 @@
  * @author         Steeve Andrian Salim
  * @copyright      Copyright (c) Steeve Andrian Salim
  */
+
 // ------------------------------------------------------------------------
 
 namespace O2System\Kernel\Cli\Writers;
@@ -92,10 +93,10 @@ class Color implements ContextualColorsInterface
      * @param string $foreground Foreground contextual color.
      * @param string $background Background contextual color.
      */
-    public function __construct( $foreground = null, $background = null )
+    public function __construct($foreground = null, $background = null)
     {
-        $this->setForeground( $foreground );
-        $this->setBackground( $background );
+        $this->setForeground($foreground);
+        $this->setBackground($background);
     }
 
     /**
@@ -107,12 +108,12 @@ class Color implements ContextualColorsInterface
      *
      * @return static
      */
-    public function setForeground( $foreground )
+    public function setForeground($foreground)
     {
-        if ( isset( $foreground ) ) {
-            $foreground = strtolower( $foreground );
+        if (isset($foreground)) {
+            $foreground = strtolower($foreground);
 
-            if ( array_key_exists( $foreground, $this->foregroundColors ) ) {
+            if (array_key_exists($foreground, $this->foregroundColors)) {
                 $this->foreground = $foreground;
             }
         }
@@ -132,12 +133,12 @@ class Color implements ContextualColorsInterface
      *
      * @return static
      */
-    public function setBackground( $background )
+    public function setBackground($background)
     {
-        if ( isset( $background ) ) {
-            $background = strtolower( $background );
+        if (isset($background)) {
+            $background = strtolower($background);
 
-            if ( array_key_exists( $background, $this->backgroundColors ) ) {
+            if (array_key_exists($background, $this->backgroundColors)) {
                 $this->background = $background;
             }
         }
@@ -154,17 +155,17 @@ class Color implements ContextualColorsInterface
      *
      * @return string
      */
-    public function paint( $string )
+    public function paint($string)
     {
         $coloredString = "";
 
         // set foreground color
-        if ( array_key_exists( $this->foreground, $this->foregroundColors ) ) {
+        if (array_key_exists($this->foreground, $this->foregroundColors)) {
             $coloredString .= "\033[" . $this->foregroundColors[ $this->foreground ] . "m";
         }
 
         // set background color
-        if ( array_key_exists( $this->background, $this->backgroundColors ) ) {
+        if (array_key_exists($this->background, $this->backgroundColors)) {
             $coloredString .= "\033[" . $this->backgroundColors[ $this->background ] . "m";
         }
 

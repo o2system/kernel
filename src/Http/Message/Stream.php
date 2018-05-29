@@ -8,6 +8,7 @@
  * @author         Steeve Andrian Salim
  * @copyright      Copyright (c) Steeve Andrian Salim
  */
+
 // ------------------------------------------------------------------------
 
 namespace O2System\Kernel\Http\Message;
@@ -35,7 +36,7 @@ class Stream implements StreamInterface
      */
     public function __construct()
     {
-        $this->context = fopen( 'php://memory', 'r+' );
+        $this->context = fopen('php://memory', 'r+');
     }
 
     // ------------------------------------------------------------------------
@@ -58,9 +59,9 @@ class Stream implements StreamInterface
      */
     public function __toString()
     {
-        $this->seek( 0 );
+        $this->seek(0);
 
-        return (string)stream_get_contents( $this->context );
+        return (string)stream_get_contents($this->context);
     }
 
     // ------------------------------------------------------------------------
@@ -81,10 +82,10 @@ class Stream implements StreamInterface
      *
      * @throws \RuntimeException on failure.
      */
-    public function seek( $offset, $whence = SEEK_SET )
+    public function seek($offset, $whence = SEEK_SET)
     {
-        if ( fseek( $this->context, $offset, $whence ) == -1 ) {
-            throw new \RuntimeException( 'Not seekable' );
+        if (fseek($this->context, $offset, $whence) == -1) {
+            throw new \RuntimeException('Not seekable');
         }
     }
 
@@ -99,8 +100,8 @@ class Stream implements StreamInterface
      */
     public function close()
     {
-        if ( is_resource( $this->context ) ) {
-            fclose( $this->context );
+        if (is_resource($this->context)) {
+            fclose($this->context);
         }
 
         $this->detach();
@@ -136,9 +137,9 @@ class Stream implements StreamInterface
      */
     public function getSize()
     {
-        $stats = fstat( $this->context );
+        $stats = fstat($this->context);
 
-        if ( isset( $stats[ 'size' ] ) ) {
+        if (isset($stats[ 'size' ])) {
             return (int)$stats[ 'size' ];
         }
 
@@ -157,11 +158,11 @@ class Stream implements StreamInterface
      */
     public function tell()
     {
-        if ( false !== ( $position = ftell( $this->context ) ) ) {
+        if (false !== ($position = ftell($this->context))) {
             return $position;
         }
 
-        throw new \RuntimeException( 'cannot find pointer' );
+        throw new \RuntimeException('cannot find pointer');
     }
 
     // ------------------------------------------------------------------------
@@ -175,7 +176,7 @@ class Stream implements StreamInterface
      */
     public function eof()
     {
-        return feof( $this->context );
+        return feof($this->context);
     }
 
     // ------------------------------------------------------------------------
@@ -189,7 +190,7 @@ class Stream implements StreamInterface
      */
     public function isSeekable()
     {
-        return (bool)$this->getMetadata( 'seekable' );
+        return (bool)$this->getMetadata('seekable');
     }
 
     // ------------------------------------------------------------------------
@@ -210,13 +211,13 @@ class Stream implements StreamInterface
      *     provided. Returns a specific key value if a key is provided and the
      *     value is found, or null if the key is not found.
      */
-    public function getMetadata( $key = null )
+    public function getMetadata($key = null)
     {
-        $metadata = stream_get_meta_data( $this->context );
+        $metadata = stream_get_meta_data($this->context);
 
-        if ( empty( $key ) ) {
+        if (empty($key)) {
             return $metadata;
-        } elseif ( isset( $metadata[ $key ] ) ) {
+        } elseif (isset($metadata[ $key ])) {
             return $metadata[ $key ];
         }
 
@@ -239,8 +240,8 @@ class Stream implements StreamInterface
      */
     public function rewind()
     {
-        if ( rewind( $this->context ) === false ) {
-            throw new \RuntimeException( 'Cannot rewind stream' );
+        if (rewind($this->context) === false) {
+            throw new \RuntimeException('Cannot rewind stream');
         }
     }
 
@@ -255,15 +256,15 @@ class Stream implements StreamInterface
      */
     public function isWritable()
     {
-        if ( null !== ( $uri = $this->getMetadata( 'uri' ) ) ) {
-            if ( is_writable( $uri ) ) {
+        if (null !== ($uri = $this->getMetadata('uri'))) {
+            if (is_writable($uri)) {
                 return true;
-            } elseif ( null !== ( $mode = $this->getMetadata( 'mode' ) ) ) {
-                preg_match_all( '/[a-z]\D?/', $mode, $matches );
+            } elseif (null !== ($mode = $this->getMetadata('mode'))) {
+                preg_match_all('/[a-z]\D?/', $mode, $matches);
 
-                if ( isset( $matches[ 0 ] ) ) {
-                    foreach ( $matches[ 0 ] as $match ) {
-                        if ( in_array( $match, [ 'r+', 'w', 'w+', 'a', 'a+', 'x', 'x+', 'c', 'c+' ] ) ) {
+                if (isset($matches[ 0 ])) {
+                    foreach ($matches[ 0 ] as $match) {
+                        if (in_array($match, ['r+', 'w', 'w+', 'a', 'a+', 'x', 'x+', 'c', 'c+'])) {
                             return true;
 
                             break;
@@ -288,9 +289,9 @@ class Stream implements StreamInterface
      * @return int Returns the number of bytes written to the stream.
      * @throws \RuntimeException on failure.
      */
-    public function write( $string )
+    public function write($string)
     {
-        return fwrite( $this->context, $string );
+        return fwrite($this->context, $string);
     }
 
     // ------------------------------------------------------------------------
@@ -304,12 +305,12 @@ class Stream implements StreamInterface
      */
     public function isReadable()
     {
-        if ( null !== ( $mode = $this->getMetadata( 'mode' ) ) ) {
-            preg_match_all( '/[a-z]\D?/', $mode, $matches );
+        if (null !== ($mode = $this->getMetadata('mode'))) {
+            preg_match_all('/[a-z]\D?/', $mode, $matches);
 
-            if ( isset( $matches[ 0 ] ) ) {
-                foreach ( $matches[ 0 ] as $match ) {
-                    if ( in_array( $match, [ 'r', 'r+', 'w+', 'a+', 'x+', 'c+' ] ) ) {
+            if (isset($matches[ 0 ])) {
+                foreach ($matches[ 0 ] as $match) {
+                    if (in_array($match, ['r', 'r+', 'w+', 'a+', 'x+', 'c+'])) {
                         return true;
                         break;
                     }
@@ -335,13 +336,13 @@ class Stream implements StreamInterface
      *     if no bytes are available.
      * @throws \RuntimeException if an error occurs.
      */
-    public function read( $length )
+    public function read($length)
     {
-        if ( null !== ( $data = fread( $this->context, $length ) ) ) {
+        if (null !== ($data = fread($this->context, $length))) {
             return $data;
         }
 
-        throw new \RuntimeException( 'Cannot read' );
+        throw new \RuntimeException('Cannot read');
     }
 
     // ------------------------------------------------------------------------
@@ -357,6 +358,6 @@ class Stream implements StreamInterface
      */
     public function getContents()
     {
-        return $this->context ? stream_get_contents( $this->context ) : '';
+        return $this->context ? stream_get_contents($this->context) : '';
     }
 }

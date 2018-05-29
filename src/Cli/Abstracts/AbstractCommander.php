@@ -8,6 +8,7 @@
  * @author         Steeve Andrian Salim
  * @copyright      Copyright (c) Steeve Andrian Salim
  */
+
 // ------------------------------------------------------------------------
 
 namespace O2System\Kernel\Cli\Abstracts;
@@ -95,19 +96,19 @@ abstract class AbstractCommander
      */
     final public function __construct()
     {
-        language()->loadFile( 'cli' );
+        language()->loadFile('cli');
 
         $className = explode('Commanders\\', get_class($this));
-        $className = str_replace('\\','/', end($className));
+        $className = str_replace('\\', '/', end($className));
         $this->commandName = implode('/', array_map('strtolower', explode('/', $className)));
 
-        foreach ( $this->commandOptions as $optionName => $optionConfig ) {
-            $shortcut = empty( $optionConfig[ 'shortcut' ] )
-                ? '-' . substr( $optionName, 0, 1 )
-                : '-' . rtrim( $optionConfig[ 'shortcut' ] );
+        foreach ($this->commandOptions as $optionName => $optionConfig) {
+            $shortcut = empty($optionConfig[ 'shortcut' ])
+                ? '-' . substr($optionName, 0, 1)
+                : '-' . rtrim($optionConfig[ 'shortcut' ]);
 
-            if ( array_key_exists( $shortcut, $this->commandOptionsShortcuts ) ) {
-                $shortcut = '-' . substr( $optionName, 0, 2 );
+            if (array_key_exists($shortcut, $this->commandOptionsShortcuts)) {
+                $shortcut = '-' . substr($optionName, 0, 2);
             }
 
             $this->commandOptions[ $optionName ][ 'shortcut' ] = $shortcut;
@@ -115,7 +116,7 @@ abstract class AbstractCommander
             $this->commandOptionsShortcuts[ $shortcut ] = $optionName;
         }
 
-        if ( array_key_exists( 'VERBOSE', $_ENV ) ) {
+        if (array_key_exists('VERBOSE', $_ENV)) {
             $this->optionVerbose = true;
         }
     }
@@ -131,10 +132,10 @@ abstract class AbstractCommander
      *
      * @return static
      */
-    public function setCommandOptions( array $commandOptions )
+    public function setCommandOptions(array $commandOptions)
     {
-        foreach ( $commandOptions as $caller => $props ) {
-            call_user_func_array( [ &$this, 'addOption' ], $props );
+        foreach ($commandOptions as $caller => $props) {
+            call_user_func_array([&$this, 'addOption'], $props);
         }
 
         return $this;
@@ -151,11 +152,11 @@ abstract class AbstractCommander
      *
      * @return $this;
      */
-    public function addCommandOption( $optionName, $optionDescription, $optionShortcut = null )
+    public function addCommandOption($optionName, $optionDescription, $optionShortcut = null)
     {
-        $optionShortcut = empty( $optionShortcut )
-            ? '-' . substr( $optionName, 0, 1 )
-            : '-' . rtrim( $optionShortcut );
+        $optionShortcut = empty($optionShortcut)
+            ? '-' . substr($optionName, 0, 1)
+            : '-' . rtrim($optionShortcut);
 
         $this->commandOptions[ $optionName ] = [
             'shortcut'    => $optionShortcut,
@@ -172,14 +173,14 @@ abstract class AbstractCommander
      */
     public function optionVersion()
     {
-        if ( property_exists( $this, 'commandVersion' ) ) {
-            if ( ! empty( $this->commandVersion ) ) {
+        if (property_exists($this, 'commandVersion')) {
+            if ( ! empty($this->commandVersion)) {
                 // Show Name & Version Line
                 output()->write(
-                    ( new Format() )
-                        ->setContextualClass( Format::INFO )
-                        ->setString( ucfirst( $this->commandName ) . ' v' . $this->commandVersion )
-                        ->setNewLinesAfter( 1 )
+                    (new Format())
+                        ->setContextualClass(Format::INFO)
+                        ->setString(ucfirst($this->commandName) . ' v' . $this->commandVersion)
+                        ->setNewLinesAfter(1)
                 );
             }
         }
@@ -196,50 +197,50 @@ abstract class AbstractCommander
      */
     public function execute()
     {
-        $command = new \ReflectionClass( $this );
+        $command = new \ReflectionClass($this);
         $options = input()->get();
 
-        if ( empty( $options ) ) {
+        if (empty($options)) {
             $this->optionHelp();
         } else {
 
-            foreach ( $options as $method => $arguments ) {
+            foreach ($options as $method => $arguments) {
 
-                if ( array_key_exists( '-' . $method, $this->commandOptionsShortcuts ) ) {
+                if (array_key_exists('-' . $method, $this->commandOptionsShortcuts)) {
                     $method = $this->commandOptionsShortcuts[ '-' . $method ];
                 }
 
-                $optionMethod = camelcase( 'option-' . $method );
+                $optionMethod = camelcase('option-' . $method);
 
-                if ( $command->hasMethod( $optionMethod ) ) {
+                if ($command->hasMethod($optionMethod)) {
 
-                    $commandMethod = $command->getMethod( $optionMethod );
+                    $commandMethod = $command->getMethod($optionMethod);
 
-                    if ( $commandMethod->getNumberOfRequiredParameters() == 0 ) {
-                        call_user_func( [ &$this, $optionMethod ] );
-                    } elseif ( $commandMethod->getNumberOfRequiredParameters() > 0 and empty( $arguments ) ) {
-                        if ( isset( $this->commandOptions[ $method ][ 'help' ] ) ) {
+                    if ($commandMethod->getNumberOfRequiredParameters() == 0) {
+                        call_user_func([&$this, $optionMethod]);
+                    } elseif ($commandMethod->getNumberOfRequiredParameters() > 0 and empty($arguments)) {
+                        if (isset($this->commandOptions[ $method ][ 'help' ])) {
                             output()->write(
-                                ( new Format() )
-                                    ->setContextualClass( Format::INFO )
-                                    ->setString( language()->getLine( 'CLI_USAGE' ) . ':' )
-                                    ->setNewLinesBefore( 1 )
-                                    ->setNewLinesAfter( 1 )
+                                (new Format())
+                                    ->setContextualClass(Format::INFO)
+                                    ->setString(language()->getLine('CLI_USAGE') . ':')
+                                    ->setNewLinesBefore(1)
+                                    ->setNewLinesAfter(1)
                             );
 
                             output()->write(
-                                ( new Format() )
-                                    ->setContextualClass( Format::INFO )
-                                    ->setString( language()->getLine( $this->commandOptions[ $method ][ 'help' ] ) )
-                                    ->setNewLinesAfter( 2 )
+                                (new Format())
+                                    ->setContextualClass(Format::INFO)
+                                    ->setString(language()->getLine($this->commandOptions[ $method ][ 'help' ]))
+                                    ->setNewLinesAfter(2)
                             );
                         }
                     } else {
-                        $optionArguments = is_array( $arguments )
+                        $optionArguments = is_array($arguments)
                             ? $arguments
-                            : [ $arguments ];
+                            : [$arguments];
 
-                        call_user_func_array( [ &$this, $optionMethod ], $optionArguments );
+                        call_user_func_array([&$this, $optionMethod], $optionArguments);
                     }
                 }
             }
@@ -259,81 +260,81 @@ abstract class AbstractCommander
     {
         // Show Usage
         output()->write(
-            ( new Format() )
-                ->setContextualClass( Format::INFO )
-                ->setString( language()->getLine( 'CLI_USAGE' ) . ':' )
-                ->setNewLinesBefore( 1 )
-                ->setNewLinesAfter( 1 )
+            (new Format())
+                ->setContextualClass(Format::INFO)
+                ->setString(language()->getLine('CLI_USAGE') . ':')
+                ->setNewLinesBefore(1)
+                ->setNewLinesAfter(1)
         );
 
         // Show Actions
         $this->loadActions();
 
-        if ( count( $this->actionsPool ) ) {
+        if (count($this->actionsPool)) {
             output()->write(
-                ( new Format() )
-                    ->setContextualClass( Format::INFO )
-                    ->setString( $this->commandName . '/action --option=value' )
+                (new Format())
+                    ->setContextualClass(Format::INFO)
+                    ->setString($this->commandName . '/action --option=value')
             );
 
             output()->write(
-                ( new Format() )
-                    ->setString( language()->getLine( 'CLI_ACTIONS' ) . ':' )
-                    ->setNewLinesBefore( 2 )
-                    ->setNewLinesAfter( 1 )
+                (new Format())
+                    ->setString(language()->getLine('CLI_ACTIONS') . ':')
+                    ->setNewLinesBefore(2)
+                    ->setNewLinesAfter(1)
             );
 
             $table = new Table();
             $table->isShowBorder = false;
 
-            foreach ( $this->actionsPool as $action ) {
+            foreach ($this->actionsPool as $action) {
 
-                if ( $action instanceof AbstractCommander ) {
+                if ($action instanceof AbstractCommander) {
                     $table
                         ->addRow()
-                        ->addColumn( $action->getCommandName() )
-                        ->addColumn( language()->getLine( $action->getCommandDescription() ) );
+                        ->addColumn($action->getCommandName())
+                        ->addColumn(language()->getLine($action->getCommandDescription()));
                 }
             }
 
             output()->write(
-                ( new Format() )
-                    ->setString( $table->render() )
+                (new Format())
+                    ->setString($table->render())
             );
         } else {
             output()->write(
-                ( new Format() )
-                    ->setContextualClass( Format::INFO )
-                    ->setString( $this->commandName . ' --option=value' )
+                (new Format())
+                    ->setContextualClass(Format::INFO)
+                    ->setString($this->commandName . ' --option=value')
             );
         }
 
         // Show Options
         output()->write(
-            ( new Format() )
-                ->setString( language()->getLine( 'CLI_OPTIONS' ) . ':' )
-                ->setNewLinesBefore( 2 )
-                ->setNewLinesAfter( 1 )
+            (new Format())
+                ->setString(language()->getLine('CLI_OPTIONS') . ':')
+                ->setNewLinesBefore(2)
+                ->setNewLinesAfter(1)
         );
 
         $table = new Table();
         $table->isShowBorder = false;
 
-        foreach ( $this->commandOptions as $optionCaller => $optionProps ) {
+        foreach ($this->commandOptions as $optionCaller => $optionProps) {
             $table
                 ->addRow()
-                ->addColumn( '--' . $optionCaller )
-                ->addColumn( $optionProps[ 'shortcut' ] )
-                ->addColumn( language()->getLine( $optionProps[ 'description' ] ) );
+                ->addColumn('--' . $optionCaller)
+                ->addColumn($optionProps[ 'shortcut' ])
+                ->addColumn(language()->getLine($optionProps[ 'description' ]));
         }
 
         output()->write(
-            ( new Format() )
-                ->setString( $table->render() )
-                ->setNewLinesAfter( 2 )
+            (new Format())
+                ->setString($table->render())
+                ->setNewLinesAfter(2)
         );
 
-        exit( EXIT_SUCCESS );
+        exit(EXIT_SUCCESS);
     }
 
     // ------------------------------------------------------------------------
@@ -348,15 +349,15 @@ abstract class AbstractCommander
      */
     protected function loadActions()
     {
-        $reflection = new \ReflectionClass( $this );
+        $reflection = new \ReflectionClass($this);
         $actionNamespace = $reflection->name . '\\';
-        $actionDirectory = get_class_name( $reflection->name );
-        $actionsPath = dirname( $reflection->getFileName() ) . DIRECTORY_SEPARATOR . $actionDirectory . DIRECTORY_SEPARATOR;
+        $actionDirectory = get_class_name($reflection->name);
+        $actionsPath = dirname($reflection->getFileName()) . DIRECTORY_SEPARATOR . $actionDirectory . DIRECTORY_SEPARATOR;
 
-        foreach ( glob( $actionsPath . '*.php' ) as $filePath ) {
-            if ( is_file( $filePath ) ) {
-                $commandClassName = $actionNamespace . pathinfo( $filePath, PATHINFO_FILENAME );
-                $this->addCommander( new $commandClassName );
+        foreach (glob($actionsPath . '*.php') as $filePath) {
+            if (is_file($filePath)) {
+                $commandClassName = $actionNamespace . pathinfo($filePath, PATHINFO_FILENAME);
+                $this->addCommander(new $commandClassName);
             }
         }
     }
@@ -370,7 +371,7 @@ abstract class AbstractCommander
      *
      * @param AbstractCommander $commander
      */
-    public function addCommander( AbstractCommander $commander )
+    public function addCommander(AbstractCommander $commander)
     {
         $this->actionsPool[ $commander->getCommandName() ] = $commander;
     }
@@ -414,9 +415,9 @@ abstract class AbstractCommander
      *
      * @return static
      */
-    public function setCommandDescription( $commandDescription )
+    public function setCommandDescription($commandDescription)
     {
-        $this->commandDescription = trim( $commandDescription );
+        $this->commandDescription = trim($commandDescription);
 
         return $this;
     }

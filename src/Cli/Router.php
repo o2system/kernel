@@ -8,6 +8,7 @@
  * @author         Steeve Andrian Salim
  * @copyright      Copyright (c) Steeve Andrian Salim
  */
+
 // ------------------------------------------------------------------------
 
 namespace O2System\Kernel\Cli;
@@ -63,50 +64,50 @@ class Router
     {
         $argv = $_SERVER[ 'argv' ];
 
-        if ( $_SERVER[ 'SCRIPT_NAME' ] === $_SERVER[ 'argv' ][ 0 ] ) {
-            array_shift( $argv );
+        if ($_SERVER[ 'SCRIPT_NAME' ] === $_SERVER[ 'argv' ][ 0 ]) {
+            array_shift($argv);
 
-            if ( empty( $argv ) ) {
+            if (empty($argv)) {
                 return;
             }
         }
 
-        $this->string = str_replace( [ '/', '\\', ':' ], '/', $argv[ 0 ] );
-        $this->segments = explode( '/', $this->string );
+        $this->string = str_replace(['/', '\\', ':'], '/', $argv[ 0 ]);
+        $this->segments = explode('/', $this->string);
 
-        if ( strpos( $this->segments[ 0 ], '--' ) !== false
-            || strpos( $this->segments[ 0 ], '-' ) !== false
+        if (strpos($this->segments[ 0 ], '--') !== false
+            || strpos($this->segments[ 0 ], '-') !== false
         ) {
             $options = $this->segments;
             $this->segments = [];
         } else {
-            $options = array_slice( $argv, 1 );
+            $options = array_slice($argv, 1);
         }
 
-        foreach ( $options as $option ) {
-            if ( strpos( $option, '--' ) !== false
-                || strpos( $option, '-' ) !== false
+        foreach ($options as $option) {
+            if (strpos($option, '--') !== false
+                || strpos($option, '-') !== false
             ) {
-                $option = str_replace( [ '-', '--' ], '', $option );
-                $option = str_replace( ':', '=', $option );
+                $option = str_replace(['-', '--'], '', $option);
+                $option = str_replace(':', '=', $option);
                 $value = null;
 
-                if ( strpos( $option, '=' ) !== false ) {
-                    $optionParts = explode( '=', $option );
+                if (strpos($option, '=') !== false) {
+                    $optionParts = explode('=', $option);
                     $option = $optionParts[ 0 ];
                     $value = $optionParts[ 1 ];
                 } else {
-                    $value = current( $options );
+                    $value = current($options);
                 }
 
-                if ( $value === 'true' ) {
+                if ($value === 'true') {
                     $value = true;
-                } elseif ( $value === 'false' ) {
+                } elseif ($value === 'false') {
                     $value = false;
                 }
 
-                if ( strpos( $value, '--' ) === false
-                    || strpos( $value, '-' ) === false
+                if (strpos($value, '--') === false
+                    || strpos($value, '-') === false
                 ) {
                     $_GET[ $option ] = $value;
                 } else {
@@ -115,11 +116,11 @@ class Router
             }
         }
 
-        if ( array_key_exists( 'verbose', $_GET ) or array_key_exists( 'v', $_GET ) ) {
+        if (array_key_exists('verbose', $_GET) or array_key_exists('v', $_GET)) {
             $_ENV[ 'VERBOSE' ] = true;
         }
 
-        $this->parseSegments( $this->segments );
+        $this->parseSegments($this->segments);
     }
 
     // ------------------------------------------------------------------------
@@ -131,17 +132,17 @@ class Router
      *
      * @param array $segments
      */
-    final private function parseSegments( array $segments )
+    final private function parseSegments(array $segments)
     {
         static $reflection;
 
-        if ( empty( $reflection ) ) {
-            $reflection = new \ReflectionClass( $this );
+        if (empty($reflection)) {
+            $reflection = new \ReflectionClass($this);
         }
 
-        foreach ( $reflection->getMethods() as $method ) {
-            if ( strpos( $method->name, 'validateSegments' ) !== false ) {
-                if ( $this->{$method->name}( $segments ) ) {
+        foreach ($reflection->getMethods() as $method) {
+            if (strpos($method->name, 'validateSegments') !== false) {
+                if ($this->{$method->name}($segments)) {
                     break;
                 }
             }
@@ -170,61 +171,61 @@ class Router
      * Sets requested commander.
      *
      * @param \O2System\Kernel\Cli\Router\Datastructures\Commander $commander
-     * @param array                                               $uriSegments
+     * @param array                                                $uriSegments
      */
-    final protected function setCommander( Router\Datastructures\Commander $commander, array $uriSegments = [] )
+    final protected function setCommander(Router\Datastructures\Commander $commander, array $uriSegments = [])
     {
         // Add Commander PSR4 Namespace
-        loader()->addNamespace( $commander->getNamespaceName(), $commander->getFileInfo()->getPath() );
+        loader()->addNamespace($commander->getNamespaceName(), $commander->getFileInfo()->getPath());
 
-        $commanderMethod = camelcase( reset( $uriSegments ) );
-        $commanderMethodParams = array_slice( $uriSegments, 1 );
+        $commanderMethod = camelcase(reset($uriSegments));
+        $commanderMethodParams = array_slice($uriSegments, 1);
 
-        if ( null !== $commander->getRequestMethod() ) {
-            $commander->setRequestMethodArgs( $commanderMethodParams );
-        } elseif ( count( $uriSegments ) ) {
-            if ( $commander->hasMethod( 'route' ) ) {
+        if (null !== $commander->getRequestMethod()) {
+            $commander->setRequestMethodArgs($commanderMethodParams);
+        } elseif (count($uriSegments)) {
+            if ($commander->hasMethod('route')) {
                 $commander
-                    ->setRequestMethod( 'route' )
+                    ->setRequestMethod('route')
                     ->setRequestMethodArgs(
                         [
                             $commanderMethod,
                             $commanderMethodParams,
                         ]
                     );
-            } elseif ( $commander->hasMethod( $commanderMethod ) ) {
-                $method = $commander->getMethod( $commanderMethod );
+            } elseif ($commander->hasMethod($commanderMethod)) {
+                $method = $commander->getMethod($commanderMethod);
 
-                if ( $method->isPublic() ) {
+                if ($method->isPublic()) {
                     $commander
-                        ->setRequestMethod( $commanderMethod )
-                        ->setRequestMethodArgs( $commanderMethodParams );
-                } elseif ( is_ajax() AND $method->isProtected() ) {
+                        ->setRequestMethod($commanderMethod)
+                        ->setRequestMethodArgs($commanderMethodParams);
+                } elseif (is_ajax() AND $method->isProtected()) {
                     $commander
-                        ->setRequestMethod( $commanderMethod )
-                        ->setRequestMethodArgs( $commanderMethodParams );
+                        ->setRequestMethod($commanderMethod)
+                        ->setRequestMethodArgs($commanderMethodParams);
                 }
-            } elseif ( $commander->hasMethod( 'execute' ) ) {
-                $execute = $commander->getMethod( 'execute' );
+            } elseif ($commander->hasMethod('execute')) {
+                $execute = $commander->getMethod('execute');
 
-                if ( $execute->getNumberOfParameters() > 0 ) {
+                if ($execute->getNumberOfParameters() > 0) {
 
-                    array_unshift( $commanderMethodParams, $commanderMethod );
+                    array_unshift($commanderMethodParams, $commanderMethod);
 
                     $commander
-                        ->setRequestMethod( 'execute' )
-                        ->setRequestMethodArgs( $commanderMethodParams );
+                        ->setRequestMethod('execute')
+                        ->setRequestMethodArgs($commanderMethodParams);
                 } else {
-                    output()->sendError( 404 );
+                    output()->sendError(404);
                 }
             }
-        } elseif ( $commander->hasMethod( 'route' ) ) {
+        } elseif ($commander->hasMethod('route')) {
             $commander
-                ->setRequestMethod( 'route' )
-                ->setRequestMethodArgs( [ 'execute', [] ] );
-        } elseif ( $commander->hasMethod( 'execute' ) ) {
+                ->setRequestMethod('route')
+                ->setRequestMethodArgs(['execute', []]);
+        } elseif ($commander->hasMethod('execute')) {
             $commander
-                ->setRequestMethod( 'execute' );
+                ->setRequestMethod('execute');
         }
 
         // Set Router Commander
@@ -240,30 +241,31 @@ class Router
      *
      * @return bool
      */
-    final private function validateSegmentsCommander( array $segments )
+    final private function validateSegmentsCommander(array $segments)
     {
-        $numSegments = count( $segments );
+        $numSegments = count($segments);
         $commanderRegistry = null;
         $uriSegments = [];
-        $commandersDirectories = modules()->getDirs( 'Commanders' );
+        $commandersDirectories = modules()->getDirs('Commanders');
 
-        for ( $i = 0; $i <= $numSegments; $i++ ) {
-            $routedSegments = array_slice( $segments, 0, ( $numSegments - $i ) );
+        for ($i = 0; $i <= $numSegments; $i++) {
+            $routedSegments = array_slice($segments, 0, ($numSegments - $i));
 
-            $commanderFilename = implode( DIRECTORY_SEPARATOR, $routedSegments );
-            $commanderFilename = prepare_filename( $commanderFilename ) . '.php';
+            $commanderFilename = implode(DIRECTORY_SEPARATOR, $routedSegments);
+            $commanderFilename = prepare_filename($commanderFilename) . '.php';
 
-            foreach ( $commandersDirectories as $commanderDirectory ) {
-                if ( is_file( $commanderFilePath = $commanderDirectory . $commanderFilename ) ) {
-                    $uriSegments = array_diff( $segments, $routedSegments );
-                    $commanderRegistry = new Router\Datastructures\Commander( $commanderFilePath );
+            foreach ($commandersDirectories as $commanderDirectory) {
+                if (is_file($commanderFilePath = $commanderDirectory . $commanderFilename)) {
+                    $uriSegments = array_diff($segments, $routedSegments);
+                    $commanderRegistry = new Router\Datastructures\Commander($commanderFilePath);
                     break;
                 }
             }
 
-            if ( $commanderRegistry instanceof Router\Datastructures\Commander ) {
+            if ($commanderRegistry instanceof Router\Datastructures\Commander) {
                 $this->setCommander($commanderRegistry, $uriSegments);
                 break;
+
                 return true;
             }
         }
