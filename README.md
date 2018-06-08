@@ -25,7 +25,7 @@ Please kindly mail us at [o2system.framework@gmail.com](mailto:o2system.framewor
 Please kindly submit your [issues at Github](http://github.com/o2system/kernel/issues) so we can track all the issues along development and send a [pull request](http://github.com/o2system/kernel/pulls) to this repository.
 
 ### System Requirements
-- PHP 5.6+
+- PHP 7.2+
 - [Composer](https://getcomposer.org)
 - [O2System Gear](https://github.com/o2system/gear)
 - [O2System Psr](https://github.com/o2system/psr)

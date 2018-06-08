@@ -176,9 +176,9 @@ class Language implements \IteratorAggregate
                 foreach ($this->filePaths as $filePath) {
                     $filePaths = [
                         $filePath . $default . DIRECTORY_SEPARATOR . $file . '.ini',
-                        $filePath . $file . '_' . $default . '.ini',
-                        $filePath . $file . '-' . $default . '.ini',
-                        $filePath . $file . '.ini',
+                        $filePath . dash($file) . '_' . $default . '.ini',
+                        $filePath . dash($file) . '-' . $default . '.ini',
+                        $filePath . dash($file) . '.ini',
                     ];
 
                     foreach ($filePaths as $filePath) {

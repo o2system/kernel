@@ -25,6 +25,11 @@ use O2System\Spl\Info\SplClassInfo;
  */
 class Controller extends SplClassInfo
 {
+    /**
+     * Request Segments
+     *
+     * @var Segments
+     */
     private $requestSegments;
 
     private $requestMethod = null;
