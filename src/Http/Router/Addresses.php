@@ -322,8 +322,14 @@ class Addresses
     {
         if ($domain !== '*') {
             $hostDomain = new Domain();
-            $domain = str_replace('.' . $hostDomain->getParentDomain(), '',
-                    $domain) . '.' . $hostDomain->getParentDomain();
+            $domainParts = explode('.', $domain);
+
+            if(count($domainParts) == 1) {
+                $domain = $domain . '.' . $hostDomain->getParentDomain();
+            } else {
+                $domain = str_replace('.' . $hostDomain->getParentDomain(), '',
+                        $domain) . '.' . $hostDomain->getParentDomain();
+            }
         }
 
         $this->domains[ $domain ] = $address;

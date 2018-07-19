@@ -90,6 +90,7 @@ class Router
             ) {
                 $option = str_replace(['-', '--'], '', $option);
                 $option = str_replace(':', '=', $option);
+                $option = str_replace('"', '', $option);
                 $value = null;
 
                 if (strpos($option, '=') !== false) {
@@ -112,6 +113,12 @@ class Router
                     $_GET[ $option ] = $value;
                 } else {
                     $_GET[ $option ] = null;
+                }
+            } else {
+                $keys = array_keys($_GET);
+                if(count($keys)) {
+                    $key = end($keys);
+                    $_GET[$key] = $option;
                 }
             }
         }

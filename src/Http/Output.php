@@ -119,17 +119,35 @@ class Output extends Message\Response
      */
     public function errorHandler($errorSeverity, $errorMessage, $errorFile, $errorLine, $errorContext = [])
     {
+        $isFatalError = (((E_ERROR | E_COMPILE_ERROR | E_CORE_ERROR | E_USER_ERROR) & $errorSeverity) === $errorSeverity);
+
         if (strpos($errorFile, 'parser') !== false) {
             if (function_exists('parser')) {
-                $errorFile = parser()->getSourceFilePath();
+                if (o2system()->hasService('presenter')) {
+                    presenter()->initialize();
+                }
+
+                $vars = presenter()->getArrayCopy();
+                extract($vars);
+
+                $errorFile = str_replace(PATH_ROOT, DIRECTORY_SEPARATOR, parser()->getSourceFilePath());
+                $error = new ErrorException($errorMessage, $errorSeverity, $errorFile, $errorLine, $errorContext);
+
+                $filePath = $this->getFilePath('error');
+
+                ob_start();
+                include $filePath;
+                $htmlOutput = ob_get_contents();
+                ob_end_clean();
+
+                echo $htmlOutput;
+                return;
             }
         }
 
-        $isFatalError = (((E_ERROR | E_COMPILE_ERROR | E_CORE_ERROR | E_USER_ERROR) & $errorSeverity) === $errorSeverity);
-
         // When the error is fatal the Kernel will throw it as an exception.
         if ($isFatalError) {
-            throw new ErrorException($errorMessage, $errorSeverity, $errorFile, $errorLine, $errorContext);
+            throw new ErrorException($errorMessage, $errorSeverity, $errorLine, $errorLine, $errorContext);
         }
 
         // Should we ignore the error? We'll get the current error_reporting
@@ -152,10 +170,8 @@ class Output extends Message\Response
             )
         );
 
-        $displayError = str_ireplace(['off', 'none', 'no', 'false', 'null'], 0, ini_get('display_errors'));
-
         // Should we display the error?
-        if ($displayError == 1) {
+        if (str_ireplace(['off', 'none', 'no', 'false', 'null'], 0, ini_get('display_errors')) == 1) {
             if (is_ajax()) {
                 $this->setContentType('application/json');
                 $this->statusCode = 500;
@@ -169,39 +185,37 @@ class Output extends Message\Response
                         $error->getFile() . ':' . $error->getLine(),
                     ]
                 ));
-            } else {
+                exit(EXIT_ERROR);
+            }
 
-                if (class_exists('O2System\Framework')) {
-                    if (o2system()->hasService('presenter')) {
-                        presenter()->initialize();
+            if (class_exists('O2System\Framework')) {
+                if (o2system()->hasService('presenter')) {
+                    presenter()->initialize();
+
+                    if(presenter()->theme->use) {
+                        presenter()->theme->load();
                     }
                 }
 
-                foreach (array_reverse($this->filePaths) as $filePath) {
-                    if (is_file($filePath . 'error.phtml')) {
-                        $filePath .= 'error.phtml';
-                        break;
-                    }
-                }
+                $vars = presenter()->getArrayCopy();
+                extract($vars);
+            }
 
-                ob_start();
-                include $filePath;
-                $htmlOutput = ob_get_contents();
-                ob_end_clean();
+            $filePath = $this->getFilePath('error');
 
-                if (class_exists('O2System\Framework')) {
-                    if (o2system()->hasService('presenter')) {
-                        parser()->loadVars(presenter()->initialize()->getArrayCopy());
-                        parser()->loadString($htmlOutput);
-                        $htmlOutput = parser()->parse(['error' => $error]);
-                        echo presenter()->assets->parseSourceCode($htmlOutput);
-                    } else {
-                        echo $htmlOutput;
-                    }
-                } else {
-                    echo $htmlOutput;
+            ob_start();
+            include $filePath;
+            $htmlOutput = ob_get_contents();
+            ob_end_clean();
+
+            if (class_exists('O2System\Framework')) {
+                if (o2system()->hasService('presenter')) {
+                    $htmlOutput = presenter()->assets->parseSourceCode($htmlOutput);
                 }
             }
+
+            echo $htmlOutput;
+            exit(EXIT_ERROR);
         }
     }
 
@@ -380,6 +394,15 @@ class Output extends Message\Response
         exit(EXIT_SUCCESS);
     }
 
+    public function sendManifest(array $manifest)
+    {
+        $this->setContentType('application/json');
+        $this->sendHeaders();
+
+        echo json_encode($manifest, JSON_PRETTY_PRINT);
+        exit(EXIT_SUCCESS);
+    }
+
     protected function sendHeaders(array $headers = [])
     {
         ini_set('expose_php', 0);
@@ -447,134 +470,66 @@ class Output extends Message\Response
                     $exception->getFile() . ':' . $exception->getLine(),
                 ]
             ));
-        } elseif ($exception instanceof \Error) {
-            $error = new ErrorException(
-                $exception->getMessage(),
-                $exception->getCode(),
-                $exception->getFile(),
-                $exception->getLine()
-            );
-
-            if (class_exists('O2System\Framework')) {
-                if (o2system()->hasService('presenter')) {
-                    presenter()->initialize();
-                }
-            }
-
-            foreach (array_reverse($this->filePaths) as $filePath) {
-                if (is_file($filePath . 'error.phtml')) {
-                    $filePath .= 'error.phtml';
-                    break;
-                }
-            }
-
-            ob_start();
-            include $filePath;
-            $htmlOutput = ob_get_contents();
-            ob_end_clean();
-
-            if (class_exists('O2System\Framework')) {
-                if (o2system()->hasService('parser')) {
-                    if (o2system()->hasService('presenter')) {
-                        parser()->loadVars(presenter()->initialize()->getArrayCopy());
-                    }
-                    parser()->loadString($htmlOutput);
-                    $htmlOutput = parser()->parse(['error' => $error]);
-                }
-
-                if (o2system()->hasService('presenter')) {
-                    echo presenter()->assets->parseSourceCode($htmlOutput);
-                } else {
-                    echo $htmlOutput;
-                }
-            } else {
-                echo $htmlOutput;
-            }
-
-            exit(EXIT_ERROR);
         } elseif ($exception instanceof AbstractException) {
 
-            if (class_exists('O2System\Framework') && $exception->getCode() !== 105) {
-                if (o2system()->hasService('presenter')) {
-                    presenter()->initialize();
-                }
-            }
-
-            foreach (array_reverse($this->filePaths) as $filePath) {
-                $filePath .= 'exception.phtml';
-                if (is_file($filePath)) {
-                    break;
-                }
-            }
-
-            ob_start();
-            include $filePath;
-            $htmlOutput = ob_get_contents();
-            ob_end_clean();
-
-            if (class_exists('O2System\Framework') && $exception->getCode() !== 105) {
-                if (o2system()->hasService('parser')) {
-                    parser()->loadVars(presenter()->getArrayCopy());
-                    parser()->loadString($htmlOutput);
-                    $htmlOutput = parser()->parse();
-                }
-
-                if (o2system()->hasService('presenter')) {
-                    echo presenter()->assets->parseSourceCode($htmlOutput);
-                } else {
-                    echo $htmlOutput;
-                }
-            } else {
-                echo $htmlOutput;
-            }
-
-            exit(EXIT_ERROR);
-        } elseif ($exception instanceof \Exception) {
             if (class_exists('O2System\Framework')) {
                 if (o2system()->hasService('presenter')) {
                     presenter()->initialize();
+
+                    if(presenter()->theme->use) {
+                        presenter()->theme->load();
+                    }
+                }
+
+                $vars = presenter()->getArrayCopy();
+                extract($vars);
+            }
+
+            ob_start();
+            include $this->getFilePath('exception');
+            $htmlOutput = ob_get_contents();
+            ob_end_clean();
+
+            if (class_exists('O2System\Framework')) {
+                if (o2system()->hasService('presenter')) {
+                    $htmlOutput = presenter()->assets->parseSourceCode($htmlOutput);
                 }
             }
 
-            foreach (array_reverse($this->filePaths) as $filePath) {
-                $filePath .= 'exception-spl.phtml';
-
-                if (is_file($filePath)) {
-                    break;
-                }
-            }
+            echo $htmlOutput;
+            exit(EXIT_ERROR);
+        } elseif ($exception instanceof \Exception || $exception instanceof \Error) {
 
             $exceptionClassName = get_class_name($exception);
-
             $header = language()->getLine('E_HEADER_' . $exceptionClassName);
             $description = language()->getLine('E_DESCRIPTION_' . $exceptionClassName);
             $trace = new Trace($exception->getTrace());
 
+            if (class_exists('O2System\Framework')) {
+                if (o2system()->hasService('presenter')) {
+                    presenter()->initialize();
+
+                    if(presenter()->theme->use) {
+                        presenter()->theme->load();
+                    }
+                }
+
+                $vars = presenter()->getArrayCopy();
+                extract($vars);
+            }
+
             ob_start();
-            include $filePath;
+            include $this->getFilePath('exception-spl');
             $htmlOutput = ob_get_contents();
             ob_end_clean();
 
             if (class_exists('O2System\Framework')) {
-                if (o2system()->hasService('parser')) {
-                    parser()->loadVars(presenter()->getArrayCopy());
-                    parser()->loadString($htmlOutput);
-                    $htmlOutput = parser()->parse([
-                        'header'      => language()->getLine('E_HEADER_' . $exceptionClassName),
-                        'description' => language()->getLine('E_DESCRIPTION_' . $exceptionClassName),
-                        'trace'       => new Trace($exception->getTrace()),
-                    ]);
-                }
-
                 if (o2system()->hasService('presenter')) {
-                    echo presenter()->assets->parseSourceCode($htmlOutput);
-                } else {
-                    echo $htmlOutput;
+                    $htmlOutput = presenter()->assets->parseSourceCode($htmlOutput);
                 }
-            } else {
-                echo $htmlOutput;
             }
 
+            echo $htmlOutput;
             exit(EXIT_ERROR);
         }
     }
@@ -609,43 +564,52 @@ class Output extends Message\Response
             $this->statusCode = $code;
             $this->reasonPhrase = $error[ 'title' ];
             $this->send($vars);
-        } else {
-            $this->sendHeaders($headers);
 
-            if (class_exists('O2System\Framework')) {
-                if (o2system()->hasService('presenter')) {
-                    presenter()->initialize();
+            exit(EXIT_ERROR);
+        }
+
+        $this->sendHeaders($headers);
+
+        if (class_exists('O2System\Framework')) {
+            if (o2system()->hasService('presenter')) {
+                presenter()->initialize();
+
+                if(presenter()->theme->use) {
+                    presenter()->theme->load();
                 }
             }
 
-            foreach (array_reverse($this->filePaths) as $filePath) {
-                if (is_file($filePath . 'error-code.phtml')) {
-                    $filePath .= 'error-code.phtml';
-                    break;
-                }
-            }
+            $vars = presenter()->getArrayCopy();
+            extract($vars);
+        }
 
-            extract($error);
+        extract($error);
 
-            ob_start();
-            include $filePath;
-            $htmlOutput = ob_get_contents();
-            ob_end_clean();
+        ob_start();
+        include $this->getFilePath('error-code');
+        $htmlOutput = ob_get_contents();
+        ob_end_clean();
 
-            if (class_exists('O2System\Framework')) {
-                if (o2system()->hasService('presenter')) {
-                    parser()->loadVars(presenter()->getArrayCopy());
-                    parser()->loadString($htmlOutput);
-                    $htmlOutput = parser()->parse();
-                    echo presenter()->assets->parseSourceCode($htmlOutput);
-                } else {
-                    echo $htmlOutput;
-                }
-            } else {
-                echo $htmlOutput;
+        if (class_exists('O2System\Framework')) {
+            if (o2system()->hasService('presenter')) {
+                $htmlOutput = presenter()->assets->parseSourceCode($htmlOutput);
             }
         }
 
+        echo $htmlOutput;
         exit(EXIT_ERROR);
+    }
+
+    public function getFilePath($filename)
+    {
+        foreach (array_reverse($this->filePaths) as $filePath) {
+            if (is_file($filePath . $filename . '.phtml')) {
+                return $filePath . $filename . '.phtml';
+                break;
+            } elseif (is_file($filePath . 'errors' . DIRECTORY_SEPARATOR . $filename . '.phtml')) {
+                return $filePath . 'errors' . DIRECTORY_SEPARATOR . $filename . '.phtml';
+                break;
+            }
+        }
     }
 }

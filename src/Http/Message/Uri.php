@@ -259,69 +259,62 @@ class Uri implements UriInterface
         /**
          * Define Uri Tld
          */
-        if (count($xHost) > 1) {
-            $this->tlds = [];
+        if ($xHostNum = count($xHost)) {
+            $this->tlds[] = end($xHost);
+            array_pop($xHost);
 
-            foreach ($xHost as $key => $hostname) {
-                if (strlen($hostname) <= 3 AND $key >= 1 AND $hostname !== 'www') {
-                    $this->tlds[] = $hostname;
+            if(count($xHost) >= 2) {
+                $this->subDomains[] = $this->subDomain = reset($xHost);
+                array_shift($xHost);
+
+                if(count($xHost)) {
+                    if(strlen($tld = end($xHost)) <= 3) {
+                        array_unshift($this->tlds, $tld);
+                        array_pop($xHost);
+                    }
                 }
             }
 
-            if (empty($this->tlds)) {
-                $this->tlds[] = end($xHost);
+            if(count($xHost)) {
+                $this->host = implode('.',$xHost). '.' . implode('.', $this->tlds);
             }
 
             $this->tld = '.' . implode('.', $this->tlds);
-
-            $this->subDomains = array_diff($xHost, $this->tlds);
-            $this->subDomains = count($this->subDomains) == 0 ? $this->tlds : $this->subDomains;
-
-            $this->host = end($this->subDomains);
-            array_pop($this->subDomains);
-
-            $this->host = implode('.', array_slice($this->subDomains, 1)) . '.' . $this->host . $this->tld;
-            $this->host = ltrim($this->host, '.');
-
-            if (count($this->subDomains) > 0) {
-                $this->subDomain = reset($this->subDomains);
-            }
         }
 
-        $ordinalEnds = ['th', 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th'];
+        $xHost = explode('.', $this->host);
+        $xHostNum = count($xHost);
+        $tldsNum = count($this->tlds);
 
-        foreach ($this->subDomains as $key => $subdomain) {
-            $ordinalNumber = count($xHost) - $key;
-
-            if ((($ordinalNumber % 100) >= 11) && (($ordinalNumber % 100) <= 13)) {
-                $ordinalKey = $ordinalNumber . 'th';
-            } else {
-                $ordinalKey = $ordinalNumber . $ordinalEnds[ $ordinalNumber % 10 ];
-            }
-
-            $this->subDomains[ $ordinalKey ] = $subdomain;
-
-            unset($this->subDomains[ $key ]);
-        }
-
-        foreach ($this->tlds as $key => $tld) {
-            $ordinalNumber = count($this->tlds) - $key;
-
-            if ((($ordinalNumber % 100) >= 11) && (($ordinalNumber % 100) <= 13)) {
-                $ordinalKey = $ordinalNumber . 'th';
-            } else {
-                $ordinalKey = $ordinalNumber . $ordinalEnds[ $ordinalNumber % 10 ];
-            }
-
-            $this->tlds[ $ordinalKey ] = $tld;
-
-            unset($this->tlds[ $key ]);
-        }
+        // Convert Keys to Ordinal
+        $this->setOrdinalKeys($this->subDomains, ($tldsNum + $xHostNum) - 1);
+        $this->setOrdinalKeys($this->tlds, $tldsNum);
 
         if (function_exists('config')) {
             if (config()->offsetExists('uri')) {
                 $this->setSuffix(config('uri')->offsetGet('suffix'));
             }
+        }
+    }
+
+    // ------------------------------------------------------------------------
+
+    protected function setOrdinalKeys(&$elements, $startNumber = 0)
+    {
+        $ordinalEnds = ['th', 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th'];
+
+        foreach ($elements as $key => $subdomain) {
+            $ordinalNumber = $startNumber - intval($key);
+
+            if ((($ordinalNumber % 100) >= 11) && (($ordinalNumber % 100) <= 13)) {
+                $ordinalKey = $ordinalNumber . 'th';
+            } else {
+                $ordinalKey = $ordinalNumber . $ordinalEnds[ $ordinalNumber % 10 ];
+            }
+
+            $elements[ $ordinalKey ] = $subdomain;
+
+            unset($elements[ $key ]);
         }
     }
 
@@ -601,9 +594,11 @@ class Uri implements UriInterface
 
     // ------------------------------------------------------------------------
 
-    public function getSubDomain($level = '3rd')
+    public function getSubDomain($level = 'AUTO')
     {
-        if (isset($this->subDomains[ $level ])) {
+        if ($level === 'AUTO') {
+            return reset($this->subDomains);
+        } elseif (isset($this->subDomains[ $level ])) {
             return $this->subDomains[ $level ];
         }
 
@@ -612,6 +607,27 @@ class Uri implements UriInterface
 
     // ------------------------------------------------------------------------
 
+    public function addSubDomain($subDomain)
+    {
+        $uri = clone $this;
+
+        if (is_null($subDomain)) {
+            $uri->subDomain = null;
+            $uri->subDomains = [];
+        } elseif (is_string($subDomain)) {
+            $uri->subDomain = $subDomain;
+            array_unshift($uri->subDomains, $subDomain);
+        } elseif (is_array($subDomain)) {
+            $uri->subDomain = reset($subDomain);
+            $uri->subDomains = array_merge($uri->subDomains, $subDomain);
+        }
+
+        $uri->subDomains = array_unique($uri->subDomains);
+        $this->setOrdinalKeys($uri->subDomains, count($uri->subDomains) + 2);
+
+        return $uri;
+    }
+
     public function withSubDomain($subDomain)
     {
         $uri = clone $this;
@@ -619,10 +635,16 @@ class Uri implements UriInterface
         if (is_null($subDomain)) {
             $uri->subDomain = null;
             $uri->subDomains = [];
-        } else {
+        } elseif (is_string($subDomain)) {
             $uri->subDomain = $subDomain;
             $uri->subDomains = [$subDomain];
+        } elseif (is_array($subDomain)) {
+            $uri->subDomain = reset($subDomain);
+            $uri->subDomains = $subDomain;
         }
+
+        $uri->subDomains = array_unique($uri->subDomains);
+        $this->setOrdinalKeys($uri->subDomains, count($uri->subDomains) + 2);
 
         return $uri;
     }

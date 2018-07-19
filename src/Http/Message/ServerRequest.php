@@ -272,7 +272,9 @@ class ServerRequest extends Request implements ServerRequestInterface
     {
         $response = [];
         foreach ($this->uploadedFiles as $key => $uploadedFile) {
-            if (is_numeric(key($uploadedFile))) {
+            if (empty($uploadedFile[ 'name' ])) {
+                continue;
+            } elseif (is_numeric(key($uploadedFile))) {
                 foreach ($uploadedFile as $index => $file) {
                     $response[ $key ][ $index ] = new UploadFile($file);
                 }

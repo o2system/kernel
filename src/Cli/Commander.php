@@ -39,7 +39,7 @@ abstract class Commander extends AbstractCommander
     /**
      * Commander::setApp
      *
-     * @param \O2System\Framework\Cli\App $app
+     * @param \O2System\Kernel\Cli\App $app
      */
     public function setApp(App $app)
     {
