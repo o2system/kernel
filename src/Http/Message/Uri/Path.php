@@ -185,7 +185,7 @@ class Path
             foreach ($segments as $key => $segment) {
                 // Filter segments for security
                 if ($segment = trim($this->filterSegment($segment))) {
-                    if (false !== ($language = language()->packageExists($segment))) {
+                    if (false !== ($language = language()->registered($segment))) {
                         language()->setDefault($segment);
 
                         continue;

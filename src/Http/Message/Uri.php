@@ -1005,7 +1005,7 @@ class Uri implements UriInterface
         $uriString .= str_replace('//', '/', $uriPath);
         $uriString .= empty($this->query)
             ? ''
-            : '/?' . $this->query;
+            : '?' . $this->query;
         $uriString .= empty($this->fragment)
             ? ''
             : $this->fragment;

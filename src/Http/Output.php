@@ -125,10 +125,10 @@ class Output extends Message\Response
             if (function_exists('parser')) {
                 if (o2system()->hasService('presenter')) {
                     presenter()->initialize();
-                }
 
-                $vars = presenter()->getArrayCopy();
-                extract($vars);
+                    $vars = presenter()->getArrayCopy();
+                    extract($vars);
+                }
 
                 $errorFile = str_replace(PATH_ROOT, DIRECTORY_SEPARATOR, parser()->getSourceFilePath());
                 $error = new ErrorException($errorMessage, $errorSeverity, $errorFile, $errorLine, $errorContext);
@@ -195,10 +195,10 @@ class Output extends Message\Response
                     if(presenter()->theme->use) {
                         presenter()->theme->load();
                     }
-                }
 
-                $vars = presenter()->getArrayCopy();
-                extract($vars);
+                    $vars = presenter()->getArrayCopy();
+                    extract($vars);
+                }
             }
 
             $filePath = $this->getFilePath('error');
@@ -479,10 +479,10 @@ class Output extends Message\Response
                     if(presenter()->theme->use) {
                         presenter()->theme->load();
                     }
-                }
 
-                $vars = presenter()->getArrayCopy();
-                extract($vars);
+                    $vars = presenter()->getArrayCopy();
+                    extract($vars);
+                }
             }
 
             ob_start();
@@ -512,10 +512,10 @@ class Output extends Message\Response
                     if(presenter()->theme->use) {
                         presenter()->theme->load();
                     }
-                }
 
-                $vars = presenter()->getArrayCopy();
-                extract($vars);
+                    $vars = presenter()->getArrayCopy();
+                    extract($vars);
+                }
             }
 
             ob_start();
@@ -577,10 +577,10 @@ class Output extends Message\Response
                 if(presenter()->theme->use) {
                     presenter()->theme->load();
                 }
-            }
 
-            $vars = presenter()->getArrayCopy();
-            extract($vars);
+                $vars = presenter()->getArrayCopy();
+                extract($vars);
+            }
         }
 
         extract($error);
@@ -602,7 +602,13 @@ class Output extends Message\Response
 
     public function getFilePath($filename)
     {
-        foreach (array_reverse($this->filePaths) as $filePath) {
+        $filePaths = array_reverse($this->filePaths);
+
+        if(class_exists('O2System\Framework')) {
+            $filePaths = modules()->getDirs('Views');
+        }
+
+        foreach ($filePaths as $filePath) {
             if (is_file($filePath . $filename . '.phtml')) {
                 return $filePath . $filename . '.phtml';
                 break;

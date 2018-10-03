@@ -30,13 +30,6 @@ class Language implements \IteratorAggregate
     use FilePathCollectorTrait;
 
     /**
-     * Language Packages
-     *
-     * @var array
-     */
-    protected $packages = [];
-
-    /**
      * Active Locale
      *
      * @type string
@@ -91,6 +84,19 @@ class Language implements \IteratorAggregate
             $this->setDefaultIdeom($ideom);
         } elseif (count($xDefault) == 1) {
             $this->setDefaultLocale(reset($xDefault));
+        }
+
+        if(class_exists('O2System\Framework', false)) {
+            if(kernel()->hasService('session')) {
+                session()->set('language', $this->getDefault());
+            }
+
+            if(count($this->isLoaded)) {
+                foreach($this->isLoaded as $fileIndex => $filePath) {
+                    unset($this->isLoaded[$fileIndex]);
+                    $this->loadFile($fileIndex);
+                }
+            }
         }
 
         return $this;
@@ -216,7 +222,9 @@ class Language implements \IteratorAggregate
         $lines = parse_ini_file($filePath, true, INI_SCANNER_RAW);
 
         if ( ! empty($lines)) {
-            $this->isLoaded[ pathinfo($filePath, PATHINFO_FILENAME) ] = $filePath;
+            $fileIndex = pathinfo($filePath, PATHINFO_FILENAME);
+            $fileIndex = str_replace('_' . $this->getDefault(), '', $fileIndex);
+            $this->isLoaded[ $fileIndex ] = $filePath;
 
             $this->lines = array_merge($this->lines, $lines);
         }
@@ -248,13 +256,6 @@ class Language implements \IteratorAggregate
         }
 
         return str_replace(['PHP_EOL', 'PHP_EOL '], PHP_EOL, $lineContent);
-    }
-
-    // ------------------------------------------------------------------------
-
-    public function isExists($localeIdeom)
-    {
-        return false;
     }
 
     // ------------------------------------------------------------------------
