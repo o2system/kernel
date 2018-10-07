@@ -127,7 +127,7 @@ class Controller extends SplClassInfo
 
     public function getParameter()
     {
-        return strtolower(get_class_name($this->name));
+        return dash(get_class_name($this->name));
     }
 
     public function getRequestMethod()
