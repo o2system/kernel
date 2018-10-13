@@ -605,7 +605,9 @@ class Output extends Message\Response
         $filePaths = array_reverse($this->filePaths);
 
         if(class_exists('O2System\Framework')) {
-            $filePaths = modules()->getDirs('Views');
+            if(function_exists('modules')) {
+                $filePaths = modules()->getDirs('Views');
+            }
         }
 
         foreach ($filePaths as $filePath) {

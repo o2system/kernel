@@ -80,7 +80,7 @@ if ( ! function_exists('set_cookie')) {
             $value,
             $expire,
             $path,
-            $domain,
+            '.' . ltrim($domain, '.'),
             $secure,
             $httponly
         );
