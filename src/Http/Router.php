@@ -22,6 +22,13 @@ namespace O2System\Kernel\Http;
 class Router
 {
     /**
+     * Router::$uri
+     *
+     * @var Router\Uri
+     */
+    protected $uri;
+    
+    /**
      * Router::$addresses
      *
      * @var Router\Addresses
@@ -29,6 +36,11 @@ class Router
     protected $addresses;
 
     // ------------------------------------------------------------------------
+    
+    public function getUri()
+    {
+        return $this->uri;
+    }
 
     public function setAddresses(Router\Addresses $addresses)
     {
@@ -36,16 +48,41 @@ class Router
 
         return $this;
     }
+    
+    public function getAddresses()
+    {
+        return $this->addresses;
+    }
 
     // ------------------------------------------------------------------------
 
     public function parseRequest(Message\Uri $uri = null)
     {
-        $uri = is_null($uri) ? server_request()->getUri() : $uri;
-        $uriSegments = $uri->getSegments()->getParts();
-        $uriString = $uri->getSegments()->getString();
+        $this->uri = is_null($uri) ? server_request()->getUri() : $uri;
+        $uriSegments = $this->uri->getSegments()->getParts();
+        $uriString = $this->uri->getSegments()->getString();
 
-        if (empty($uriSegments)) {
+        $this->uri = is_null($uri) ? new Kernel\Http\Message\Uri() : $uri;
+        $uriSegments = $this->uri->getSegments()->getParts();
+        $uriString = $this->uri->getSegments()->getString();
+
+        if($this->uri->getSegments()->getTotalParts()) {
+            if(strpos(end($uriSegments), '.json') !== false) {
+                output()->setContentType('application/json');
+                $endSegment = str_replace('.json', '', end($uriSegments));
+                array_pop($uriSegments);
+                array_push($uriSegments, $endSegment);
+                $this->uri = $this->uri->withSegments(new Kernel\Http\Message\Uri\Segments($uriSegments));
+                $uriString = $this->uri->getSegments()->getString();
+            } elseif(strpos(end($uriSegments), '.xml') !== false) {
+                output()->setContentType('application/xml');
+                $endSegment = str_replace('.xml', '', end($uriSegments));
+                array_pop($uriSegments);
+                array_push($uriSegments, $endSegment);
+                $this->uri = $this->uri->withSegments(new Kernel\Http\Message\Uri\Segments($uriSegments));
+                $uriString = $this->uri->getSegments()->getString();
+            }
+        } else {
             $uriPath = urldecode(
                 parse_url($_SERVER[ 'REQUEST_URI' ], PHP_URL_PATH)
             );
@@ -56,6 +93,9 @@ class Router
             if ($uriPath !== '/') {
                 $uriString = $uriPath;
                 $uriSegments = array_filter(explode('/', $uriString));
+
+                $this->uri = $this->uri->withSegments(new Kernel\Http\Message\Uri\Segments($uriSegments));
+                $uriString = $this->uri->getSegments()->getString();
             }
         }
 
@@ -64,12 +104,14 @@ class Router
             if (null !== ($domain = $this->addresses->getDomain())) {
                 if (is_array($domain)) {
                     $uriSegments = array_merge($domain, $uriSegments);
-                    $uriString = implode('/', array_map('dash', $uriSegments));
+                    $this->uri = $this->uri->withSegments(new Kernel\Http\Message\Uri\Segments($uriSegments));
+                    $uriString = $this->uri->getSegments()->getString();
                 }
-            } elseif (false !== ($subdomain = $uri->getSubdomain())) {
+            } elseif (false !== ($subdomain = $this->uri->getSubdomain())) {
                 if (is_array($subdomain)) {
                     $uriSegments = array_merge($subdomain, $uriSegments);
-                    $uriString = implode('/', array_map('dash', $uriSegments));
+                    $this->uri = $this->uri->withSegments(new Kernel\Http\Message\Uri\Segments($uriSegments));
+                    $uriString = $this->uri->getSegments()->getString();
                 }
             }
         }
@@ -84,6 +126,9 @@ class Router
                 } else {
                     $uriSegments = [];
                 }
+
+                $this->uri = $this->uri->withSegments(new Kernel\Http\Message\Uri\Segments($uriSegments));
+                $uriString = $this->uri->getSegments()->getString();
 
                 $this->parseAction($action, $uriSegments);
             }
@@ -117,7 +162,7 @@ class Router
             $uri = (new Message\Uri())
                 ->withSegments(new Message\Uri\Segments(''))
                 ->withQuery('');
-            $this->parseRequest($uri->addSegments($closure));
+            $this->parseRequest($this->uri->addSegments($closure));
         } else {
             if (class_exists($closure)) {
                 $this->setController(
@@ -224,6 +269,6 @@ class Router
         }
 
         // Set Controller
-        kernel()->addService($controller, 'controller');
+        services()->add($controller, 'controller');
     }
 }

@@ -86,10 +86,10 @@ class Output extends Message\Response
 
         if (is_array($lastError)) {
             $this->errorHandler(
-                $lastError[ 'type' ],
-                $lastError[ 'message' ],
-                $lastError[ 'file' ],
-                $lastError[ 'line' ]
+                $lastError['type'],
+                $lastError['message'],
+                $lastError['file'],
+                $lastError['line']
             );
         }
 
@@ -103,13 +103,13 @@ class Output extends Message\Response
      *
      * Kernel defined error handler function.
      *
-     * @param int    $errorSeverity The first parameter, errno, contains the level of the error raised, as an integer.
-     * @param string $errorMessage  The second parameter, errstr, contains the error message, as a string.
-     * @param string $errorFile     The third parameter is optional, errfile, which contains the filename that the error
+     * @param int $errorSeverity The first parameter, errno, contains the level of the error raised, as an integer.
+     * @param string $errorMessage The second parameter, errstr, contains the error message, as a string.
+     * @param string $errorFile The third parameter is optional, errfile, which contains the filename that the error
      *                              was raised in, as a string.
-     * @param string $errorLine     The fourth parameter is optional, errline, which contains the line number the error
+     * @param string $errorLine The fourth parameter is optional, errline, which contains the line number the error
      *                              was raised at, as an integer.
-     * @param array  $errorContext  The fifth parameter is optional, errcontext, which is an array that points to the
+     * @param array $errorContext The fifth parameter is optional, errcontext, which is an array that points to the
      *                              active symbol table at the point the error occurred. In other words, errcontext will
      *                              contain an array of every variable that existed in the scope the error was triggered
      *                              in. User error handler must not modify error context.
@@ -123,7 +123,7 @@ class Output extends Message\Response
 
         if (strpos($errorFile, 'parser') !== false) {
             if (function_exists('parser')) {
-                if (o2system()->hasService('presenter')) {
+                if (services()->has('presenter')) {
                     presenter()->initialize();
 
                     $vars = presenter()->getArrayCopy();
@@ -189,10 +189,10 @@ class Output extends Message\Response
             }
 
             if (class_exists('O2System\Framework')) {
-                if (o2system()->hasService('presenter')) {
+                if (services()->has('presenter')) {
                     presenter()->initialize();
 
-                    if(presenter()->theme->use) {
+                    if (presenter()->theme->use) {
                         presenter()->theme->load();
                     }
 
@@ -209,7 +209,7 @@ class Output extends Message\Response
             ob_end_clean();
 
             if (class_exists('O2System\Framework')) {
-                if (o2system()->hasService('presenter')) {
+                if (services()->has('presenter')) {
                     $htmlOutput = presenter()->assets->parseSourceCode($htmlOutput);
                 }
             }
@@ -240,8 +240,8 @@ class Output extends Message\Response
         if (strpos($mimeType, '/') === false) {
             $extension = ltrim($mimeType, '.');
             // Is this extension supported?
-            if (isset($mimes[ $extension ])) {
-                $mimeType =& $mimes[ $extension ];
+            if (isset($mimes[$extension])) {
+                $mimeType =& $mimes[$extension];
                 if (is_array($mimeType)) {
                     $mimeType = current($mimeType);
                 }
@@ -263,7 +263,7 @@ class Output extends Message\Response
 
     public function addHeader($name, $value)
     {
-        $this->headers[ $name ] = $value;
+        $this->headers[$name] = $value;
 
         return $this;
     }
@@ -282,109 +282,135 @@ class Output extends Message\Response
         $reasonPhrase = $this->reasonPhrase;
 
         if (is_ajax()) {
-            $contentType = isset($_SERVER[ 'HTTP_X_REQUESTED_CONTENT_TYPE' ]) ? $_SERVER[ 'HTTP_X_REQUESTED_CONTENT_TYPE' ] : 'application/json';
+            $contentType = isset($_SERVER['HTTP_X_REQUESTED_CONTENT_TYPE']) ? $_SERVER['HTTP_X_REQUESTED_CONTENT_TYPE'] : 'application/json';
             $this->setContentType($contentType);
         }
 
         $this->sendHeaders($headers);
 
         $response = [
-            'status'  => (int)$statusCode,
-            'reason'  => $reasonPhrase,
+            'status' => (int)$statusCode,
+            'reason' => $reasonPhrase,
             'success' => $statusCode >= 200 && $statusCode < 300 ? true : false,
-            'message' => isset($data[ 'message' ]) ? $data[ 'message' ] : '',
-            'result'  => [],
+            'message' => isset($data['message']) ? $data['message'] : '',
+            'result' => [],
         ];
 
-        if (is_array($data) or is_object($data)) {
+        if ($data instanceof \ArrayIterator) {
+            $data = $data->getArrayCopy();
+        }
 
-            if (array_key_exists('success', $data)) {
-                $response[ 'success' ] = $data[ 'success' ];
-                unset($data[ 'success' ]);
-            }
-
-            if (array_key_exists('message', $data)) {
-                $response[ 'message' ] = $data[ 'message' ];
-                unset($data[ 'message' ]);
-            }
-
-            if (array_key_exists('timestamp', $data)) {
-                $response[ 'timestamp' ] = $data[ 'timestamp' ];
-                unset($data[ 'timestamp' ]);
-            }
-
-            if (array_key_exists('metadata', $data)) {
-                $response[ 'metadata' ] = $data[ 'metadata' ];
-                unset($data[ 'metadata' ]);
-            }
-
-            if (array_key_exists('data', $data)) {
-                $data = $data[ 'data' ];
-            }
-
-            if (array_key_exists('errors', $data)) {
-                $response[ 'errors' ] = $data[ 'errors' ];
-            }
-
-            if (is_array($data)) {
-                if (is_numeric(key($data))) {
-                    $response[ 'result' ] = $data;
-                } elseif (is_string(key($data))) {
-                    $response[ 'result' ] = [$data];
-                } elseif (count($data)) {
-                    $response[ 'result' ] = $data;
-                }
-            } elseif (is_object($data)) {
-                $response[ 'result' ] = [$data];
-            }
-
-            if ($this->mimeType === 'application/json') {
-                echo json_encode($response, JSON_PRETTY_PRINT);
-            } elseif ($this->mimeType === 'application/xml') {
-                $xml = new \SimpleXMLElement('<response/>');
-
-                $result = $response[ 'result' ];
-                unset($response[ 'result' ]);
-
-                foreach ($response as $item => $value) {
-                    $xml->addAttribute($item, $value);
+        if (is_array($data) and count($data)) {
+            if (is_numeric(key($data))) {
+                $response['result'] = $data;
+            } elseif (is_string(key($data))) {
+                if (array_key_exists('success', $data)) {
+                    $response['success'] = $data['success'];
+                    unset($data['success']);
                 }
 
-                function array_to_xml($data, \SimpleXMLElement &$xml)
-                {
-                    foreach ($data as $key => $value) {
-                        if (is_numeric($key)) {
-                            $key = 'item' . $key; //dealing with <0/>..<n/> issues
+                if (array_key_exists('message', $data)) {
+                    $response['message'] = $data['message'];
+                    unset($data['message']);
+                }
+
+                if (array_key_exists('timestamp', $data)) {
+                    $response['timestamp'] = $data['timestamp'];
+                    unset($data['timestamp']);
+                }
+
+                if (array_key_exists('metadata', $data)) {
+                    $response['metadata'] = $data['metadata'];
+                    unset($data['metadata']);
+                }
+
+                if (array_key_exists('errors', $data)) {
+                    $response['errors'] = $data['errors'];
+                }
+
+                if (array_key_exists('error', $data)) {
+                    $response['error'] = $data['error'];
+                }
+
+                if (array_key_exists('data', $data)) {
+                    if ($data['data'] instanceof \ArrayIterator) {
+                        $data['data'] = $data['data']->getArrayCopy();
+                    }
+
+                    if (is_array($data['data'])) {
+                        if (is_string(key($data['data']))) {
+                            $response['result'] = [$data['data']];
+                        } elseif (is_numeric(key($data['data']))) {
+                            $response['result'] = $data['data'];
                         }
-                        if (is_array($value)) {
-                            $subnode = $xml->addChild($key);
-                            array_to_xml($value, $subnode);
-                        } else {
-                            $xml->addChild("$key", htmlspecialchars("$value"));
-                        }
+                    } else {
+                        $response['result'] = [$data['data']];
                     }
                 }
+            }
+        }
 
-                array_to_xml($result, $xml);
-
-                echo $xml->asXML();
-            } else {
-                echo json_encode($response, JSON_PRETTY_PRINT);
+        if (is_object($data)) {
+            if (isset($data->success)) {
+                $response['success'] = $data->success;
+                unset($data->success);
             }
 
-        } elseif ($this->mimeType === 'application/json') {
-            if ( ! empty($data)) {
-                array_push($response[ 'result' ], $data);
+            if (isset($data->message)) {
+                $response['message'] = $data->message;
+                unset($data->message);
+            }
+
+            if (isset($data->timestamp)) {
+                $response['timestamp'] = $data->timestamp;
+                unset($data->timestamp);
+            }
+
+            if (isset($data->metadata)) {
+                $response['metadata'] = $data->metadata;
+                unset($data->metadata);
+            }
+
+            if (isset($data->errors)) {
+                $response['errors'] = $data->errors;
+                unset($data->errors);
+            }
+
+            if (isset($data->error)) {
+                $response['error'] = $data->error;
+                unset($data->error);
+            }
+
+            if (isset($data->data)) {
+                if ($data->data instanceof \ArrayIterator) {
+                    $data->data = $data->data->getArrayCopy();
+                }
+
+                if (is_array($data->data)) {
+                    if (is_string(key($data->data))) {
+                        $response['result'] = [$data->data];
+                    } elseif (is_numeric(key($data->data))) {
+                        $response['result'] = $data->data;
+                    }
+                } else {
+                    $response['result'] = [$data->data];
+                }
+            }
+        }
+
+        if ($this->mimeType === 'application/json') {
+            if (!empty($data)) {
+                array_push($response['result'], $data);
             }
 
             echo json_encode($response, JSON_PRETTY_PRINT);
         } elseif ($this->mimeType === 'application/xml') {
-            $xml = new \SimpleXMLElement('<response/>');
+            $xml = new \SimpleXMLElement('<?xml version="1.0"?><response></response>');
             $xml->addAttribute('status', $statusCode);
             $xml->addAttribute('reason', $reasonPhrase);
 
-            if ( ! empty($data)) {
-                $xml->addChild('message', $data);
+            if (!empty($data)) {
+                $this->arrayToXml(['message' => $data], $xml);
             }
             echo $xml->asXML();
         } else {
@@ -394,13 +420,37 @@ class Output extends Message\Response
         exit(EXIT_SUCCESS);
     }
 
-    public function sendManifest(array $manifest)
+    public function sendPayload(array $data, $mimeType = null)
     {
-        $this->setContentType('application/json');
-        $this->sendHeaders();
+        $mimeType = isset($mimeType) ? $mimeType : $this->mimeType;
+        $this->setContentType($mimeType);
 
-        echo json_encode($manifest, JSON_PRETTY_PRINT);
+        if ($mimeType === 'application/json') {
+            $payload = json_encode($data, JSON_PRETTY_PRINT);
+        } elseif ($mimeType === 'application/xml') {
+            $xml = new \SimpleXMLElement('<?xml version="1.0"?><payload></payload>');
+            $this->arrayToXml($data, $xml);
+            $payload = $xml->asXML();
+        }
+
+        $this->sendHeaders();
+        echo $payload;
         exit(EXIT_SUCCESS);
+    }
+
+    protected function arrayToXml($data, \SimpleXMLElement &$xml)
+    {
+        foreach ($data as $key => $value) {
+            if (is_numeric($key)) {
+                $key = 'item' . $key; //dealing with <0/>..<n/> issues
+            }
+            if (is_array($value)) {
+                $subnode = $xml->addChild($key);
+                $this->arrayToXml($value, $subnode);
+            } else {
+                $xml->addChild("$key", htmlspecialchars("$value"));
+            }
+        }
     }
 
     protected function sendHeaders(array $headers = [])
@@ -411,8 +461,8 @@ class Output extends Message\Response
         foreach (headers_list() as $header) {
             $headerParts = explode(':', $header);
             $headerParts = array_map('trim', $headerParts);
-            $headers[ $headerParts[ 0 ] ] = $headerParts[ 1 ];
-            header_remove($header[ 0 ]);
+            $headers[$headerParts[0]] = $headerParts[1];
+            header_remove($header[0]);
         }
 
         if (count($headers)) {
@@ -473,10 +523,10 @@ class Output extends Message\Response
         } elseif ($exception instanceof AbstractException) {
 
             if (class_exists('O2System\Framework')) {
-                if (o2system()->hasService('presenter')) {
+                if (services()->has('presenter')) {
                     presenter()->initialize();
 
-                    if(presenter()->theme->use) {
+                    if (presenter()->theme->use) {
                         presenter()->theme->load();
                     }
 
@@ -491,7 +541,7 @@ class Output extends Message\Response
             ob_end_clean();
 
             if (class_exists('O2System\Framework')) {
-                if (o2system()->hasService('presenter')) {
+                if (services()->has('presenter')) {
                     $htmlOutput = presenter()->assets->parseSourceCode($htmlOutput);
                 }
             }
@@ -506,10 +556,10 @@ class Output extends Message\Response
             $trace = new Trace($exception->getTrace());
 
             if (class_exists('O2System\Framework')) {
-                if (o2system()->hasService('presenter')) {
+                if (services()->has('presenter')) {
                     presenter()->initialize();
 
-                    if(presenter()->theme->use) {
+                    if (presenter()->theme->use) {
                         presenter()->theme->load();
                     }
 
@@ -524,7 +574,7 @@ class Output extends Message\Response
             ob_end_clean();
 
             if (class_exists('O2System\Framework')) {
-                if (o2system()->hasService('presenter')) {
+                if (services()->has('presenter')) {
                     $htmlOutput = presenter()->assets->parseSourceCode($htmlOutput);
                 }
             }
@@ -537,32 +587,36 @@ class Output extends Message\Response
     /**
      * Browser::sendError
      *
-     * @param int               $code
+     * @param int $code
      * @param null|array|string $vars
-     * @param array             $headers
+     * @param array $headers
      */
     public function sendError($code = 204, $vars = null, $headers = [])
     {
         $languageKey = $code . '_' . error_code_string($code);
 
         $error = [
-            'code'    => $code,
-            'title'   => language()->getLine($languageKey . '_TITLE'),
+            'code' => $code,
+            'title' => language()->getLine($languageKey . '_TITLE'),
             'message' => language()->getLine($languageKey . '_MESSAGE'),
         ];
 
         $this->statusCode = $code;
-        $this->reasonPhrase = $error[ 'title' ];
+        $this->reasonPhrase = $error['title'];
 
         if (is_string($vars)) {
             $vars = ['message' => $vars];
-        } elseif (is_array($vars)) {
-            $vars[ 'message' ] = $error[ 'message' ];
+        } elseif (is_array($vars) and empty($vars['message'])) {
+            $vars['message'] = $error['message'];
+        }
+
+        if (isset($vars['message'])) {
+            $error['message'] = $vars['message'];
         }
 
         if (is_ajax() or $this->mimeType !== 'text/html') {
             $this->statusCode = $code;
-            $this->reasonPhrase = $error[ 'title' ];
+            $this->reasonPhrase = $error['title'];
             $this->send($vars);
 
             exit(EXIT_ERROR);
@@ -571,10 +625,10 @@ class Output extends Message\Response
         $this->sendHeaders($headers);
 
         if (class_exists('O2System\Framework')) {
-            if (o2system()->hasService('presenter')) {
+            if (services()->has('presenter')) {
                 presenter()->initialize();
 
-                if(presenter()->theme->use) {
+                if (presenter()->theme->use) {
                     presenter()->theme->load();
                 }
 
@@ -591,7 +645,7 @@ class Output extends Message\Response
         ob_end_clean();
 
         if (class_exists('O2System\Framework')) {
-            if (o2system()->hasService('presenter')) {
+            if (services()->has('presenter')) {
                 $htmlOutput = presenter()->assets->parseSourceCode($htmlOutput);
             }
         }
@@ -604,9 +658,11 @@ class Output extends Message\Response
     {
         $filePaths = array_reverse($this->filePaths);
 
-        if(class_exists('O2System\Framework')) {
-            if(function_exists('modules')) {
-                $filePaths = modules()->getDirs('Views');
+        if (class_exists('O2System\Framework')) {
+            if (function_exists('modules')) {
+                if (modules()) {
+                    $filePaths = modules()->getDirs('Views');
+                }
             }
         }
 

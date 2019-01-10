@@ -28,7 +28,7 @@ use O2System\Psr\NotFoundExceptionInterface;
  *
  * WITH TRAILING SLASH!
  */
-if ( ! defined('PATH_KERNEL')) {
+if (!defined('PATH_KERNEL')) {
     define('PATH_KERNEL', __DIR__ . DIRECTORY_SEPARATOR);
 }
 
@@ -39,14 +39,14 @@ require_once 'Helpers/Kernel.php';
  *
  * @package O2System
  */
-class Kernel extends Psr\Patterns\Creational\Singleton\AbstractSingleton implements ContainerInterface
+class Kernel extends Psr\Patterns\Creational\Singleton\AbstractSingleton
 {
     /**
      * Kernel Services
      *
-     * @var array
+     * @var Kernel\Containers\Services
      */
-    private $services = [];
+    public $services;
 
     // ------------------------------------------------------------------------
 
@@ -57,29 +57,26 @@ class Kernel extends Psr\Patterns\Creational\Singleton\AbstractSingleton impleme
     {
         parent::__construct();
 
-        $this->addService(new Gear\Profiler());
+        $this->services = new Kernel\Containers\Services();
 
-        $this->getService('profiler')->watch('INSTANTIATE_KERNEL_SERVICES');
-
-        foreach (['Language', 'Logger', 'Shutdown'] as $serviceClassName) {
-            if (class_exists('O2System\Framework', false)) {
-                if (class_exists('App\Kernel\Services\\' . $serviceClassName)) {
-                    $this->addService(new Kernel\Datastructures\Service('App\Kernel\Services\\' . $serviceClassName));
-                } elseif (class_exists('O2System\Framework\Services\\' . $serviceClassName)) {
-                    $this->addService(
-                        new Kernel\Datastructures\Service('O2System\Framework\Services\\' . $serviceClassName)
-                    );
-                } elseif (class_exists('O2System\Kernel\Services\\' . $serviceClassName)) {
-                    $this->addService(
-                        new Kernel\Datastructures\Service('O2System\Kernel\Services\\' . $serviceClassName)
-                    );
-                }
-            } elseif (class_exists('O2System\Kernel\Services\\' . $serviceClassName)) {
-                $this->addService(new Kernel\Datastructures\Service('O2System\Kernel\Services\\' . $serviceClassName));
-            }
+        if (isset($_ENV['DEBUG_STAGE']) and $_ENV['DEBUG_STAGE'] === 'DEVELOPER') {
+            $this->services->load(Gear\Profiler::class);
+            profiler()->watch('Starting Kernel Services');
         }
 
-        $this->getService('profiler')->watch('INSTANTIATE_KERNEL_I/O_SERVICE');
+        $services = [
+            'Services\Language' => 'language',
+            'Services\Logger' => 'logger',
+            'Services\Shutdown' => 'shutdown'
+        ];
+
+        foreach ($services as $className => $classOffset) {
+            $this->services->load($className, $classOffset);
+        }
+
+        if (profiler() !== false) {
+            profiler()->watch('Starting Kernel I/O Service');
+        }
 
         if (is_cli()) {
             $this->cliIO();
@@ -91,163 +88,69 @@ class Kernel extends Psr\Patterns\Creational\Singleton\AbstractSingleton impleme
     // ------------------------------------------------------------------------
 
     /**
-     * Kernel::addService
-     *
-     * @param object|string $service
-     * @param string|null   $offset
-     */
-    public function addService($service, $offset = null)
-    {
-        if (is_object($service)) {
-            if ( ! $service instanceof Kernel\Datastructures\Service) {
-                $service = new Kernel\Datastructures\Service($service);
-            }
-        } elseif (is_string($service)) {
-            if (strpos($service, 'O2System\Framework\\') !== false) {
-                $serviceExtends = str_replace('O2System\Framework\\', 'App\\', $service);
-
-                if (class_exists($serviceExtends)) {
-                    $service = $serviceExtends;
-                }
-            }
-
-            if (class_exists($service)) {
-                $service = new Kernel\Datastructures\Service($service);
-            }
-        }
-
-        if ($service instanceof Kernel\Datastructures\Service) {
-            $offset = isset($offset)
-                ? $offset
-                : $service->getClassParameter();
-            $this->services[ $offset ] = $service;
-        }
-    }
-
-    // ------------------------------------------------------------------------
-
-    /**
-     * Kernel::getService
-     *
-     * @param string $offset
-     * @param bool   $getInstance
-     *
-     * @return mixed
-     */
-    public function &getService($offset, $getInstance = true)
-    {
-        $getService[ $offset ] = false;
-
-        if ($this->hasService($offset)) {
-            if ($getInstance === true) {
-                return $this->services[ $offset ]->getInstance();
-            }
-
-            return $this->services[ $offset ];
-        }
-
-        return $getService[ $offset ];
-    }
-
-    // ------------------------------------------------------------------------
-
-    /**
-     * Kernel::hasService
-     *
-     * @param $offset
-     *
-     * @return bool
-     */
-    public function hasService($offset)
-    {
-        return (bool)array_key_exists($offset, $this->services);
-    }
-
-    // ------------------------------------------------------------------------
-
-    /**
      * Kernel::cliIO
-     *
      */
     private function cliIO()
     {
-        // Instantiate Kernel Cli Input
-        $this->addService(new Kernel\Cli\Input());
+        $services = [
+            'Cli\Input' => 'input',
+            'Cli\Output' => 'output'
+        ];
 
-        // Instantiate Kernel Cli Browser
-        $this->addService(new Kernel\Cli\Output());
+        foreach ($services as $className => $classOffset) {
+            $this->services->load($className, $classOffset);
+        }
     }
 
     // ------------------------------------------------------------------------
 
     /**
      * Kernel::httpIO
-     *
      */
     private function httpIO()
     {
-        // Instantiate Kernel Http Input
-        $this->addService(new Kernel\Http\Input());
+        $services = [
+            'Http\Message\ServerRequest' => 'serverRequest',
+            'Http\Input' => 'input',
+            'Http\Output' => 'output'
+        ];
 
-        // Instantiate Kernel Http Browser
-        $this->addService(new Kernel\Http\Output());
-    }
-
-    // ------------------------------------------------------------------------
-
-    /**
-     * Kernel::loadService
-     *
-     * @param string      $service
-     * @param string|null $offset
-     */
-    public function loadService($service, $offset = null)
-    {
-        if (class_exists($service)) {
-            $service = new Kernel\Datastructures\Service($service);
-            $offset = isset($offset)
-                ? $offset
-                : $service->getClassParameter();
-            $this->services[ $offset ] = $service;
+        foreach ($services as $className => $classOffset) {
+            $this->services->load($className, $classOffset);
         }
     }
 
-    // ------------------------------------------------------------------------
-
     /**
-     * Finds an entry of the container by its identifier and returns it.
+     * Framework::__isset
      *
-     * @param string $id Identifier of the entry to look for.
-     *
-     * @throws NotFoundExceptionInterface  No entry was found for **this** identifier.
-     * @throws ContainerExceptionInterface Error while retrieving the entry.
-     *
-     * @return mixed Entry.
-     */
-    public function get($id)
-    {
-        if ($this->has($id)) {
-            return $this->getService($id);
-        }
-
-        // @todo throw exception
-    }
-
-    // ------------------------------------------------------------------------
-
-    /**
-     * Returns true if the container can return an entry for the given identifier.
-     * Returns false otherwise.
-     *
-     * `has($id)` returning true does not mean that `get($id)` will not throw an exception.
-     * It does however mean that `get($id)` will not throw a `NotFoundExceptionInterface`.
-     *
-     * @param string $id Identifier of the entry to look for.
+     * @param $property
      *
      * @return bool
      */
-    public function has($id)
+    public function __isset($property)
     {
-        return (bool)$this->hasService($id);
+        return (bool)isset($this->{$property});
+    }
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * Framework::__get
+     *
+     * @param $property
+     *
+     * @return mixed
+     */
+    public function &__get($property)
+    {
+        $get[$property] = $property;
+
+        if (isset($this->{$property})) {
+            $get[$property] =& $this->{$property};
+        } elseif ($this->services->has($property)) {
+            $get[$property] = $this->services->get($property);
+        }
+
+        return $get[$property];
     }
 }

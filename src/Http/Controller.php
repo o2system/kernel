@@ -35,8 +35,8 @@ class Controller
     {
         $get[ $property ] = false;
 
-        if (kernel()->hasService($property)) {
-            return kernel()->getService($property);
+        if (services()->has($property)) {
+            $get[ $property ] = services()->get($property);
         }
 
         return $get[ $property ];

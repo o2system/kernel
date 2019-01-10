@@ -107,6 +107,4 @@ class Config extends SplArrayObject
 
         parent::offsetSet($offset, $value);
     }
-
-    // ------------------------------------------------------------------------
 }

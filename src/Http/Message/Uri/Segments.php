@@ -31,7 +31,7 @@ class Segments
     public function __construct($string = null)
     {
         if (is_null($string)) {
-            if (function_exists('config')) {
+            if (kernel()->services->has('config')) {
                 if (config()->offsetExists('uri')) {
                     $protocol = strtoupper(config('uri')->offsetGet('protocol'));
                 }
@@ -63,6 +63,8 @@ class Segments
         $string = trim(remove_invisible_characters($string, false), '/');
         $this->setParts(explode('/', $string));
     }
+
+    // ------------------------------------------------------------------------
 
     /**
      * Parse REQUEST_URI
@@ -295,7 +297,7 @@ class Segments
 
     public function __toString()
     {
-        if (empty($this->parts)) {
+        if (count($this->parts)) {
             return implode('/', $this->parts);
         }
 
@@ -333,7 +335,7 @@ class Segments
             throw new RuntimeException('E_URI_HAS_DISALLOWED_CHARACTERS', 105);
         }
 
-        $regex = ['$', '(', ')', '%28', '%29', 'index']; // Bad
+        $regex = ['$', '(', ')', '%28', '%29', 'index', '.php', '.phtml']; // Bad
         $replace = ['&#36;', '&#40;', '&#41;', '&#40;', '&#41;']; // Good
 
         if ( ! empty($config)) {

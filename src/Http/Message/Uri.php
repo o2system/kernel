@@ -290,7 +290,7 @@ class Uri implements UriInterface
         $this->setOrdinalKeys($this->subDomains, ($tldsNum + $xHostNum) - 1);
         $this->setOrdinalKeys($this->tlds, $tldsNum);
 
-        if (function_exists('config')) {
+        if (services()->has('config')) {
             if (config()->offsetExists('uri')) {
                 $this->setSuffix(config('uri')->offsetGet('suffix'));
             }

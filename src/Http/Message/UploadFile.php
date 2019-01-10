@@ -143,18 +143,13 @@ class UploadFile implements UploadedFileInterface
             throw new \RuntimeException('Uploaded File Has Been Moved');
         }
 
-        if ( ! is_dir(dirname($targetPath))) {
-            @mkdir(dirname($targetPath));
+        if ( ! is_writable(dirname($targetPath))) {
+            @mkdir(dirname($targetPath), 0777, true);
         }
 
-        $targetIsStream = strpos($targetPath, '://') > 0;
-        if ( ! $targetIsStream && ! is_writable(dirname($targetPath))) {
-            throw new \InvalidArgumentException('Target Path Is Invalid');
-        }
-
-        if ($targetIsStream) {
+        if (strpos($targetPath, '://') !== false) {
             if ( ! copy($this->tmpName, $targetPath)) {
-                throw new \RuntimeException(sprintf('Cant Move Uploaded File %1 to %2', $this->name, $targetPath));
+                throw new \RuntimeException(sprintf('Cant Move Uploaded File %1 to %2', $this->tmpName, $targetPath));
             }
 
             if ( ! unlink($this->tmpName)) {
@@ -166,7 +161,7 @@ class UploadFile implements UploadedFileInterface
             }
 
             if ( ! move_uploaded_file($this->tmpName, $targetPath)) {
-                throw new \RuntimeException(sprintf('Cant Move Uploaded File %1 to %2', $this->name, $targetPath));
+                throw new \RuntimeException(sprintf('Cant Move Uploaded File %1 to %2', $this->tmpName, $targetPath));
             }
         }
 

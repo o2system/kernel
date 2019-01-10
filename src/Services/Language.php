@@ -87,7 +87,7 @@ class Language implements \IteratorAggregate
         }
 
         if(class_exists('O2System\Framework', false)) {
-            if(kernel()->hasService('session')) {
+            if(services()->has('session')) {
                 session()->set('language', $this->getDefault());
             }
 
@@ -176,22 +176,25 @@ class Language implements \IteratorAggregate
         }
 
         foreach ($filename as $file) {
-            if (is_file($file)) {
-                $this->parseFile($file);
-            } else {
-                foreach ($this->filePaths as $filePath) {
-                    $filePaths = [
-                        $filePath . $default . DIRECTORY_SEPARATOR . $file . '.ini',
-                        $filePath . dash($file) . '_' . $default . '.ini',
-                        $filePath . dash($file) . '-' . $default . '.ini',
-                        $filePath . dash($file) . '.ini',
-                    ];
+            $file = dash($file);
+            if(! $this->isLoaded($file)) {
+                if (is_file($file)) {
+                    $this->parseFile($file);
+                } else {
+                    foreach ($this->filePaths as $filePath) {
+                        $filePaths = [
+                            $filePath . $default . DIRECTORY_SEPARATOR . $file . '.ini',
+                            $filePath . $file . '_' . $default . '.ini',
+                            $filePath . $file . '-' . $default . '.ini',
+                            $filePath . $file . '.ini',
+                        ];
 
-                    foreach ($filePaths as $filePath) {
-                        if (is_file($filePath) AND ! in_array($filePath, $this->isLoaded)) {
-                            $this->parseFile($filePath);
-                            break;
-                            break;
+                        foreach ($filePaths as $filePath) {
+                            if (is_file($filePath) AND ! in_array($filePath, $this->isLoaded)) {
+                                $this->parseFile($filePath);
+                                break;
+                                break;
+                            }
                         }
                     }
                 }
@@ -202,6 +205,14 @@ class Language implements \IteratorAggregate
     }
 
     // ------------------------------------------------------------------------
+
+    public function isLoaded($filePath)
+    {
+        $fileIndex = pathinfo($filePath, PATHINFO_FILENAME);
+        $fileIndex = str_replace('_' . $this->getDefault(), '', $fileIndex);
+
+        return array_key_exists($fileIndex, $this->isLoaded);
+    }
 
     public function getDefault()
     {

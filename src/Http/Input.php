@@ -319,13 +319,7 @@ class Input
      */
     final public function files($offset = null)
     {
-        static $serverRequest;
-
-        if (empty($serverRequest)) {
-            $serverRequest = new ServerRequest();
-        }
-
-        $uploadFiles = $serverRequest->getUploadedFiles();
+        $uploadFiles = server_request()->getUploadedFiles();
 
         if (isset($offset)) {
             if (isset($uploadFiles[ $offset ])) {
@@ -479,11 +473,22 @@ class Input
         return $this->filter(INPUT_SERVER, $offset, $filter);
     }
 
+    //--------------------------------------------------------------------
+
     public function userAgent()
     {
         return $this->server('HTTP_USER_AGENT');
     }
 
+    //--------------------------------------------------------------------
+
+    /**
+     * Input::submit
+     *
+     * Determines if the POST input is submit
+     *
+     * @return bool
+     */
     final public function submit()
     {
         return (bool)isset($_POST[ 'submit' ]);

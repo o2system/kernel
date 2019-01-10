@@ -138,13 +138,7 @@ class Request extends AbstractMessage implements
      */
     public function getServer()
     {
-        static $serverRequest;
-
-        if (empty($serverRequest)) {
-            $serverRequest = new ServerRequest();
-        }
-
-        return $serverRequest;
+        return server_request();
     }
 
     //--------------------------------------------------------------------

@@ -10,7 +10,7 @@
  */
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('kernel')) {
+if (!function_exists('kernel')) {
     /**
      * kernel
      *
@@ -30,7 +30,37 @@ if ( ! function_exists('kernel')) {
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('profiler')) {
+
+if (!function_exists('services')) {
+    /**
+     * services
+     *
+     * Convenient shortcut for O2System Framework Services container.
+     *
+     * @return mixed|\O2System\Kernel\Containers\Services
+     */
+    function services()
+    {
+        $args = func_get_args();
+
+        if (count($args)) {
+            if (kernel()->services->has($args[0])) {
+                if(isset($args[1]) and is_array($args[1])) {
+                    return kernel()->services->get($args[0], $args[1]);
+                }
+                return kernel()->services->get($args[0]);
+            }
+
+            return false;
+        }
+
+        return kernel()->services;
+    }
+}
+
+// ------------------------------------------------------------------------
+
+if (!function_exists('profiler')) {
     /**
      * profiler
      *
@@ -40,13 +70,13 @@ if ( ! function_exists('profiler')) {
      */
     function profiler()
     {
-        return kernel()->getService('profiler');
+        return services('profiler');
     }
 }
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('language')) {
+if (!function_exists('language')) {
     /**
      * language
      *
@@ -59,18 +89,22 @@ if ( ! function_exists('language')) {
         $args = func_get_args();
 
         if (count($args)) {
-            $language =& kernel()->getService('language');
+            if (services()->has('language')) {
+                $language =& kernel()->services->get('language');
 
-            return call_user_func_array([&$language, 'getLine'], $args);
+                return call_user_func_array([&$language, 'getLine'], $args);
+            }
+
+            return false;
         }
 
-        return kernel()->getService('language');
+        return services('language');
     }
 }
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('logger')) {
+if (!function_exists('logger')) {
     /**
      * logger
      *
@@ -83,18 +117,22 @@ if ( ! function_exists('logger')) {
         $args = func_get_args();
 
         if (count($args)) {
-            $logger =& kernel()->getService('logger');
+            if (services()->has('logger')) {
+                $logger =& services('logger');
 
-            return call_user_func_array([&$logger, 'log'], $args);
+                return call_user_func_array([&$logger, 'log'], $args);
+            }
+
+            return false;
         }
 
-        return kernel()->getService('logger');
+        return services('logger');
     }
 }
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('shutdown')) {
+if (!function_exists('shutdown')) {
     /**
      * shutdown
      *
@@ -104,13 +142,13 @@ if ( ! function_exists('shutdown')) {
      */
     function shutdown()
     {
-        return kernel()->getService('shutdown');
+        return services('shutdown');
     }
 }
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('input')) {
+if (!function_exists('input')) {
     /**
      * input
      *
@@ -120,13 +158,13 @@ if ( ! function_exists('input')) {
      */
     function input()
     {
-        return kernel()->getService('input');
+        return services('input');
     }
 }
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('output')) {
+if (!function_exists('output')) {
     /**
      * output
      *
@@ -136,13 +174,13 @@ if ( ! function_exists('output')) {
      */
     function output()
     {
-        return kernel()->getService('output');
+        return services('output');
     }
 }
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('server_request')) {
+if (!function_exists('server_request')) {
     /**
      * server_request
      *
@@ -152,13 +190,25 @@ if ( ! function_exists('server_request')) {
      */
     function server_request()
     {
-        return o2system()->getService('serverRequest');
+        if (function_exists('o2system')) {
+            if (!services()->has('serverRequest')) {
+                services()->load(new \O2System\Kernel\Http\Message\ServerRequest(), 'serverRequest');
+            }
+
+            return services('serverRequest');
+        } else {
+            if (!services()->has('serverRequest')) {
+                services()->load(new \O2System\Kernel\Http\Message\ServerRequest(), 'serverRequest');
+            }
+
+            return services('serverRequest');
+        }
     }
 }
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('globals')) {
+if (!function_exists('globals')) {
     /**
      * globals
      *
@@ -170,19 +220,27 @@ if ( ! function_exists('globals')) {
      */
     function globals($offset = null)
     {
-        if (isset($offset)) {
-            if (isset($GLOBALS[ $offset ])) {
-                return $GLOBALS[ $offset ];
+        $args = func_get_args();
+
+        if (count($args)) {
+            if (isset($args[0])) {
+                if (isset($GLOBALS[$args[0]])) {
+                    return $GLOBALS[$args[0]];
+                }
             }
+
+            return null;
         }
 
-        return kernel()->getService('globals');
+        return services('globals');
+
+
     }
 }
 
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('env')) {
+if (!function_exists('env')) {
     /**
      * env
      *
@@ -194,14 +252,18 @@ if ( ! function_exists('env')) {
      */
     function env($offset = null)
     {
-        if (isset($offset)) {
-            if (isset($_ENV[ $offset ])) {
-                return $_ENV[ $offset ];
+        $args = func_get_args();
+
+        if (count($args)) {
+            if (isset($args[0])) {
+                if (isset($_ENV[$args[0]])) {
+                    return $_ENV[$args[0]];
+                }
             }
+
+            return null;
         }
 
-        return kernel()->getService('environment');
+        return services('environment');
     }
 }
-
-// ------------------------------------------------------------------------
