@@ -232,9 +232,11 @@ if (!function_exists('globals')) {
             return null;
         }
 
+        if ( ! services()->has('globals')) {
+            services()->load(new \O2System\Kernel\Containers\Globals(), 'globals');
+        }
+
         return services('globals');
-
-
     }
 }
 
@@ -262,6 +264,10 @@ if (!function_exists('env')) {
             }
 
             return null;
+        }
+
+        if ( ! services()->has('environment')) {
+            services()->load(new \O2System\Kernel\Containers\Environment(), 'environment');
         }
 
         return services('environment');

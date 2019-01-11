@@ -475,9 +475,50 @@ class Input
 
     //--------------------------------------------------------------------
 
+    /**
+     * Input::userAgent
+     *
+     * @return string
+     */
     public function userAgent()
     {
         return $this->server('HTTP_USER_AGENT');
+    }
+
+    //--------------------------------------------------------------------
+
+    /**
+     * Input::bearerToken
+     *
+     * @return string
+     */
+    public function bearerToken()
+    {
+        $authorization = $this->server('HTTP_AUTHORIZATION');
+
+        if(preg_match('/(Bearer)/', $authorization)) {
+            return str_replace('Bearer ', '', $authorization);
+        }
+
+        return false;
+    }
+
+    //--------------------------------------------------------------------
+
+    /**
+     * Input::basicAuth
+     *
+     * @return string
+     */
+    public function basicAuth()
+    {
+        $authorization = $this->server('HTTP_AUTHORIZATION');
+
+        if(preg_match('/(Basic)/', $authorization)) {
+            return str_replace('Basic ', '', $authorization);
+        }
+
+        return false;
     }
 
     //--------------------------------------------------------------------
