@@ -506,6 +506,22 @@ class Input
     //--------------------------------------------------------------------
 
     /**
+     * Input::webToken
+     *
+     * @return string
+     */
+    public function webToken()
+    {
+        if($webToken = $this->server('HTTP_X_WEB_TOKEN')) {
+            return $webToken;
+        }
+
+        return false;
+    }
+
+    //--------------------------------------------------------------------
+
+    /**
      * Input::basicAuth
      *
      * @return string
