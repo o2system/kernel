@@ -1,3 +1,19 @@
+<div align="center" markdown="1">
+
+[![O2System Framework](http://o2system.id/assets/img/logo/logo-white-200px.png?logo)](http://o2system.id)
+</div>
+
+<div align="center" markdown="1">
+
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/o2system/kernel/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/o2system/kernel/?branch=master)
+[![Build Status](https://scrutinizer-ci.com/g/o2system/kernel/badges/build.png?b=master)](https://scrutinizer-ci.com/g/o2system/kernel/build-status/master)
+[![Latest Stable Version](https://poser.pugx.org/o2system/kernel/v/stable)](https://packagist.org/packages/o2system/kernel)
+[![Total Downloads](https://poser.pugx.org/o2system/kernel/downloads)](https://packagist.org/packages/o2system/kernel)
+[![License](https://poser.pugx.org/o2system/kernel/license)](https://packagist.org/packages/o2system/kernel)
+
+</div>
+
+
 # O2System Kernel
 O2System Kernel is a set of PHP classes that is the core of O2System Framework. It contains classes that are loaded at startup. It handles the start-up process as well as input/output requests from the client side whether they are browser requests or command line requests, translating them into router for the framework. It handles registries and services like modules, language, config, and etc. The kernel design pattern is based on Hybrid (or modular) kernels and the kernel bootstrap class it is based on Singleton Design Pattern and has a dependency on 3 major set of PHP classes: O2System\Spl (O2System Standard PHP Library), O2System\Psr (O2System PHP Standard Recommendations) and O2System\Gear (O2System PHP Debugger).
 
