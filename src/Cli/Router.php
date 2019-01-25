@@ -59,6 +59,7 @@ class Router
      * Parse server argv to determine requested commander.
      *
      * @return void
+     * @throws \ReflectionException
      */
     public function parseRequest()
     {
@@ -138,6 +139,8 @@ class Router
      * Parse and validate requested segments.
      *
      * @param array $segments
+     *
+     * @throws \ReflectionException
      */
     final private function parseSegments(array $segments)
     {
@@ -179,6 +182,8 @@ class Router
      *
      * @param \O2System\Kernel\Cli\Router\Datastructures\Commander $commander
      * @param array                                                $uriSegments
+     *
+     * @throws \ReflectionException
      */
     final protected function setCommander(Router\Datastructures\Commander $commander, array $uriSegments = [])
     {
@@ -247,13 +252,22 @@ class Router
      * @param array $segments
      *
      * @return bool
+     * @throws \ReflectionException
      */
     final private function validateSegmentsCommander(array $segments)
     {
         $numSegments = count($segments);
         $commanderRegistry = null;
         $uriSegments = [];
-        $commandersDirectories = modules()->getDirs('Commanders');
+
+        if(class_exists('O2System\Framework', false)) {
+            $commandersDirectories = modules()->getDirs('Commanders');
+        } else {
+            $commandersDirectories = [
+                PATH_APP . 'Commanders' . DIRECTORY_SEPARATOR,
+                PATH_REACTOR . 'Commanders' . DIRECTORY_SEPARATOR,
+            ];
+        }
 
         for ($i = 0; $i <= $numSegments; $i++) {
             $routedSegments = array_slice($segments, 0, ($numSegments - $i));
