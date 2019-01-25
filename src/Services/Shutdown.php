@@ -29,4 +29,9 @@ class Shutdown extends SplClosureContainer
             call_user_func($closure);
         }
     }
+    
+    public function register()
+    {
+        return call_user_func_array('register_shutdown_function', func_get_args());
+    }
 }

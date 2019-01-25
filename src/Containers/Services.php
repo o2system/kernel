@@ -47,6 +47,19 @@ class Services extends SplServiceContainer
                         break;
                     }
                 }
+            } elseif(class_exists('O2System\Reactor', false)) {
+                $className = str_replace(
+                    ['App\\','App\Kernel\\','O2System\Reactor\\','O2System\Kernel\\'],
+                    '',
+                    $service
+                );
+
+                foreach(['App\\','App\Kernel\\','O2System\Reactor\\','O2System\Kernel\\'] as $namespace) {
+                    if (class_exists($namespace . $className)) {
+                        $service = $namespace . $className;
+                        break;
+                    }
+                }
             }
 
             if (class_exists($service)) {

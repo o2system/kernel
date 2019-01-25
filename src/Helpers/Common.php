@@ -342,7 +342,12 @@ if ( ! function_exists('path_to_url')) {
         $base_url = str_replace(DIRECTORY_SEPARATOR, '/', $base_url);
         $base_url = trim($base_url, '/') . '/';
 
-        if (defined('PATH_PUBLIC')) {
+        if (defined('PATH_RESOURCES')) {
+            $path_url = str_replace(PATH_RESOURCES, '', $path);
+            if(strpos($path, 'resources') !== false) {
+                $path_url = 'resources/' . $path_url; 
+            }
+        } elseif (defined('PATH_PUBLIC')) {
             $path_url = str_replace(PATH_PUBLIC, '', $path);
         } else {
             $path_url = str_replace($base_dir, '', $path);

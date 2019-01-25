@@ -62,24 +62,20 @@ class Router
         $uriSegments = $this->uri->getSegments()->getParts();
         $uriString = $this->uri->getSegments()->getString();
 
-        $this->uri = is_null($uri) ? new Kernel\Http\Message\Uri() : $uri;
-        $uriSegments = $this->uri->getSegments()->getParts();
-        $uriString = $this->uri->getSegments()->getString();
-
         if($this->uri->getSegments()->getTotalParts()) {
             if(strpos(end($uriSegments), '.json') !== false) {
                 output()->setContentType('application/json');
                 $endSegment = str_replace('.json', '', end($uriSegments));
                 array_pop($uriSegments);
                 array_push($uriSegments, $endSegment);
-                $this->uri = $this->uri->withSegments(new Kernel\Http\Message\Uri\Segments($uriSegments));
+                $this->uri = $this->uri->withSegments(new Message\Uri\Segments($uriSegments));
                 $uriString = $this->uri->getSegments()->getString();
             } elseif(strpos(end($uriSegments), '.xml') !== false) {
                 output()->setContentType('application/xml');
                 $endSegment = str_replace('.xml', '', end($uriSegments));
                 array_pop($uriSegments);
                 array_push($uriSegments, $endSegment);
-                $this->uri = $this->uri->withSegments(new Kernel\Http\Message\Uri\Segments($uriSegments));
+                $this->uri = $this->uri->withSegments(new Message\Uri\Segments($uriSegments));
                 $uriString = $this->uri->getSegments()->getString();
             }
         } else {
@@ -94,7 +90,7 @@ class Router
                 $uriString = $uriPath;
                 $uriSegments = array_filter(explode('/', $uriString));
 
-                $this->uri = $this->uri->withSegments(new Kernel\Http\Message\Uri\Segments($uriSegments));
+                $this->uri = $this->uri->withSegments(new Message\Uri\Segments($uriSegments));
                 $uriString = $this->uri->getSegments()->getString();
             }
         }
@@ -104,13 +100,13 @@ class Router
             if (null !== ($domain = $this->addresses->getDomain())) {
                 if (is_array($domain)) {
                     $uriSegments = array_merge($domain, $uriSegments);
-                    $this->uri = $this->uri->withSegments(new Kernel\Http\Message\Uri\Segments($uriSegments));
+                    $this->uri = $this->uri->withSegments(new Message\Uri\Segments($uriSegments));
                     $uriString = $this->uri->getSegments()->getString();
                 }
             } elseif (false !== ($subdomain = $this->uri->getSubdomain())) {
                 if (is_array($subdomain)) {
                     $uriSegments = array_merge($subdomain, $uriSegments);
-                    $this->uri = $this->uri->withSegments(new Kernel\Http\Message\Uri\Segments($uriSegments));
+                    $this->uri = $this->uri->withSegments(new Message\Uri\Segments($uriSegments));
                     $uriString = $this->uri->getSegments()->getString();
                 }
             }
@@ -127,15 +123,15 @@ class Router
                     $uriSegments = [];
                 }
 
-                $this->uri = $this->uri->withSegments(new Kernel\Http\Message\Uri\Segments($uriSegments));
+                $this->uri = $this->uri->withSegments(new Message\Uri\Segments($uriSegments));
                 $uriString = $this->uri->getSegments()->getString();
 
                 $this->parseAction($action, $uriSegments);
             }
         }
 
-        // Whoops it seems there is no match
-        output()->sendError(404);
+        // Let's the app do the rest when there is no controller found
+        // the app should redirect to PAGE 404
     }
 
     // ------------------------------------------------------------------------

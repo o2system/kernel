@@ -22,6 +22,8 @@ if (!function_exists('kernel')) {
     {
         if (class_exists('O2System\Framework', false)) {
             return O2System\Framework::getInstance();
+        } else if (class_exists('O2System\Reactor', false)) {
+            return O2System\Reactor::getInstance();
         }
 
         return O2System\Kernel::getInstance();
@@ -203,73 +205,5 @@ if (!function_exists('server_request')) {
 
             return services('serverRequest');
         }
-    }
-}
-
-// ------------------------------------------------------------------------
-
-if (!function_exists('globals')) {
-    /**
-     * globals
-     *
-     * Convenient shortcut for O2System Kernel Globals container.
-     *
-     * @param string $offset
-     *
-     * @return O2System\Kernel\Containers\Globals
-     */
-    function globals($offset = null)
-    {
-        $args = func_get_args();
-
-        if (count($args)) {
-            if (isset($args[0])) {
-                if (isset($GLOBALS[$args[0]])) {
-                    return $GLOBALS[$args[0]];
-                }
-            }
-
-            return null;
-        }
-
-        if ( ! services()->has('globals')) {
-            services()->load(new \O2System\Kernel\Containers\Globals(), 'globals');
-        }
-
-        return services('globals');
-    }
-}
-
-// ------------------------------------------------------------------------
-
-if (!function_exists('env')) {
-    /**
-     * env
-     *
-     * Convenient shortcut for O2System Kernel Environment container.
-     *
-     * @param string $offset
-     *
-     * @return O2System\Kernel\Containers\Globals
-     */
-    function env($offset = null)
-    {
-        $args = func_get_args();
-
-        if (count($args)) {
-            if (isset($args[0])) {
-                if (isset($_ENV[$args[0]])) {
-                    return $_ENV[$args[0]];
-                }
-            }
-
-            return null;
-        }
-
-        if ( ! services()->has('environment')) {
-            services()->load(new \O2System\Kernel\Containers\Environment(), 'environment');
-        }
-
-        return services('environment');
     }
 }

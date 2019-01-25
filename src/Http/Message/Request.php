@@ -54,7 +54,11 @@ class Request extends AbstractMessage implements
 
     public function getClientIpAddress()
     {
-        return input()->ipAddress(config()->getItem('ipAddresses')->proxy);
+        if($ipAddresses = config()->getItem('ipAddresses')) {
+            return input()->ipAddress($ipAddresses->proxy);
+        }
+
+        return false;
     }
 
     // ------------------------------------------------------------------------

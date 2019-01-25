@@ -86,7 +86,7 @@ class Language implements \IteratorAggregate
             $this->setDefaultLocale(reset($xDefault));
         }
 
-        if(class_exists('O2System\Framework', false)) {
+        if(class_exists('O2System\Framework', false) or class_exists('\O2System\Reactor', false)) {
             if(services()->has('session')) {
                 session()->set('language', $this->getDefault());
             }
