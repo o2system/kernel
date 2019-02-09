@@ -1,6 +1,6 @@
 <?php
 /**
- * This file is part of the O2System PHP Framework package.
+ * This file is part of the O2System Framework package.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -141,6 +141,8 @@ abstract class AbstractCommander
         return $this;
     }
 
+    // ------------------------------------------------------------------------
+
     /**
      * AbstractCommander::addCommandOption
      *
@@ -163,6 +165,8 @@ abstract class AbstractCommander
             'description' => $optionDescription,
         ];
     }
+
+    // ------------------------------------------------------------------------
 
     /**
      * AbstractCommander::optionVersion
@@ -194,6 +198,7 @@ abstract class AbstractCommander
      * Default abstract commander execution to execute help option.
      *
      * @return void
+     * @throws \ReflectionException
      */
     public function execute()
     {
@@ -255,6 +260,7 @@ abstract class AbstractCommander
      * Option help method, write commander help.
      *
      * @return void
+     * @throws \ReflectionException
      */
     final public function optionHelp()
     {
@@ -346,6 +352,8 @@ abstract class AbstractCommander
      *
      * @param $namespace
      * @param $commandsPath
+     *
+     * @throws \ReflectionException
      */
     protected function loadActions()
     {
@@ -365,7 +373,7 @@ abstract class AbstractCommander
     // ------------------------------------------------------------------------
 
     /**
-     * App::addCommander
+     * AbstractCommander::addCommander
      *
      * Add new commander to the pool.
      *

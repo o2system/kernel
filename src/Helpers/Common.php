@@ -1,6 +1,6 @@
 <?php
 /**
- * This file is part of the O2System PHP Framework package.
+ * This file is part of the O2System Framework package.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -344,8 +344,8 @@ if ( ! function_exists('path_to_url')) {
 
         if (defined('PATH_RESOURCES')) {
             $path_url = str_replace(PATH_RESOURCES, '', $path);
-            if(strpos($path, 'resources') !== false) {
-                $path_url = 'resources/' . $path_url; 
+            if (strpos($path, 'resources') !== false) {
+                $path_url = 'resources/' . $path_url;
             }
         } elseif (defined('PATH_PUBLIC')) {
             $path_url = str_replace(PATH_PUBLIC, '', $path);

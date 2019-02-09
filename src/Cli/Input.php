@@ -1,6 +1,6 @@
 <?php
 /**
- * This file is part of the O2System PHP Framework package.
+ * This file is part of the O2System Framework package.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -15,7 +15,7 @@ namespace O2System\Kernel\Cli;
 
 // ------------------------------------------------------------------------
 
-use O2System\Spl\Datastructures\SplArrayObject;
+use O2System\Spl\DataStructures\SplArrayObject;
 
 /**
  * Class Input
@@ -65,7 +65,7 @@ class Input
      *                      If omitted, FILTER_DEFAULT will be used, which is equivalent to FILTER_UNSAFE_RAW.
      *                      This will result in no filtering taking place by default.
      *
-     * @return mixed|\O2System\Spl\Datastructures\SplArrayObject
+     * @return mixed|\O2System\Spl\DataStructures\SplArrayObject
      */
     protected function filter($type, $offset = null, $filter = FILTER_DEFAULT)
     {
@@ -244,6 +244,8 @@ class Input
         return $this->filter(INPUT_POST, $offset, $filter);
     }
 
+    // ------------------------------------------------------------------------
+
     /**
      * Input::argv
      *
@@ -318,6 +320,11 @@ class Input
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Input::standard
+     *
+     * @return string
+     */
     public function standard()
     {
         return trim(fgets(STDIN));
@@ -325,6 +332,11 @@ class Input
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Input::getApp
+     *
+     * @return bool
+     */
     public function getApp()
     {
         return isset($_SERVER[ 'argv' ][ 0 ])
@@ -334,6 +346,11 @@ class Input
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Input::getCommand
+     *
+     * @return bool
+     */
     public function getCommand()
     {
         return isset($_SERVER[ 'argv' ][ 1 ])
@@ -343,6 +360,14 @@ class Input
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Input::getOptions
+     *
+     * @param string|null $offset
+     * @param mixed $filter
+     *
+     * @return array|mixed
+     */
     public function getOptions($offset = null, $filter = null)
     {
         $arguments = $_SERVER[ 'argv' ];
@@ -485,6 +510,4 @@ class Input
     {
         return $this->filter(INPUT_REQUEST, $offset, $filter);
     }
-
-    //--------------------------------------------------------------------
 }

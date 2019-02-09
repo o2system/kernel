@@ -1,6 +1,6 @@
 <?php
 /**
- * This file is part of the O2System PHP Framework package.
+ * This file is part of the O2System Framework package.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -21,7 +21,7 @@ use O2System\Spl\Exceptions\ErrorException;
 use O2System\Spl\Traits\Collectors\FilePathCollectorTrait;
 
 /**
- * Class Browser
+ * Class Output
  *
  * @package O2System\Kernel\Http
  */
@@ -29,18 +29,24 @@ class Output extends Message\Response
 {
     use FilePathCollectorTrait;
 
+    /**
+     * Output::$mimeType
+     *
+     * @var string
+     */
     protected $mimeType = 'text/html';
 
+    /**
+     * Output::$charset
+     *
+     * @var string
+     */
     protected $charset = 'utf8';
 
     // ------------------------------------------------------------------------
 
     /**
-     * Browser::__construct
-     *
-     * Constructs the Kernel Browser.
-     *
-     * @return Output
+     * Output::__construct
      */
     public function __construct()
     {
@@ -60,25 +66,28 @@ class Output extends Message\Response
     // ------------------------------------------------------------------------
 
     /**
-     * Browser::register
+     * Output::register
      *
      * Register Kernel defined error, exception and shutdown handler.
      *
      * @return void
      */
-    public function register()
+    final private function register()
     {
         set_error_handler([&$this, 'errorHandler']);
         set_exception_handler([&$this, 'exceptionHandler']);
         register_shutdown_function([&$this, 'shutdownHandler']);
     }
 
+    // ------------------------------------------------------------------------
+
     /**
-     * Browser::shutdownHandler
+     * Output::shutdownHandler
      *
      * Kernel defined shutdown handler function.
      *
      * @return void
+     * @throws \O2System\Spl\Exceptions\ErrorException
      */
     public function shutdownHandler()
     {
@@ -86,30 +95,27 @@ class Output extends Message\Response
 
         if (is_array($lastError)) {
             $this->errorHandler(
-                $lastError['type'],
-                $lastError['message'],
-                $lastError['file'],
-                $lastError['line']
+                $lastError[ 'type' ],
+                $lastError[ 'message' ],
+                $lastError[ 'file' ],
+                $lastError[ 'line' ]
             );
         }
-
-        // Execute Kernel Shutdown Service
-        shutdown()->execute();
     }
     // --------------------------------------------------------------------
 
     /**
-     * Browser::errorHandler
+     * Output::errorHandler
      *
      * Kernel defined error handler function.
      *
-     * @param int $errorSeverity The first parameter, errno, contains the level of the error raised, as an integer.
-     * @param string $errorMessage The second parameter, errstr, contains the error message, as a string.
-     * @param string $errorFile The third parameter is optional, errfile, which contains the filename that the error
+     * @param int    $errorSeverity The first parameter, errno, contains the level of the error raised, as an integer.
+     * @param string $errorMessage  The second parameter, errstr, contains the error message, as a string.
+     * @param string $errorFile     The third parameter is optional, errfile, which contains the filename that the error
      *                              was raised in, as a string.
-     * @param string $errorLine The fourth parameter is optional, errline, which contains the line number the error
+     * @param string $errorLine     The fourth parameter is optional, errline, which contains the line number the error
      *                              was raised at, as an integer.
-     * @param array $errorContext The fifth parameter is optional, errcontext, which is an array that points to the
+     * @param array  $errorContext  The fifth parameter is optional, errcontext, which is an array that points to the
      *                              active symbol table at the point the error occurred. In other words, errcontext will
      *                              contain an array of every variable that existed in the scope the error was triggered
      *                              in. User error handler must not modify error context.
@@ -120,30 +126,6 @@ class Output extends Message\Response
     public function errorHandler($errorSeverity, $errorMessage, $errorFile, $errorLine, $errorContext = [])
     {
         $isFatalError = (((E_ERROR | E_COMPILE_ERROR | E_CORE_ERROR | E_USER_ERROR) & $errorSeverity) === $errorSeverity);
-
-        if (strpos($errorFile, 'parser') !== false) {
-            if (function_exists('parser')) {
-                if (services()->has('presenter')) {
-                    presenter()->initialize();
-
-                    $vars = presenter()->getArrayCopy();
-                    extract($vars);
-                }
-
-                $errorFile = str_replace(PATH_ROOT, DIRECTORY_SEPARATOR, parser()->getSourceFilePath());
-                $error = new ErrorException($errorMessage, $errorSeverity, $errorFile, $errorLine, $errorContext);
-
-                $filePath = $this->getFilePath('error');
-
-                ob_start();
-                include $filePath;
-                $htmlOutput = ob_get_contents();
-                ob_end_clean();
-
-                echo $htmlOutput;
-                return;
-            }
-        }
 
         // When the error is fatal the Kernel will throw it as an exception.
         if ($isFatalError) {
@@ -159,17 +141,19 @@ class Output extends Message\Response
         $error = new ErrorException($errorMessage, $errorSeverity, $errorFile, $errorLine, $errorContext);
 
         // Logged the error
-        logger()->error(
-            implode(
-                ' ',
-                [
-                    '[ ' . $error->getStringSeverity() . ' ] ',
-                    $error->getMessage(),
-                    $error->getFile() . ':' . $error->getLine(),
-                ]
-            )
-        );
-
+        if(services()->has('logger')) {
+            logger()->error(
+                implode(
+                    ' ',
+                    [
+                        '[ ' . $error->getStringSeverity() . ' ] ',
+                        $error->getMessage(),
+                        $error->getFile() . ':' . $error->getLine(),
+                    ]
+                )
+            );
+        }
+        
         // Should we display the error?
         if (str_ireplace(['off', 'none', 'no', 'false', 'null'], 0, ini_get('display_errors')) == 1) {
             if (is_ajax()) {
@@ -188,31 +172,12 @@ class Output extends Message\Response
                 exit(EXIT_ERROR);
             }
 
-            if (class_exists('O2System\Framework')) {
-                if (services()->has('presenter')) {
-                    presenter()->initialize();
-
-                    if (presenter()->theme->use) {
-                        presenter()->theme->load();
-                    }
-
-                    $vars = presenter()->getArrayCopy();
-                    extract($vars);
-                }
-            }
-
             $filePath = $this->getFilePath('error');
 
             ob_start();
             include $filePath;
             $htmlOutput = ob_get_contents();
             ob_end_clean();
-
-            if (class_exists('O2System\Framework')) {
-                if (services()->has('presenter')) {
-                    $htmlOutput = presenter()->assets->parseSourceCode($htmlOutput);
-                }
-            }
 
             echo $htmlOutput;
             exit(EXIT_ERROR);
@@ -222,7 +187,31 @@ class Output extends Message\Response
     // ------------------------------------------------------------------------
 
     /**
-     * Browser::setContentType
+     * Output::getFilePath
+     *
+     * @param string $filename
+     *
+     * @return string
+     */
+    public function getFilePath($filename)
+    {
+        $filePaths = array_reverse($this->filePaths);
+
+        foreach ($filePaths as $filePath) {
+            if (is_file($filePath . $filename . '.phtml')) {
+                return $filePath . $filename . '.phtml';
+                break;
+            } elseif (is_file($filePath . 'errors' . DIRECTORY_SEPARATOR . $filename . '.phtml')) {
+                return $filePath . 'errors' . DIRECTORY_SEPARATOR . $filename . '.phtml';
+                break;
+            }
+        }
+    }
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * Output::setContentType
      *
      * @param string $mimeType
      * @param string $charset
@@ -240,8 +229,8 @@ class Output extends Message\Response
         if (strpos($mimeType, '/') === false) {
             $extension = ltrim($mimeType, '.');
             // Is this extension supported?
-            if (isset($mimes[$extension])) {
-                $mimeType =& $mimes[$extension];
+            if (isset($mimes[ $extension ])) {
+                $mimeType =& $mimes[ $extension ];
                 if (is_array($mimeType)) {
                     $mimeType = current($mimeType);
                 }
@@ -261,9 +250,17 @@ class Output extends Message\Response
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Output::addHeader
+     *
+     * @param string $name
+     * @param string $value
+     *
+     * @return static
+     */
     public function addHeader($name, $value)
     {
-        $this->headers[$name] = $value;
+        $this->headers[ $name ] = $value;
 
         return $this;
     }
@@ -271,7 +268,7 @@ class Output extends Message\Response
     // ------------------------------------------------------------------------
 
     /**
-     * Browser::send
+     * Output::send
      *
      * @param       $data
      * @param array $headers
@@ -282,18 +279,18 @@ class Output extends Message\Response
         $reasonPhrase = $this->reasonPhrase;
 
         if (is_ajax()) {
-            $contentType = isset($_SERVER['HTTP_X_REQUESTED_CONTENT_TYPE']) ? $_SERVER['HTTP_X_REQUESTED_CONTENT_TYPE'] : 'application/json';
+            $contentType = isset($_SERVER[ 'HTTP_X_REQUESTED_CONTENT_TYPE' ]) ? $_SERVER[ 'HTTP_X_REQUESTED_CONTENT_TYPE' ] : 'application/json';
             $this->setContentType($contentType);
         }
 
         $this->sendHeaders($headers);
 
         $response = [
-            'status' => (int)$statusCode,
-            'reason' => $reasonPhrase,
+            'status'  => (int)$statusCode,
+            'reason'  => $reasonPhrase,
             'success' => $statusCode >= 200 && $statusCode < 300 ? true : false,
-            'message' => isset($data['message']) ? $data['message'] : '',
-            'result' => [],
+            'message' => isset($data[ 'message' ]) ? $data[ 'message' ] : '',
+            'result'  => [],
         ];
 
         if ($data instanceof \ArrayIterator) {
@@ -302,49 +299,49 @@ class Output extends Message\Response
 
         if (is_array($data) and count($data)) {
             if (is_numeric(key($data))) {
-                $response['result'] = $data;
+                $response[ 'result' ] = $data;
             } elseif (is_string(key($data))) {
                 if (array_key_exists('success', $data)) {
-                    $response['success'] = $data['success'];
-                    unset($data['success']);
+                    $response[ 'success' ] = $data[ 'success' ];
+                    unset($data[ 'success' ]);
                 }
 
                 if (array_key_exists('message', $data)) {
-                    $response['message'] = $data['message'];
-                    unset($data['message']);
+                    $response[ 'message' ] = $data[ 'message' ];
+                    unset($data[ 'message' ]);
                 }
 
                 if (array_key_exists('timestamp', $data)) {
-                    $response['timestamp'] = $data['timestamp'];
-                    unset($data['timestamp']);
+                    $response[ 'timestamp' ] = $data[ 'timestamp' ];
+                    unset($data[ 'timestamp' ]);
                 }
 
                 if (array_key_exists('metadata', $data)) {
-                    $response['metadata'] = $data['metadata'];
-                    unset($data['metadata']);
+                    $response[ 'metadata' ] = $data[ 'metadata' ];
+                    unset($data[ 'metadata' ]);
                 }
 
                 if (array_key_exists('errors', $data)) {
-                    $response['errors'] = $data['errors'];
+                    $response[ 'errors' ] = $data[ 'errors' ];
                 }
 
                 if (array_key_exists('error', $data)) {
-                    $response['error'] = $data['error'];
+                    $response[ 'error' ] = $data[ 'error' ];
                 }
 
                 if (array_key_exists('data', $data)) {
-                    if ($data['data'] instanceof \ArrayIterator) {
-                        $data['data'] = $data['data']->getArrayCopy();
+                    if ($data[ 'data' ] instanceof \ArrayIterator) {
+                        $data[ 'data' ] = $data[ 'data' ]->getArrayCopy();
                     }
 
-                    if (is_array($data['data'])) {
-                        if (is_string(key($data['data']))) {
-                            $response['result'] = [$data['data']];
-                        } elseif (is_numeric(key($data['data']))) {
-                            $response['result'] = $data['data'];
+                    if (is_array($data[ 'data' ])) {
+                        if (is_string(key($data[ 'data' ]))) {
+                            $response[ 'result' ] = [$data[ 'data' ]];
+                        } elseif (is_numeric(key($data[ 'data' ]))) {
+                            $response[ 'result' ] = $data[ 'data' ];
                         }
                     } else {
-                        $response['result'] = [$data['data']];
+                        $response[ 'result' ] = [$data[ 'data' ]];
                     }
                 }
             }
@@ -352,32 +349,32 @@ class Output extends Message\Response
 
         if (is_object($data)) {
             if (isset($data->success)) {
-                $response['success'] = $data->success;
+                $response[ 'success' ] = $data->success;
                 unset($data->success);
             }
 
             if (isset($data->message)) {
-                $response['message'] = $data->message;
+                $response[ 'message' ] = $data->message;
                 unset($data->message);
             }
 
             if (isset($data->timestamp)) {
-                $response['timestamp'] = $data->timestamp;
+                $response[ 'timestamp' ] = $data->timestamp;
                 unset($data->timestamp);
             }
 
             if (isset($data->metadata)) {
-                $response['metadata'] = $data->metadata;
+                $response[ 'metadata' ] = $data->metadata;
                 unset($data->metadata);
             }
 
             if (isset($data->errors)) {
-                $response['errors'] = $data->errors;
+                $response[ 'errors' ] = $data->errors;
                 unset($data->errors);
             }
 
             if (isset($data->error)) {
-                $response['error'] = $data->error;
+                $response[ 'error' ] = $data->error;
                 unset($data->error);
             }
 
@@ -388,19 +385,19 @@ class Output extends Message\Response
 
                 if (is_array($data->data)) {
                     if (is_string(key($data->data))) {
-                        $response['result'] = [$data->data];
+                        $response[ 'result' ] = [$data->data];
                     } elseif (is_numeric(key($data->data))) {
-                        $response['result'] = $data->data;
+                        $response[ 'result' ] = $data->data;
                     }
                 } else {
-                    $response['result'] = [$data->data];
+                    $response[ 'result' ] = [$data->data];
                 }
             }
         }
 
         if ($this->mimeType === 'application/json') {
-            if (!empty($data)) {
-                array_push($response['result'], $data);
+            if ( ! empty($data)) {
+                array_push($response[ 'result' ], $data);
             }
 
             echo json_encode($response, JSON_PRETTY_PRINT);
@@ -409,47 +406,12 @@ class Output extends Message\Response
             $xml->addAttribute('status', $statusCode);
             $xml->addAttribute('reason', $reasonPhrase);
 
-            if (!empty($data)) {
+            if ( ! empty($data)) {
                 $this->arrayToXml(['message' => $data], $xml);
             }
             echo $xml->asXML();
         } else {
             echo $data;
-        }
-
-        exit(EXIT_SUCCESS);
-    }
-
-    public function sendPayload(array $data, $mimeType = null)
-    {
-        $mimeType = isset($mimeType) ? $mimeType : $this->mimeType;
-        $this->setContentType($mimeType);
-
-        if ($mimeType === 'application/json') {
-            $payload = json_encode($data, JSON_PRETTY_PRINT);
-        } elseif ($mimeType === 'application/xml') {
-            $xml = new \SimpleXMLElement('<?xml version="1.0"?><payload></payload>');
-            $this->arrayToXml($data, $xml);
-            $payload = $xml->asXML();
-        }
-
-        $this->sendHeaders();
-        echo $payload;
-        exit(EXIT_SUCCESS);
-    }
-
-    protected function arrayToXml($data, \SimpleXMLElement &$xml)
-    {
-        foreach ($data as $key => $value) {
-            if (is_numeric($key)) {
-                $key = 'item' . $key; //dealing with <0/>..<n/> issues
-            }
-            if (is_array($value)) {
-                $subnode = $xml->addChild($key);
-                $this->arrayToXml($value, $subnode);
-            } else {
-                $xml->addChild("$key", htmlspecialchars("$value"));
-            }
         }
     }
 
@@ -461,8 +423,8 @@ class Output extends Message\Response
         foreach (headers_list() as $header) {
             $headerParts = explode(':', $header);
             $headerParts = array_map('trim', $headerParts);
-            $headers[$headerParts[0]] = $headerParts[1];
-            header_remove($header[0]);
+            $headers[ $headerParts[ 0 ] ] = $headerParts[ 1 ];
+            header_remove($header[ 0 ]);
         }
 
         if (count($headers)) {
@@ -481,6 +443,17 @@ class Output extends Message\Response
         }
     }
 
+    // ------------------------------------------------------------------------
+
+    /**
+     * Output::sendHeaderStatus
+     *
+     * @param int    $statusCode
+     * @param string $reasonPhrase
+     * @param string $protocol
+     *
+     * @return $this
+     */
     public function sendHeaderStatus($statusCode, $reasonPhrase, $protocol = '1.1')
     {
         @header('HTTP/' . $protocol . ' ' . $statusCode . ' ' . $reasonPhrase, true);
@@ -488,6 +461,17 @@ class Output extends Message\Response
         return $this;
     }
 
+    // ------------------------------------------------------------------------
+
+    /**
+     * Output::sendHeader
+     *
+     * @param string    $name
+     * @param string    $value
+     * @param bool      $replace
+     *
+     * @return static
+     */
     public function sendHeader($name, $value, $replace = true)
     {
         @header($name . ': ' . trim($value), $replace);
@@ -498,7 +482,55 @@ class Output extends Message\Response
     // ------------------------------------------------------------------------
 
     /**
-     * Browser::exceptionHandler
+     * Output::arrayToXml
+     *
+     * @param array             $data
+     * @param \SimpleXMLElement $xml
+     */
+    protected function arrayToXml(array $data, \SimpleXMLElement &$xml)
+    {
+        foreach ($data as $key => $value) {
+            if (is_numeric($key)) {
+                $key = 'item' . $key; //dealing with <0/>..<n/> issues
+            }
+            if (is_array($value)) {
+                $subnode = $xml->addChild($key);
+                $this->arrayToXml($value, $subnode);
+            } else {
+                $xml->addChild("$key", htmlspecialchars("$value"));
+            }
+        }
+    }
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * Output::sendPayload
+     *
+     * @param array         $data
+     * @param string|null   $mimeType
+     */
+    public function sendPayload(array $data, $mimeType = null)
+    {
+        $mimeType = isset($mimeType) ? $mimeType : $this->mimeType;
+        $this->setContentType($mimeType);
+
+        if ($mimeType === 'application/json') {
+            $payload = json_encode($data, JSON_PRETTY_PRINT);
+        } elseif ($mimeType === 'application/xml') {
+            $xml = new \SimpleXMLElement('<?xml version="1.0"?><payload></payload>');
+            $this->arrayToXml($data, $xml);
+            $payload = $xml->asXML();
+        }
+
+        $this->sendHeaders();
+        echo $payload;
+    }
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * Output::exceptionHandler
      *
      * Kernel defined exception handler function.
      *
@@ -522,29 +554,10 @@ class Output extends Message\Response
             ));
         } elseif ($exception instanceof AbstractException) {
 
-            if (class_exists('O2System\Framework')) {
-                if (services()->has('presenter')) {
-                    presenter()->initialize();
-
-                    if (presenter()->theme->use) {
-                        presenter()->theme->load();
-                    }
-
-                    $vars = presenter()->getArrayCopy();
-                    extract($vars);
-                }
-            }
-
             ob_start();
             include $this->getFilePath('exception');
             $htmlOutput = ob_get_contents();
             ob_end_clean();
-
-            if (class_exists('O2System\Framework')) {
-                if (services()->has('presenter')) {
-                    $htmlOutput = presenter()->assets->parseSourceCode($htmlOutput);
-                }
-            }
 
             echo $htmlOutput;
             exit(EXIT_ERROR);
@@ -555,87 +568,57 @@ class Output extends Message\Response
             $description = language()->getLine('E_DESCRIPTION_' . $exceptionClassName);
             $trace = new Trace($exception->getTrace());
 
-            if (class_exists('O2System\Framework')) {
-                if (services()->has('presenter')) {
-                    presenter()->initialize();
-
-                    if (presenter()->theme->use) {
-                        presenter()->theme->load();
-                    }
-
-                    $vars = presenter()->getArrayCopy();
-                    extract($vars);
-                }
-            }
-
             ob_start();
             include $this->getFilePath('exception-spl');
             $htmlOutput = ob_get_contents();
             ob_end_clean();
-
-            if (class_exists('O2System\Framework')) {
-                if (services()->has('presenter')) {
-                    $htmlOutput = presenter()->assets->parseSourceCode($htmlOutput);
-                }
-            }
 
             echo $htmlOutput;
             exit(EXIT_ERROR);
         }
     }
 
+    // ------------------------------------------------------------------------
+
     /**
-     * Browser::sendError
+     * Output::sendError
      *
-     * @param int $code
+     * @param int               $code
      * @param null|array|string $vars
-     * @param array $headers
+     * @param array             $headers
      */
     public function sendError($code = 204, $vars = null, $headers = [])
     {
         $languageKey = $code . '_' . error_code_string($code);
 
         $error = [
-            'code' => $code,
-            'title' => language()->getLine($languageKey . '_TITLE'),
+            'code'    => $code,
+            'title'   => language()->getLine($languageKey . '_TITLE'),
             'message' => language()->getLine($languageKey . '_MESSAGE'),
         ];
 
         $this->statusCode = $code;
-        $this->reasonPhrase = $error['title'];
+        $this->reasonPhrase = $error[ 'title' ];
 
         if (is_string($vars)) {
             $vars = ['message' => $vars];
-        } elseif (is_array($vars) and empty($vars['message'])) {
-            $vars['message'] = $error['message'];
+        } elseif (is_array($vars) and empty($vars[ 'message' ])) {
+            $vars[ 'message' ] = $error[ 'message' ];
         }
 
-        if (isset($vars['message'])) {
-            $error['message'] = $vars['message'];
+        if (isset($vars[ 'message' ])) {
+            $error[ 'message' ] = $vars[ 'message' ];
         }
 
         if (is_ajax() or $this->mimeType !== 'text/html') {
             $this->statusCode = $code;
-            $this->reasonPhrase = $error['title'];
+            $this->reasonPhrase = $error[ 'title' ];
             $this->send($vars);
 
             exit(EXIT_ERROR);
         }
 
         $this->sendHeaders($headers);
-
-        if (class_exists('O2System\Framework')) {
-            if (services()->has('presenter')) {
-                presenter()->initialize();
-
-                if (presenter()->theme->use) {
-                    presenter()->theme->load();
-                }
-
-                $vars = presenter()->getArrayCopy();
-                extract($vars);
-            }
-        }
 
         extract($error);
 
@@ -644,36 +627,7 @@ class Output extends Message\Response
         $htmlOutput = ob_get_contents();
         ob_end_clean();
 
-        if (class_exists('O2System\Framework')) {
-            if (services()->has('presenter')) {
-                $htmlOutput = presenter()->assets->parseSourceCode($htmlOutput);
-            }
-        }
-
         echo $htmlOutput;
         exit(EXIT_ERROR);
-    }
-
-    public function getFilePath($filename)
-    {
-        $filePaths = array_reverse($this->filePaths);
-
-        if (class_exists('O2System\Framework')) {
-            if (function_exists('modules')) {
-                if (modules()) {
-                    $filePaths = modules()->getDirs('Views');
-                }
-            }
-        }
-
-        foreach ($filePaths as $filePath) {
-            if (is_file($filePath . $filename . '.phtml')) {
-                return $filePath . $filename . '.phtml';
-                break;
-            } elseif (is_file($filePath . 'errors' . DIRECTORY_SEPARATOR . $filename . '.phtml')) {
-                return $filePath . 'errors' . DIRECTORY_SEPARATOR . $filename . '.phtml';
-                break;
-            }
-        }
     }
 }

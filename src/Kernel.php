@@ -1,6 +1,6 @@
 <?php
 /**
- * This file is part of the O2System PHP Framework package.
+ * This file is part of the O2System Framework package.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -15,10 +15,6 @@ namespace O2System;
 
 // ------------------------------------------------------------------------
 
-use O2System\Psr\Container\ContainerExceptionInterface;
-use O2System\Psr\Container\ContainerInterface;
-use O2System\Psr\NotFoundExceptionInterface;
-
 /*
  *---------------------------------------------------------------
  * KERNEL PATH
@@ -28,7 +24,7 @@ use O2System\Psr\NotFoundExceptionInterface;
  *
  * WITH TRAILING SLASH!
  */
-if (!defined('PATH_KERNEL')) {
+if ( ! defined('PATH_KERNEL')) {
     define('PATH_KERNEL', __DIR__ . DIRECTORY_SEPARATOR);
 }
 
@@ -59,15 +55,15 @@ class Kernel extends Psr\Patterns\Creational\Singleton\AbstractSingleton
 
         $this->services = new Kernel\Containers\Services();
 
-        if (isset($_ENV['DEBUG_STAGE']) and $_ENV['DEBUG_STAGE'] === 'DEVELOPER') {
+        if (isset($_ENV[ 'DEBUG_STAGE' ]) and $_ENV[ 'DEBUG_STAGE' ] === 'DEVELOPER') {
             $this->services->load(Gear\Profiler::class);
-            profiler()->watch('Starting Kernel Services');
+            if (profiler() !== false) {
+                profiler()->watch('Starting Kernel Services');
+            }
         }
 
         $services = [
-            'Services\Language' => 'language',
-            'Services\Logger' => 'logger',
-            'Services\Shutdown' => 'shutdown'
+            'Services\Language' => 'language'
         ];
 
         foreach ($services as $className => $classOffset) {
@@ -78,10 +74,12 @@ class Kernel extends Psr\Patterns\Creational\Singleton\AbstractSingleton
             profiler()->watch('Starting Kernel I/O Service');
         }
 
-        if (is_cli()) {
-            $this->cliIO();
-        } else {
-            $this->httpIO();
+        if (class_exists('O2System\Framework', false) or class_exists('O2System\Reactor', false)) {
+            if (is_cli()) {
+                $this->cliIO();
+            } else {
+                $this->httpIO();
+            }
         }
     }
 
@@ -89,12 +87,14 @@ class Kernel extends Psr\Patterns\Creational\Singleton\AbstractSingleton
 
     /**
      * Kernel::cliIO
+     *
+     * Runs command line input/output services.
      */
     private function cliIO()
     {
         $services = [
-            'Cli\Input' => 'input',
-            'Cli\Output' => 'output'
+            'Cli\Input'  => 'input',
+            'Cli\Output' => 'output',
         ];
 
         foreach ($services as $className => $classOffset) {
@@ -106,13 +106,15 @@ class Kernel extends Psr\Patterns\Creational\Singleton\AbstractSingleton
 
     /**
      * Kernel::httpIO
+     *
+     * Runs http input/output services.
      */
     private function httpIO()
     {
         $services = [
             'Http\Message\ServerRequest' => 'serverRequest',
-            'Http\Input' => 'input',
-            'Http\Output' => 'output'
+            'Http\Input'                 => 'input',
+            'Http\Output'                => 'output',
         ];
 
         foreach ($services as $className => $classOffset) {
@@ -120,10 +122,12 @@ class Kernel extends Psr\Patterns\Creational\Singleton\AbstractSingleton
         }
     }
 
+    // ------------------------------------------------------------------------
+
     /**
-     * Framework::__isset
+     * Kernel::__isset
      *
-     * @param $property
+     * @param string $property
      *
      * @return bool
      */
@@ -135,22 +139,22 @@ class Kernel extends Psr\Patterns\Creational\Singleton\AbstractSingleton
     // ------------------------------------------------------------------------
 
     /**
-     * Framework::__get
+     * Kernel::__get
      *
-     * @param $property
+     * @param string $property
      *
      * @return mixed
      */
     public function &__get($property)
     {
-        $get[$property] = $property;
+        $get[ $property ] = null;
 
         if (isset($this->{$property})) {
-            $get[$property] =& $this->{$property};
+            $get[ $property ] =& $this->{$property};
         } elseif ($this->services->has($property)) {
-            $get[$property] = $this->services->get($property);
+            $get[ $property ] = $this->services->get($property);
         }
 
-        return $get[$property];
+        return $get[ $property ];
     }
 }

@@ -1,6 +1,6 @@
 <?php
 /**
- * This file is part of the O2System PHP Framework package.
+ * This file is part of the O2System Framework package.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -30,6 +30,8 @@ class Request extends AbstractMessage implements
     RequestFieldInterface
 {
     /**
+     * Request::$method
+     *
      * Request Method
      *
      * @var string
@@ -37,6 +39,8 @@ class Request extends AbstractMessage implements
     protected $method = 'GET';
 
     /**
+     * Request::$uri
+     *
      * Request Uri
      *
      * @var Uri|\O2System\Kernel\Http\Message\Uri
@@ -45,6 +49,9 @@ class Request extends AbstractMessage implements
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Request::__construct
+     */
     public function __construct()
     {
         $this->uri = new Uri();
@@ -52,9 +59,14 @@ class Request extends AbstractMessage implements
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Request::getClientIpAddress
+     *
+     * @return bool|string
+     */
     public function getClientIpAddress()
     {
-        if($ipAddresses = config()->getItem('ipAddresses')) {
+        if ($ipAddresses = config()->getItem('ipAddresses')) {
             return input()->ipAddress($ipAddresses->proxy);
         }
 
@@ -63,6 +75,11 @@ class Request extends AbstractMessage implements
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Request::getClientUserAgent
+     *
+     * @return string
+     */
     public function getClientUserAgent()
     {
         return input()->userAgent();
@@ -71,6 +88,8 @@ class Request extends AbstractMessage implements
     // ------------------------------------------------------------------------
 
     /**
+     * Request::isCli
+     *
      * Determines if this request was made from the command line (CLI).
      *
      * @return bool
@@ -83,6 +102,8 @@ class Request extends AbstractMessage implements
     // ------------------------------------------------------------------------
 
     /**
+     * Request::isAjax
+     *
      * Test to see if a request contains the HTTP_X_REQUESTED_WITH header.
      *
      * @return bool
@@ -96,6 +117,8 @@ class Request extends AbstractMessage implements
     //--------------------------------------------------------------------
 
     /**
+     * Request::isSecure
+     *
      * Attempts to detect if the current connection is secure through
      * a few different methods.
      *
@@ -309,6 +332,11 @@ class Request extends AbstractMessage implements
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Request::setUri
+     *
+     * @param \O2System\Psr\Http\Message\UriInterface $uri
+     */
     public function setUri(UriInterface $uri)
     {
         $this->uri = $uri;
@@ -371,6 +399,8 @@ class Request extends AbstractMessage implements
     //--------------------------------------------------------------------
 
     /**
+     * Request::getIterator
+     *
      * Retrieve an external iterator
      *
      * @link  http://php.net/manual/en/iteratoraggregate.getiterator.php
@@ -386,6 +416,8 @@ class Request extends AbstractMessage implements
     //--------------------------------------------------------------------
 
     /**
+     * Request::count
+     *
      * Count elements of an object
      *
      * @link  http://php.net/manual/en/countable.count.php

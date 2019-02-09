@@ -1,6 +1,6 @@
 <?php
 /**
- * This file is part of the O2System PHP Framework package.
+ * This file is part of the O2System Framework package.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -35,11 +35,7 @@ class Output
     // ------------------------------------------------------------------------
 
     /**
-     * Browser::__construct
-     *
-     * Constructs the Kernel Browser.
-     *
-     * @return Output
+     * Output::__construct
      */
     public function __construct()
     {
@@ -78,6 +74,7 @@ class Output
      * Kernel defined shutdown handler function.
      *
      * @return void
+     * @throws \O2System\Spl\Exceptions\ErrorException
      */
     public function shutdownHandler()
     {
@@ -92,8 +89,10 @@ class Output
             );
         }
 
-        // Execute Kernel Shutdown Service
-        shutdown()->execute();
+        // Execute shutdown service
+        if(services()->has('shutdown')) {
+            shutdown()->execute();
+        }
     }
 
     // ------------------------------------------------------------------------
@@ -133,18 +132,20 @@ class Output
         }
 
         $error = new ErrorException($errstr, $errno, $errfile, $errline);
-
+        
         // Logged the error
-        logger()->error(
-            implode(
-                ' ',
-                [
-                    '[ ' . $error->getStringSeverity() . ' ] ',
-                    $error->getMessage(),
-                    $error->getFile() . ':' . $error->getLine(),
-                ]
-            )
-        );
+        if(services()->has('logger')) {
+            logger()->error(
+                implode(
+                    ' ',
+                    [
+                        '[ ' . $error->getStringSeverity() . ' ] ',
+                        $error->getMessage(),
+                        $error->getFile() . ':' . $error->getLine(),
+                    ]
+                )
+            );
+        }
 
         $errdisplay = str_ireplace(['off', 'none', 'no', 'false', 'null'], 0, ini_get('display_errors'));
 

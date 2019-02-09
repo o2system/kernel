@@ -1,12 +1,11 @@
 <?php
 /**
- * This file is part of the O2System PHP Framework package.
+ * This file is part of the O2System Framework package.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
  * @author         Steeve Andrian Salim
- *                 Mohamad Rafi Randoni
  * @copyright      Copyright (c) Steeve Andrian Salim
  */
 
@@ -21,16 +20,46 @@ use O2System\Spl\Exceptions\Logic\BadFunctionCall\BadPhpExtensionCallException;
 
 class UploadFile implements UploadedFileInterface
 {
+    /**
+     * UploadFile::$name
+     *
+     * @var string
+     */
     protected $name;
 
+    /**
+     * UploadFile::$type
+     *
+     * @var string
+     */
     protected $type;
 
+    /**
+     * UploadFile::$tmpName
+     *
+     * @var string
+     */
     protected $tmpName;
 
+    /**
+     * UploadFile::$size
+     *
+     * @var int
+     */
     protected $size;
 
+    /**
+     * UploadFile::$error
+     *
+     * @var mixed
+     */
     protected $error;
 
+    /**
+     * UploadFIle::$isMoved
+     *
+     * @var bool
+     */
     protected $isMoved = false;
 
     /**
@@ -46,6 +75,8 @@ class UploadFile implements UploadedFileInterface
      * UploadFile::__construct
      *
      * @param array $uploadedFile
+     *
+     * @throws \O2System\Spl\Exceptions\Logic\BadFunctionCall\BadPhpExtensionCallException
      */
     public function __construct(array $uploadedFile)
     {
@@ -256,6 +287,8 @@ class UploadFile implements UploadedFileInterface
     // --------------------------------------------------------------------------------------
 
     /**
+     * UploadFile::getFileMime
+     *
      * Get file mime type
      *
      * @return string
@@ -270,6 +303,8 @@ class UploadFile implements UploadedFileInterface
     // --------------------------------------------------------------------------------------
 
     /**
+     * UploadFile::getExtension
+     *
      * Get uploaded file extension
      *
      * @return string
@@ -279,6 +314,13 @@ class UploadFile implements UploadedFileInterface
         return pathinfo($this->name, PATHINFO_EXTENSION);
     }
 
+    // ------------------------------------------------------------------------
+
+    /**
+     * UploadFile::getFileTemp
+     *
+     * @return mixed|string
+     */
     public function getFileTemp()
     {
         return $this->tmpName;

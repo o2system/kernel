@@ -1,6 +1,6 @@
 <?php
 /**
- * This file is part of the O2System PHP Framework package.
+ * This file is part of the O2System Framework package.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -15,7 +15,7 @@ namespace O2System\Kernel\Services;
 
 // ------------------------------------------------------------------------
 
-use O2System\Kernel\Datastructures\Config;
+use O2System\Kernel\DataStructures\Config;
 use O2System\Psr\Log\LoggerInterface;
 
 /**
@@ -78,10 +78,17 @@ class Logger implements LoggerInterface
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Logger::getLines
+     *
+     * @return array
+     */
     public function getLines()
     {
         return $this->lines;
     }
+
+    // ------------------------------------------------------------------------
 
     /**
      * Logger::setThreshold
@@ -112,7 +119,7 @@ class Logger implements LoggerInterface
     // --------------------------------------------------------------------
 
     /**
-     * Set Path
+     * Logger::setPath
      *
      * @param string $path
      */

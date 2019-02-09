@@ -1,6 +1,6 @@
 <?php
 /**
- * This file is part of the O2System PHP Framework package.
+ * This file is part of the O2System Framework package.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -41,7 +41,7 @@ abstract class AbstractCommandersPool
     protected $commandersPath;
 
     /**
-     * App::$commandersPool
+     * AbstractCommandPool::$commandersPool
      *
      * Commanders pool.
      *
@@ -52,11 +52,11 @@ abstract class AbstractCommandersPool
     // ------------------------------------------------------------------------
 
     /**
-     * App::setCommandNamespace
+     * AbstractCommandPool::setCommandNamespace
      *
      * Sets command namespace.
      *
-     * @param $namespace
+     * @param string $namespace
      *
      * @return static
      */
@@ -70,11 +70,11 @@ abstract class AbstractCommandersPool
     // ------------------------------------------------------------------------
 
     /**
-     * App::setCommandsPath
+     * AbstractCommandPool::setCommandsPath
      *
      * Sets command namespace.
      *
-     * @param $namespace
+     * @param string $path
      *
      * @return static
      */
@@ -93,7 +93,7 @@ abstract class AbstractCommandersPool
     // ------------------------------------------------------------------------
 
     /**
-     * App::hasCommand
+     * AbstractCommandPool::hasCommand
      *
      * Check whether the application has a command that you're looking for.
      *
@@ -109,12 +109,9 @@ abstract class AbstractCommandersPool
     // ------------------------------------------------------------------------
 
     /**
-     * App::loadCommands
+     * AbstractCommandPool::loadCommands
      *
      * Load all commands.
-     *
-     * @param $namespace
-     * @param $commandsPath
      */
     protected function loadCommanders()
     {
@@ -132,7 +129,7 @@ abstract class AbstractCommandersPool
     // ------------------------------------------------------------------------
 
     /**
-     * App::addCommander
+     * AbstractCommandPool::addCommander
      *
      * Add new commander to the pool.
      *

@@ -1,6 +1,6 @@
 <?php
 /**
- * This file is part of the O2System PHP Framework package.
+ * This file is part of the O2System Framework package.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -11,7 +11,7 @@
 
 // ------------------------------------------------------------------------
 
-namespace O2System\Kernel\Http\Router\Datastructures;
+namespace O2System\Kernel\Http\Router\DataStructures;
 
 // ------------------------------------------------------------------------
 
@@ -21,27 +21,54 @@ use O2System\Spl\Info\SplClassInfo;
 /**
  * Class Controller
  *
- * @package O2System\Datastructures
+ * @package O2System\DataStructures
  */
 class Controller extends SplClassInfo
 {
     /**
+     * Controller::$requestSegments
+     *
      * Request Segments
      *
      * @var Segments
      */
     private $requestSegments;
 
+    /**
+     * Controller::$requestMethod
+     *
+     * @var string|null
+     */
     private $requestMethod = null;
 
+    /**
+     * Controller::$requestMethodArgs
+     *
+     * @var array
+     */
     private $requestMethodArgs = [];
 
+    /**
+     * Controller::$properties
+     *
+     * @var array
+     */
     private $properties = [];
 
+    /**
+     * Controller::$instance
+     *
+     * @var \O2System\Kernel\Http\Controller
+     */
     private $instance;
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Controller::__construct
+     *
+     * @param string $filePath
+     */
     public function __construct($filePath)
     {
         if (is_object($filePath)) {
@@ -72,6 +99,11 @@ class Controller extends SplClassInfo
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Controller::setProperties
+     *
+     * @param array $properties
+     */
     public function setProperties(array $properties)
     {
         $this->properties = $properties;
@@ -79,6 +111,11 @@ class Controller extends SplClassInfo
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Controller::getInstance
+     *
+     * @return \O2System\Kernel\Http\Controller|string
+     */
     public function &getInstance()
     {
         if (empty($this->instance)) {
@@ -103,6 +140,11 @@ class Controller extends SplClassInfo
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Controller::getRequestSegments
+     *
+     * @return \O2System\Kernel\Http\Message\Uri\Segments
+     */
     public function getRequestSegments()
     {
         if (empty($this->requestSegments)) {
@@ -118,6 +160,15 @@ class Controller extends SplClassInfo
         return $this->requestSegments;
     }
 
+    // ------------------------------------------------------------------------
+
+    /**
+     * Controller::setRequestSegments
+     *
+     * @param array $segments
+     *
+     * @return static
+     */
     public function setRequestSegments(array $segments)
     {
         $this->requestSegments = new Segments($segments);
@@ -125,11 +176,25 @@ class Controller extends SplClassInfo
         return $this;
     }
 
+    // ------------------------------------------------------------------------
+
+    /**
+     * Controller::getParameter
+     *
+     * @return string
+     */
     public function getParameter()
     {
         return dash(get_class_name($this->name));
     }
 
+    // ------------------------------------------------------------------------
+
+    /**
+     * Controller::getRequestMethod
+     *
+     * @return string|null
+     */
     public function getRequestMethod()
     {
         return $this->requestMethod;
@@ -137,6 +202,13 @@ class Controller extends SplClassInfo
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Controller::setRequestMethod
+     *
+     * @param string $method
+     *
+     * @return static
+     */
     public function setRequestMethod($method)
     {
         $this->requestMethod = $method;
@@ -146,11 +218,25 @@ class Controller extends SplClassInfo
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Controller::getRequestMethodArgs
+     *
+     * @return array
+     */
     public function getRequestMethodArgs()
     {
         return $this->requestMethodArgs;
     }
 
+    // ------------------------------------------------------------------------
+
+    /**
+     * Controller::setRequestMethodArgs
+     *
+     * @param array $arguments
+     *
+     * @return static
+     */
     public function setRequestMethodArgs(array $arguments)
     {
         $arguments = array_values($arguments);
@@ -162,6 +248,13 @@ class Controller extends SplClassInfo
         return $this;
     }
 
+    // ------------------------------------------------------------------------
+
+    /**
+     * Controller::isValid
+     *
+     * @return bool
+     */
     public function isValid()
     {
         if ( ! empty($this->name) and $this->hasMethod('__call') and $this->isSubclassOf('\O2System\Kernel\Http\Controller')) {

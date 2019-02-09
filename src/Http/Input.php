@@ -1,6 +1,6 @@
 <?php
 /**
- * This file is part of the O2System PHP Framework package.
+ * This file is part of the O2System Framework package.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -15,9 +15,8 @@ namespace O2System\Kernel\Http;
 
 // ------------------------------------------------------------------------
 
-use O2System\Kernel\Http\Message\ServerRequest;
 use O2System\Psr\Http\Message\UploadedFileInterface;
-use O2System\Spl\Datastructures\SplArrayObject;
+use O2System\Spl\DataStructures\SplArrayObject;
 
 /**
  * Class Input
@@ -96,7 +95,7 @@ class Input
      *                      If omitted, FILTER_DEFAULT will be used, which is equivalent to FILTER_UNSAFE_RAW.
      *                      This will result in no filtering taking place by default.
      *
-     * @return mixed|\O2System\Spl\Datastructures\SplArrayObject
+     * @return mixed|\O2System\Spl\DataStructures\SplArrayObject
      */
     protected function filter($type, $offset = null, $filter = FILTER_DEFAULT)
     {
@@ -439,7 +438,8 @@ class Input
                      'HTTP_X_CLIENT_IP',
                      'HTTP_X_CLUSTER_CLIENT_IP',
                      'REMOTE_ADDR',
-                 ] as $header) {
+                 ] as $header
+        ) {
             if (null !== ($ipAddress = $this->server($header))) {
                 if (filter_var($ipAddress, FILTER_VALIDATE_IP)) {
                     if ( ! in_array($ipAddress, $proxyIps)) {
@@ -496,7 +496,7 @@ class Input
     {
         $authorization = $this->server('HTTP_AUTHORIZATION');
 
-        if(preg_match('/(Bearer)/', $authorization)) {
+        if (preg_match('/(Bearer)/', $authorization)) {
             return str_replace('Bearer ', '', $authorization);
         }
 
@@ -512,7 +512,7 @@ class Input
      */
     public function webToken()
     {
-        if($webToken = $this->server('HTTP_X_WEB_TOKEN')) {
+        if ($webToken = $this->server('HTTP_X_WEB_TOKEN')) {
             return $webToken;
         }
 
@@ -530,7 +530,7 @@ class Input
     {
         $authorization = $this->server('HTTP_AUTHORIZATION');
 
-        if(preg_match('/(Basic)/', $authorization)) {
+        if (preg_match('/(Basic)/', $authorization)) {
             return str_replace('Basic ', '', $authorization);
         }
 

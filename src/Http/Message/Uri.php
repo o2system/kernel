@@ -1,6 +1,6 @@
 <?php
 /**
- * This file is part of the O2System PHP Framework package.
+ * This file is part of the O2System Framework package.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -47,7 +47,7 @@ class Uri implements UriInterface
     protected $suffix;
 
     /**
-     * Uri Host
+     * Uri::$host
      *
      * The host subcomponent of authority is identified by an IP literal
      * encapsulated within square brackets, an IPv4 address in dotted-decimal form,
@@ -60,62 +60,64 @@ class Uri implements UriInterface
     protected $host;
 
     /**
-     * Uri Port
+     * Uri::$port
      *
      * @var int
      */
     protected $port = 80;
 
     /**
-     * Uri Username
+     * Uri::$username
      *
      * @var string
      */
     protected $username;
 
     /**
-     * Uri User Password
+     * Uri::$password
      *
      * @var string
      */
     protected $password;
 
     /**
-     * Uri Path
+     * Uri::$path
      *
      * @var string
      */
     protected $path;
 
     /**
-     * Uri Query Params
+     * Uri::$query
      *
      * @var string
      */
     protected $query;
 
     /**
-     * Uri Fragment
+     * Uri::$fragment
      *
      * @var string
      */
     protected $fragment;
 
     /**
-     * Uri Attribute
+     * Uri::$attribute
      *
      * @var string
      */
     protected $attribute;
 
     /**
-     * Uri SubDomain
+     * Uri::$subDomain
      *
      * @var string
      */
     protected $subDomain;
 
     /**
+     * Uri::$subDomains
+     *
      * List of Uri SubDomains
      *
      * @var array
@@ -123,6 +125,8 @@ class Uri implements UriInterface
     protected $subDomains = [];
 
     /**
+     * Uri::$tld
+     *
      * Uri Top Level Domain
      *
      * @var string
@@ -130,6 +134,8 @@ class Uri implements UriInterface
     protected $tld;
 
     /**
+     * Uri::$tlds
+     *
      * List of Uri Top Level Domains
      *
      * @var array
@@ -263,20 +269,20 @@ class Uri implements UriInterface
             $this->tlds[] = end($xHost);
             array_pop($xHost);
 
-            if(count($xHost) >= 2) {
+            if (count($xHost) >= 2) {
                 $this->subDomains[] = $this->subDomain = reset($xHost);
                 array_shift($xHost);
 
-                if(count($xHost)) {
-                    if(strlen($tld = end($xHost)) <= 3) {
+                if (count($xHost)) {
+                    if (strlen($tld = end($xHost)) <= 3) {
                         array_unshift($this->tlds, $tld);
                         array_pop($xHost);
                     }
                 }
             }
 
-            if(count($xHost)) {
-                $this->host = implode('.',$xHost). '.' . implode('.', $this->tlds);
+            if (count($xHost)) {
+                $this->host = implode('.', $xHost) . '.' . implode('.', $this->tlds);
             }
 
             $this->tld = '.' . implode('.', $this->tlds);
@@ -299,7 +305,13 @@ class Uri implements UriInterface
 
     // ------------------------------------------------------------------------
 
-    protected function setOrdinalKeys(&$elements, $startNumber = 0)
+    /**
+     * Uri::setOrdinalKeys
+     *
+     * @param array $elements
+     * @param int   $startNumber
+     */
+    protected function setOrdinalKeys(array &$elements, $startNumber = 0)
     {
         $ordinalEnds = ['th', 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th'];
 
@@ -349,6 +361,13 @@ class Uri implements UriInterface
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Uri::addSegments
+     *
+     * @param Segments|string|array $segments
+     *
+     * @return \O2System\Kernel\Http\Message\Uri
+     */
     public function addSegments($segments)
     {
         if ( ! $segments instanceof Segments) {
@@ -367,7 +386,7 @@ class Uri implements UriInterface
     // ------------------------------------------------------------------------
 
     /**
-     * UriInterface::getScheme
+     * Uri::getScheme
      *
      * Retrieve the scheme component of the URI.
      *
@@ -390,7 +409,7 @@ class Uri implements UriInterface
     // ------------------------------------------------------------------------
 
     /**
-     * UriInterface::getAuthority
+     * Uri::getAuthority
      *
      * Retrieve the authority component of the URI.
      *
@@ -433,7 +452,7 @@ class Uri implements UriInterface
     // ------------------------------------------------------------------------
 
     /**
-     * UriInterface::getUserInfo
+     * Uri::getUserInfo
      *
      * Retrieve the user information component of the URI.
      *
@@ -463,7 +482,7 @@ class Uri implements UriInterface
     // ------------------------------------------------------------------------
 
     /**
-     * UriInterface::getHost
+     * Uri::getHost
      *
      * Retrieve the host component of the URI.
      *
@@ -483,7 +502,7 @@ class Uri implements UriInterface
     // ------------------------------------------------------------------------
 
     /**
-     * UriInterface::getPort
+     * Uri::getPort
      *
      * Retrieve the port component of the URI.
      *
@@ -507,7 +526,7 @@ class Uri implements UriInterface
     // ------------------------------------------------------------------------
 
     /**
-     * UriInterface::getPath
+     * Uri::getPath
      *
      * Retrieve the path component of the URI.
      *
@@ -541,7 +560,7 @@ class Uri implements UriInterface
     // ------------------------------------------------------------------------
 
     /**
-     * UriInterface::getQuery
+     * Uri::getQuery
      *
      * Retrieve the query string of the URI.
      *
@@ -570,7 +589,7 @@ class Uri implements UriInterface
     // ------------------------------------------------------------------------
 
     /**
-     * UriInterface::getFragment
+     * Uri::getFragment
      *
      * Retrieve the fragment component of the URI.
      *
@@ -594,6 +613,13 @@ class Uri implements UriInterface
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Uri::getSubDomain
+     *
+     * @param string $level
+     *
+     * @return bool|mixed
+     */
     public function getSubDomain($level = 'AUTO')
     {
         if ($level === 'AUTO') {
@@ -607,6 +633,13 @@ class Uri implements UriInterface
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Uri::addSubDomain
+     *
+     * @param string|array|null $subDomain
+     *
+     * @return \O2System\Kernel\Http\Message\Uri
+     */
     public function addSubDomain($subDomain)
     {
         $uri = clone $this;
@@ -628,6 +661,15 @@ class Uri implements UriInterface
         return $uri;
     }
 
+    // ------------------------------------------------------------------------
+
+    /**
+     * Uri::withSubDomain
+     *
+     * @param string|array|null $subDomain
+     *
+     * @return \O2System\Kernel\Http\Message\Uri
+     */
     public function withSubDomain($subDomain)
     {
         $uri = clone $this;
@@ -651,6 +693,11 @@ class Uri implements UriInterface
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Uri::getSubDomains
+     *
+     * @return array
+     */
     public function getSubDomains()
     {
         return $this->subDomains;
@@ -658,6 +705,13 @@ class Uri implements UriInterface
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Uri::withSubDomains
+     *
+     * @param array $subDomains
+     *
+     * @return \O2System\Kernel\Http\Message\Uri
+     */
     public function withSubDomains(array $subDomains)
     {
         $uri = clone $this;
@@ -670,7 +724,7 @@ class Uri implements UriInterface
     // ------------------------------------------------------------------------
 
     /**
-     * UriInterface::withScheme
+     * Uri::withScheme
      *
      * Return an instance with the specified scheme.
      *
@@ -702,7 +756,7 @@ class Uri implements UriInterface
     // ------------------------------------------------------------------------
 
     /**
-     * UriInterface::withUserInfo
+     * Uri::withUserInfo
      *
      * Return an instance with the specified user information.
      *
@@ -729,7 +783,7 @@ class Uri implements UriInterface
     // ------------------------------------------------------------------------
 
     /**
-     * UriInterface::withHost
+     * Uri::withHost
      *
      * Return an instance with the specified host.
      *
@@ -754,7 +808,7 @@ class Uri implements UriInterface
     // ------------------------------------------------------------------------
 
     /**
-     * UriInterface::withPort
+     * Uri::withPort
      *
      * Return an instance with the specified port.
      *
@@ -784,7 +838,7 @@ class Uri implements UriInterface
     // ------------------------------------------------------------------------
 
     /**
-     * UriInterface::withPath
+     * Uri::withPath
      *
      * Return an instance with the specified path.
      *
@@ -818,6 +872,13 @@ class Uri implements UriInterface
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Uri::addPath
+     *
+     * @param string $path
+     *
+     * @return \O2System\Kernel\Http\Message\Uri
+     */
     public function addPath($path)
     {
         $uri = clone $this;
@@ -829,7 +890,7 @@ class Uri implements UriInterface
     // ------------------------------------------------------------------------
 
     /**
-     * UriInterface::withQuery
+     * Uri::withQuery
      *
      * Return an instance with the specified query string.
      *
@@ -856,6 +917,13 @@ class Uri implements UriInterface
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Uri::addQuery
+     *
+     * @param array|string $query
+     *
+     * @return \O2System\Kernel\Http\Message\Uri
+     */
     public function addQuery($query)
     {
         $uri = clone $this;
@@ -880,7 +948,7 @@ class Uri implements UriInterface
     // ------------------------------------------------------------------------
 
     /**
-     * UriInterface::withFragment
+     * Uri::withFragment
      *
      * Return an instance with the specified URI fragment.
      *
@@ -906,6 +974,11 @@ class Uri implements UriInterface
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Uri::getSuffix
+     *
+     * @return string
+     */
     public function getSuffix()
     {
         return $this->suffix;
@@ -913,6 +986,11 @@ class Uri implements UriInterface
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Uri::setSuffix
+     *
+     * @param string $suffix
+     */
     protected function setSuffix($suffix)
     {
         if (is_null($suffix) or is_bool($suffix)) {
@@ -926,6 +1004,13 @@ class Uri implements UriInterface
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Uri::withSuffix
+     *
+     * @param string $suffix
+     *
+     * @return \O2System\Kernel\Http\Message\Uri
+     */
     public function withSuffix($suffix)
     {
         $uri = clone $this;
@@ -937,7 +1022,7 @@ class Uri implements UriInterface
     // ------------------------------------------------------------------------
 
     /**
-     * UriInterface::__toString
+     * Uri::__toString
      *
      * Return the string representation as a URI reference.
      *

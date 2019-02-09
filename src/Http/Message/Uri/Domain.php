@@ -1,6 +1,6 @@
 <?php
 /**
- * This file is part of the O2System PHP Framework package.
+ * This file is part of the O2System Framework package.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -22,16 +22,76 @@ namespace O2System\Kernel\Http\Message\Uri;
  */
 class Domain
 {
+    /**
+     * Domain::$string
+     *
+     * @var string
+     */
     protected $string;
+
+    /**
+     * Domain::$origin
+     *
+     * @var string
+     */
     protected $origin;
+
+    /**
+     * Domain::$scheme
+     *
+     * @var string
+     */
     protected $scheme = 'http';
+
+    /**
+     * Domain::$www
+     *
+     * @var bool
+     */
     protected $www = false;
+
+    /**
+     * Domain::$port
+     *
+     * @var int
+     */
     protected $port = 80;
+
+    /**
+     * Domain::$parentDomain
+     *
+     * @var string|null
+     */
     protected $parentDomain = null;
+
+    /**
+     * Domain::$subDomains
+     *
+     * @var array
+     */
     protected $subDomains = [];
+
+    /**
+     * Domain::$tlds
+     *
+     * @var array
+     */
     protected $tlds = [];
+
+    /**
+     * Domain::$path
+     *
+     * @var string
+     */
     protected $path;
 
+    // ------------------------------------------------------------------------
+
+    /**
+     * Domain::__construct
+     *
+     * @param string|null $string
+     */
     public function __construct($string = null)
     {
         $this->origin = isset($_SERVER[ 'HTTP_HOST' ])
@@ -157,41 +217,99 @@ class Domain
         }
     }
 
+    // ------------------------------------------------------------------------
+
+    /**
+     * Domain::getString
+     *
+     * @return string
+     */
     public function getString()
     {
         return $this->string;
     }
 
+    // ------------------------------------------------------------------------
+
+    /**
+     * Domain::getOrigin
+     *
+     * @return string
+     */
     public function getOrigin()
     {
         return $this->origin;
     }
 
+    // ------------------------------------------------------------------------
+
+    /**
+     * Domain::getScheme
+     *
+     * @return string
+     */
     public function getScheme()
     {
         return $this->scheme;
     }
 
+    // ------------------------------------------------------------------------
+
+    /**
+     * Domain::isWWWW
+     *
+     * @return bool
+     */
     public function isWWW()
     {
         return $this->www;
     }
 
+    // ------------------------------------------------------------------------
+
+    /**
+     * Domain::getIpAddress
+     *
+     * @return string
+     */
     public function getIpAddress()
     {
         return gethostbyname($this->origin);
     }
 
+    // ------------------------------------------------------------------------
+
+    /**
+     * Domain::getPort
+     *
+     * @return int
+     */
     public function getPort()
     {
         return $this->port;
     }
 
+    // ------------------------------------------------------------------------
+
+    /**
+     * Domain::getParentDomain
+     *
+     * @return string|null
+     */
     public function getParentDomain()
     {
         return $this->parentDomain;
     }
 
+    // ------------------------------------------------------------------------
+
+    /**
+     * Domain::getSubDomain
+     *
+     * @param string $level
+     *
+     * @return bool|mixed
+     */
     public function getSubDomain($level = '3rd')
     {
         if (isset($this->subDomains[ $level ])) {
@@ -201,16 +319,39 @@ class Domain
         return false;
     }
 
+    // ------------------------------------------------------------------------
+
+    /**
+     * Domain::getSubDomains
+     *
+     * @return array
+     */
     public function getSubDomains()
     {
         return $this->subDomains;
     }
 
+    // ------------------------------------------------------------------------
+
+    /**
+     * Domain::getTotalSubDOmains
+     *
+     * @return int
+     */
     public function getTotalSubDomains()
     {
         return count($this->subDomains);
     }
 
+    // ------------------------------------------------------------------------
+
+    /**
+     * Domain::getTld
+     *
+     * @param string|null $level
+     *
+     * @return bool|mixed|string
+     */
     public function getTld($level = null)
     {
         if (is_null($level)) {
@@ -222,11 +363,25 @@ class Domain
         return false;
     }
 
+    // ------------------------------------------------------------------------
+
+    /**
+     * Domain::getTlds
+     *
+     * @return array
+     */
     public function getTlds()
     {
         return $this->tlds;
     }
 
+    // ------------------------------------------------------------------------
+
+    /**
+     * Domain::getTotalTlds
+     *
+     * @return int
+     */
     public function getTotalTlds()
     {
         return count($this->tlds);

@@ -1,6 +1,6 @@
 <?php
 /**
- * This file is part of the O2System PHP Framework package.
+ * This file is part of the O2System Framework package.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -99,26 +99,28 @@ class ServerRequest extends Request implements ServerRequestInterface
         // Populate file array
         $uploadedFiles = [];
 
-        foreach ($_FILES as $key => $value) {
-            if (is_array($value[ 'name' ])) {
-                for ($i = 0; $i < count($value[ 'name' ]); $i++) {
-                    if ( ! is_array($value[ 'name' ])) {
-                        $uploadedFiles[ $key ][ $i ] = $value;
-                        break;
-                    }
+        if (count($_FILES)) {
+            foreach ($_FILES as $key => $value) {
+                if (is_array($value[ 'name' ])) {
+                    for ($i = 0; $i < count($value[ 'name' ]); $i++) {
+                        if ( ! is_array($value[ 'name' ])) {
+                            $uploadedFiles[ $key ][ $i ] = $value;
+                            break;
+                        }
 
-                    $uploadedFiles[ $key ][ $i ][ 'name' ] = $value[ 'name' ][ $i ];
-                    $uploadedFiles[ $key ][ $i ][ 'type' ] = $value[ 'type' ][ $i ];
-                    $uploadedFiles[ $key ][ $i ][ 'tmp_name' ] = $value[ 'tmp_name' ][ $i ];
-                    $uploadedFiles[ $key ][ $i ][ 'error' ] = $value[ 'error' ][ $i ];
-                    $uploadedFiles[ $key ][ $i ][ 'size' ] = $value[ 'size' ][ $i ];
+                        $uploadedFiles[ $key ][ $i ][ 'name' ] = $value[ 'name' ][ $i ];
+                        $uploadedFiles[ $key ][ $i ][ 'type' ] = $value[ 'type' ][ $i ];
+                        $uploadedFiles[ $key ][ $i ][ 'tmp_name' ] = $value[ 'tmp_name' ][ $i ];
+                        $uploadedFiles[ $key ][ $i ][ 'error' ] = $value[ 'error' ][ $i ];
+                        $uploadedFiles[ $key ][ $i ][ 'size' ] = $value[ 'size' ][ $i ];
+                    }
+                } else {
+                    $uploadedFiles[ $key ][ 'name' ] = $value[ 'name' ];
+                    $uploadedFiles[ $key ][ 'type' ] = $value[ 'type' ];
+                    $uploadedFiles[ $key ][ 'tmp_name' ] = $value[ 'tmp_name' ];
+                    $uploadedFiles[ $key ][ 'error' ] = $value[ 'error' ];
+                    $uploadedFiles[ $key ][ 'size' ] = $value[ 'size' ];
                 }
-            } else {
-                $uploadedFiles[ $key ][ 'name' ] = $value[ 'name' ];
-                $uploadedFiles[ $key ][ 'type' ] = $value[ 'type' ];
-                $uploadedFiles[ $key ][ 'tmp_name' ] = $value[ 'tmp_name' ];
-                $uploadedFiles[ $key ][ 'error' ] = $value[ 'error' ];
-                $uploadedFiles[ $key ][ 'size' ] = $value[ 'size' ];
             }
         }
 
@@ -267,6 +269,7 @@ class ServerRequest extends Request implements ServerRequestInterface
      *
      * @return array An array tree of UploadedFileInterface instances; an empty
      *     array MUST be returned if no data is present.
+     * @throws \O2System\Spl\Exceptions\Logic\BadFunctionCall\BadPhpExtensionCallException
      */
     public function getUploadedFiles()
     {
@@ -321,6 +324,8 @@ class ServerRequest extends Request implements ServerRequestInterface
     //--------------------------------------------------------------------
 
     /**
+     * ServerRequest::getParsedBody
+     *
      * Retrieve any parameters provided in the request body.
      *
      * If the request Content-Type is either application/x-www-form-urlencoded

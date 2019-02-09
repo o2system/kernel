@@ -1,6 +1,6 @@
 <?php
 /**
- * This file is part of the O2System PHP Framework package.
+ * This file is part of the O2System Framework package.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -11,17 +11,19 @@
 
 // ------------------------------------------------------------------------
 
-namespace O2System\Kernel\Http\Router\Datastructures;
+namespace O2System\Kernel\Http\Router\DataStructures;
 
 // ------------------------------------------------------------------------
 
 /**
  * Class Action
- * @package O2System\Kernel\Http\Router\Datastructures
+ * @package O2System\Kernel\Http\Router\DataStructures
  */
 class Action
 {
     /**
+     * Action::$methods
+     *
      * Action Methods
      *
      * @var array
@@ -38,6 +40,8 @@ class Action
     private $domain;
 
     /**
+     * Action::$path
+     *
      * Action Path
      *
      * @var string
@@ -45,6 +49,8 @@ class Action
     private $path;
 
     /**
+     * Action::$closure
+     *
      * Action Closure
      *
      * @var \Closure
@@ -52,6 +58,8 @@ class Action
     private $closure;
 
     /**
+     * Action::$closureParameters
+     *
      * Action Closure Parameters
      *
      * @var array
@@ -95,6 +103,11 @@ class Action
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Action::getMethods
+     *
+     * @return array
+     */
     public function getMethods()
     {
         return $this->methods;
@@ -102,6 +115,11 @@ class Action
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Action::getDomain
+     *
+     * @return mixed|string
+     */
     public function getDomain()
     {
         return $this->domain;
@@ -109,6 +127,11 @@ class Action
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Action::getPath
+     *
+     * @return string
+     */
     public function getPath()
     {
         return $this->path;
@@ -116,6 +139,11 @@ class Action
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Action::getClosure
+     *
+     * @return mixed
+     */
     public function getClosure()
     {
         return call_user_func_array($this->closure, $this->closureParameters);
@@ -123,6 +151,13 @@ class Action
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Action::addClosureParameters
+     *
+     * @param mixed $value
+     *
+     * @return static
+     */
     public function addClosureParameters($value)
     {
         $this->closureParameters[] = $value;
@@ -130,11 +165,27 @@ class Action
         return $this;
     }
 
+    // ------------------------------------------------------------------------
+
+    /**
+     * Action::getClosureParameters
+     *
+     * @return array
+     */
     public function getClosureParameters()
     {
         return $this->closureParameters;
     }
 
+    // ------------------------------------------------------------------------
+
+    /**
+     * Action::setClosureParameters
+     *
+     * @param array $parameters
+     *
+     * @return static
+     */
     public function setClosureParameters(array $parameters)
     {
         $this->closureParameters = $parameters;
@@ -144,6 +195,11 @@ class Action
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Action::isValidDomain
+     *
+     * @return bool
+     */
     public function isValidDomain()
     {
         $domain = isset($_SERVER[ 'HTTP_HOST' ])
@@ -159,6 +215,14 @@ class Action
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Action::isValidUriString
+     *
+     * @param string $uriString
+     *
+     * @return bool
+     * @throws \ReflectionException
+     */
     public function isValidUriString($uriString)
     {
         $uriString = '/' . ltrim($uriString, '/');
@@ -209,6 +273,13 @@ class Action
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Action::getParseUriString
+     *
+     * @param string $uriString
+     *
+     * @return array|bool
+     */
     public function getParseUriString($uriString)
     {
         // Convert wildcards to RegEx
@@ -261,6 +332,13 @@ class Action
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Action::isValidHttpMethod
+     *
+     * @param string $method
+     *
+     * @return bool
+     */
     public function isValidHttpMethod($method)
     {
         $method = strtoupper($method);
@@ -274,6 +352,11 @@ class Action
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Action::isAnyHttpMethod
+     *
+     * @return bool
+     */
     public function isAnyHttpMethod()
     {
         return (bool)in_array('ANY', $this->methods);

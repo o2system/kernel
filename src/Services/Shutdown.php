@@ -1,6 +1,6 @@
 <?php
 /**
- * This file is part of the O2System PHP Framework package.
+ * This file is part of the O2System Framework package.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -23,13 +23,23 @@ use O2System\Spl\Containers\SplClosureContainer;
  */
 class Shutdown extends SplClosureContainer
 {
+    /**
+     * Shutdown::execute
+     */
     public function execute()
     {
         foreach ($this as $offset => $closure) {
             call_user_func($closure);
         }
     }
-    
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * Shutdown::register
+     *
+     * @return mixed
+     */
     public function register()
     {
         return call_user_func_array('register_shutdown_function', func_get_args());

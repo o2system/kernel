@@ -1,6 +1,6 @@
 <?php
 /**
- * This file is part of the O2System PHP Framework package.
+ * This file is part of the O2System Framework package.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -10,7 +10,7 @@
  */
 // ------------------------------------------------------------------------
 
-if (!function_exists('kernel')) {
+if ( ! function_exists('kernel')) {
     /**
      * kernel
      *
@@ -22,7 +22,7 @@ if (!function_exists('kernel')) {
     {
         if (class_exists('O2System\Framework', false)) {
             return O2System\Framework::getInstance();
-        } else if (class_exists('O2System\Reactor', false)) {
+        } elseif (class_exists('O2System\Reactor', false)) {
             return O2System\Reactor::getInstance();
         }
 
@@ -33,7 +33,7 @@ if (!function_exists('kernel')) {
 // ------------------------------------------------------------------------
 
 
-if (!function_exists('services')) {
+if ( ! function_exists('services')) {
     /**
      * services
      *
@@ -46,11 +46,12 @@ if (!function_exists('services')) {
         $args = func_get_args();
 
         if (count($args)) {
-            if (kernel()->services->has($args[0])) {
-                if(isset($args[1]) and is_array($args[1])) {
-                    return kernel()->services->get($args[0], $args[1]);
+            if (kernel()->services->has($args[ 0 ])) {
+                if (isset($args[ 1 ]) and is_array($args[ 1 ])) {
+                    return kernel()->services->get($args[ 0 ], $args[ 1 ]);
                 }
-                return kernel()->services->get($args[0]);
+
+                return kernel()->services->get($args[ 0 ]);
             }
 
             return false;
@@ -62,89 +63,27 @@ if (!function_exists('services')) {
 
 // ------------------------------------------------------------------------
 
-if (!function_exists('profiler')) {
+if ( ! function_exists('profiler')) {
     /**
      * profiler
      *
      * Convenient shortcut for O2System Gear Profiler service.
      *
-     * @return O2System\Gear\Profiler
+     * @return bool|O2System\Gear\Profiler
      */
     function profiler()
     {
-        return services('profiler');
-    }
-}
-
-if (!function_exists('globals')) {
-    /**
-     * globals
-     *
-     * Convenient shortcut for O2System Kernel Globals container.
-     *
-     * @param string $offset
-     *
-     * @return O2System\Kernel\Containers\Globals
-     */
-    function globals($offset = null)
-    {
-        $args = func_get_args();
-
-        if (count($args)) {
-            if (isset($args[0])) {
-                if (isset($GLOBALS[$args[0]])) {
-                    return $GLOBALS[$args[0]];
-                }
-            }
-
-            return null;
+        if (services()->has('profiler')) {
+            return services('profiler');
         }
 
-        if ( ! services()->has('globals')) {
-            services()->load(new \O2System\Kernel\Containers\Globals(), 'globals');
-        }
-
-        return services('globals');
+        return false;
     }
 }
 
 // ------------------------------------------------------------------------
 
-if (!function_exists('env')) {
-    /**
-     * env
-     *
-     * Convenient shortcut for O2System Kernel Environment container.
-     *
-     * @param string $offset
-     *
-     * @return O2System\Kernel\Containers\Globals
-     */
-    function env($offset = null)
-    {
-        $args = func_get_args();
-
-        if (count($args)) {
-            if (isset($args[0])) {
-                if (isset($_ENV[$args[0]])) {
-                    return $_ENV[$args[0]];
-                }
-            }
-
-            return null;
-        }
-
-        if ( ! services()->has('environment')) {
-            services()->load(new \O2System\Kernel\Containers\Environment(), 'environment');
-        }
-
-        return services('environment');
-    }
-}
-
-// ------------------------------------------------------------------------
-
-if (!function_exists('language')) {
+if ( ! function_exists('language')) {
     /**
      * language
      *
@@ -158,7 +97,7 @@ if (!function_exists('language')) {
 
         if (count($args)) {
             if (services()->has('language')) {
-                $language =& kernel()->services->get('language');
+                $language =& services()->get('language');
 
                 return call_user_func_array([&$language, 'getLine'], $args);
             }
@@ -172,7 +111,7 @@ if (!function_exists('language')) {
 
 // ------------------------------------------------------------------------
 
-if (!function_exists('logger')) {
+if ( ! function_exists('logger')) {
     /**
      * logger
      *
@@ -200,55 +139,67 @@ if (!function_exists('logger')) {
 
 // ------------------------------------------------------------------------
 
-if (!function_exists('shutdown')) {
+if ( ! function_exists('shutdown')) {
     /**
      * shutdown
      *
      * Convenient shortcut for O2System Kernel Shutdown service.
      *
-     * @return O2System\Kernel\Services\Shutdown
+     * @return bool|O2System\Kernel\Services\Shutdown
      */
     function shutdown()
     {
-        return services('shutdown');
+        if (services()->has('shutdown')) {
+            return services('shutdown');
+        }
+
+        return false;
     }
 }
 
 // ------------------------------------------------------------------------
 
-if (!function_exists('input')) {
+if ( ! function_exists('input')) {
     /**
      * input
      *
      * Convenient shortcut for O2System Kernel Input Instance
      *
-     * @return O2System\Kernel\Http\Input|O2System\Kernel\Cli\Input
+     * @return bool|O2System\Kernel\Http\Input|O2System\Kernel\Cli\Input
      */
     function input()
     {
-        return services('input');
+        if (services()->has('input')) {
+            return services('input');
+        }
+
+        return false;
     }
 }
 
 // ------------------------------------------------------------------------
 
-if (!function_exists('output')) {
+if ( ! function_exists('output')) {
     /**
      * output
      *
      * Convenient shortcut for O2System Kernel Browser Instance
      *
-     * @return O2System\Kernel\Http\Output|O2System\Kernel\Cli\Output
+     * @return bool|O2System\Kernel\Http\Output|O2System\Kernel\Cli\Output
      */
     function output()
     {
-        return services('output');
+        if (services()->has('output')) {
+            return services('output');
+        }
+
+        return false;
     }
 }
 
 // ------------------------------------------------------------------------
 
-if (!function_exists('server_request')) {
+if ( ! function_exists('server_request')) {
     /**
      * server_request
      *
@@ -258,18 +209,10 @@ if (!function_exists('server_request')) {
      */
     function server_request()
     {
-        if (function_exists('o2system')) {
-            if (!services()->has('serverRequest')) {
-                services()->load(new \O2System\Kernel\Http\Message\ServerRequest(), 'serverRequest');
-            }
-
-            return services('serverRequest');
-        } else {
-            if (!services()->has('serverRequest')) {
-                services()->load(new \O2System\Kernel\Http\Message\ServerRequest(), 'serverRequest');
-            }
-
-            return services('serverRequest');
+        if (services()->has('serverRequest') === false) {
+            services()->load(new \O2System\Kernel\Http\Message\ServerRequest(), 'serverRequest');
         }
+
+        return services('serverRequest');
     }
 }
