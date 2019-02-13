@@ -293,7 +293,7 @@ class Output extends Message\Response
             'result'  => [],
         ];
 
-        if ($data instanceof \ArrayIterator) {
+        if (is_object($data) and method_exists($data, 'getArrayCopy')) {
             $data = $data->getArrayCopy();
         }
 
@@ -343,6 +343,8 @@ class Output extends Message\Response
                     } else {
                         $response[ 'result' ] = [$data[ 'data' ]];
                     }
+                } else {
+                    $response['result'] = $data;
                 }
             }
         } elseif (is_object($data)) {
