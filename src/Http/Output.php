@@ -141,7 +141,7 @@ class Output extends Message\Response
         $error = new ErrorException($errorMessage, $errorSeverity, $errorFile, $errorLine, $errorContext);
 
         // Logged the error
-        if(services()->has('logger')) {
+        if (services()->has('logger')) {
             logger()->error(
                 implode(
                     ' ',
@@ -153,7 +153,7 @@ class Output extends Message\Response
                 )
             );
         }
-        
+
         // Should we display the error?
         if (str_ireplace(['off', 'none', 'no', 'false', 'null'], 0, ini_get('display_errors')) == 1) {
             if (is_ajax()) {
@@ -345,9 +345,7 @@ class Output extends Message\Response
                     }
                 }
             }
-        }
-
-        if (is_object($data)) {
+        } elseif (is_object($data)) {
             if (isset($data->success)) {
                 $response[ 'success' ] = $data->success;
                 unset($data->success);
@@ -396,19 +394,13 @@ class Output extends Message\Response
         }
 
         if ($this->mimeType === 'application/json') {
-            if ( ! empty($data)) {
-                array_push($response[ 'result' ], $data);
-            }
-
             echo json_encode($response, JSON_PRETTY_PRINT);
         } elseif ($this->mimeType === 'application/xml') {
             $xml = new \SimpleXMLElement('<?xml version="1.0"?><response></response>');
             $xml->addAttribute('status', $statusCode);
             $xml->addAttribute('reason', $reasonPhrase);
+            $this->arrayToXml($response, $xml);
 
-            if ( ! empty($data)) {
-                $this->arrayToXml(['message' => $data], $xml);
-            }
             echo $xml->asXML();
         } else {
             echo $data;
@@ -466,9 +458,9 @@ class Output extends Message\Response
     /**
      * Output::sendHeader
      *
-     * @param string    $name
-     * @param string    $value
-     * @param bool      $replace
+     * @param string $name
+     * @param string $value
+     * @param bool   $replace
      *
      * @return static
      */
@@ -507,8 +499,8 @@ class Output extends Message\Response
     /**
      * Output::sendPayload
      *
-     * @param array         $data
-     * @param string|null   $mimeType
+     * @param array       $data
+     * @param string|null $mimeType
      */
     public function sendPayload(array $data, $mimeType = null)
     {
