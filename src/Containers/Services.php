@@ -34,17 +34,38 @@ class Services extends SplServiceContainer
     public function load($className, $offset = null)
     {
         if (is_string($className)) {
+            $className = str_replace([
+                'O2System\Framework\\',
+                'O2System\Reactor\\',
+                'O2System\Kernel\\',
+                'App\\',
+            ], '',
+                ltrim($className, '\\')
+            );
+
             if (class_exists($className)) {
                 $service = new SplServiceRegistry($className);
             } else {
-                if (class_exists($serviceClassName = 'App\\' . $className)) {
-                    $service = new SplServiceRegistry($serviceClassName);
-                } elseif (class_exists($serviceClassName = 'O2System\Framework\\' . $className)) {
-                    $service = new SplServiceRegistry($serviceClassName);
-                } elseif (class_exists($serviceClassName = 'O2System\Reactor\\' . $className)) {
-                    $service = new SplServiceRegistry($serviceClassName);
-                } elseif (class_exists($serviceClassName = 'O2System\Kernel\\' . $className)) {
-                    $service = new SplServiceRegistry($serviceClassName);
+                if (is_object(kernel()->modules)) {
+                    if ($module = kernel()->modules->top()) {
+                        if (class_exists($serviceClassName = $module->getNamespace() . $className)) {
+                            $service = new SplServiceRegistry($serviceClassName);
+                        }
+                    }
+                }
+
+                if (empty($service)) {
+                    if (class_exists($serviceClassName = 'App\\' . $className)) {
+                        $service = new SplServiceRegistry($serviceClassName);
+                    } elseif (class_exists($serviceClassName = 'O2System\Framework\\' . $className)) {
+                        $service = new SplServiceRegistry($serviceClassName);
+                    } elseif (class_exists($serviceClassName = 'O2System\Reactor\\' . $className)) {
+                        $service = new SplServiceRegistry($serviceClassName);
+                    } elseif (class_exists($serviceClassName = 'O2System\Kernel\\' . $className)) {
+                        $service = new SplServiceRegistry($serviceClassName);
+                    } elseif(class_exists($className)) {
+                        $service = new SplServiceRegistry($serviceClassName);
+                    }
                 }
             }
         }
