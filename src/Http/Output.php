@@ -19,6 +19,11 @@ use O2System\Gear\Trace;
 use O2System\Spl\Exceptions\Abstracts\AbstractException;
 use O2System\Spl\Exceptions\ErrorException;
 use O2System\Spl\Traits\Collectors\FilePathCollectorTrait;
+use Whoops\Handler\CallbackHandler;
+use Whoops\Handler\JsonResponseHandler;
+use Whoops\Handler\PlainTextHandler;
+use Whoops\Handler\PrettyPageHandler;
+use Whoops\Handler\XmlResponseHandler;
 
 /**
  * Class Output
@@ -74,8 +79,31 @@ class Output extends Message\Response
      */
     final private function register()
     {
+        $whoops = new \Whoops\Run();
+
+        if (is_ajax() or $this->mimeType === 'application/json' or $this->mimeType === 'application/xml') {
+            $whoops->pushHandler(new CallbackHandler(function ($error) {
+                $this->send([
+                    'status'   => 500,
+                    'success'  => false,
+                    'message'  => $error->getMessage(),
+                    'metadata' => [
+                        'file'  => $error->getFile(),
+                        'line'  => $error->getLine(),
+                        'trace' => $error->getTrace(),
+                    ],
+                ]);
+            }));
+        } elseif (is_cli() or $this->mimeType === 'text/plain') {
+            $whoops->pushHandler(new PlainTextHandler());
+        } elseif ($this->mimeType === 'text/html') {
+            $whoops->pushHandler(new PrettyPageHandler());
+        }
+
+        $whoops->register();
+
         set_error_handler([&$this, 'errorHandler']);
-        set_exception_handler([&$this, 'exceptionHandler']);
+        set_exception_handler([&$whoops, 'handleException']);
         register_shutdown_function([&$this, 'shutdownHandler']);
     }
 
@@ -275,79 +303,58 @@ class Output extends Message\Response
      */
     public function send($data = null, array $headers = [])
     {
-        $statusCode = $this->statusCode;
-        $reasonPhrase = $this->reasonPhrase;
-
-        if (is_ajax()) {
-            $contentType = isset($_SERVER[ 'HTTP_X_REQUESTED_CONTENT_TYPE' ]) ? $_SERVER[ 'HTTP_X_REQUESTED_CONTENT_TYPE' ] : 'application/json';
-            $this->setContentType($contentType);
-        }
-
-        $this->sendHeaders($headers);
-
         $response = [
-            'status'  => (int)$statusCode,
-            'reason'  => $reasonPhrase,
-            'success' => $statusCode >= 200 && $statusCode < 300 ? true : false,
-            'message' => isset($data[ 'message' ]) ? $data[ 'message' ] : '',
+            'status'  => $statusCode = $this->statusCode,
+            'reason'  => $reasonPhrase = readable($this->reasonPhrase),
+            'success' => true,
+            'message' => null,
             'result'  => [],
         ];
 
-        if (is_object($data) and method_exists($data, 'getArrayCopy')) {
-            $data = $data->getArrayCopy();
-        }
+        if (is_array($data)) {
+            if (isset($data[ 'status' ])) {
+                $response[ 'status' ] = $statusCode = $data[ 'status' ];
+                unset($data[ 'status' ]);
+            }
 
-        if (is_array($data) and count($data)) {
-            if (is_numeric(key($data))) {
-                $response[ 'result' ] = $data;
-            } elseif (is_string(key($data))) {
-                if (array_key_exists('success', $data)) {
-                    $response[ 'success' ] = $data[ 'success' ];
-                    unset($data[ 'success' ]);
-                }
+            if (isset($data[ 'reason' ])) {
+                $response[ 'reason' ] = $reasonPhrase = $data[ 'reason' ];
+                unset($data[ 'reason' ]);
+            }
 
-                if (array_key_exists('message', $data)) {
-                    $response[ 'message' ] = $data[ 'message' ];
-                    unset($data[ 'message' ]);
-                }
+            if (isset($data[ 'success' ])) {
+                $response[ 'success' ] = $data[ 'success' ];
+                unset($data[ 'success' ]);
+            }
 
-                if (array_key_exists('timestamp', $data)) {
-                    $response[ 'timestamp' ] = $data[ 'timestamp' ];
-                    unset($data[ 'timestamp' ]);
-                }
+            if (isset($data[ 'message' ])) {
+                $response[ 'message' ] = $data[ 'message' ];
+                unset($data[ 'message' ]);
+            }
 
-                if (array_key_exists('metadata', $data)) {
-                    $response[ 'metadata' ] = $data[ 'metadata' ];
-                    unset($data[ 'metadata' ]);
-                }
+            if (isset($data[ 'metadata' ])) {
+                $response[ 'metadata' ] = $data[ 'metadata' ];
+                unset($data[ 'metadata' ]);
+            }
 
-                if (array_key_exists('errors', $data)) {
-                    $response[ 'errors' ] = $data[ 'errors' ];
-                }
+            if (isset($data[ 'result' ])) {
+                $data = $data[ 'result' ];
+            }
 
-                if (array_key_exists('error', $data)) {
-                    $response[ 'error' ] = $data[ 'error' ];
-                }
-
-                if (array_key_exists('data', $data)) {
-                    if ($data[ 'data' ] instanceof \ArrayIterator) {
-                        $data[ 'data' ] = $data[ 'data' ]->getArrayCopy();
-                    }
-
-                    if (is_array($data[ 'data' ])) {
-                        if (is_string(key($data[ 'data' ]))) {
-                            $response[ 'result' ] = [$data[ 'data' ]];
-                        } elseif (is_numeric(key($data[ 'data' ]))) {
-                            $response[ 'result' ] = $data[ 'data' ];
-                        }
-                    } else {
-                        $response[ 'result' ] = [$data[ 'data' ]];
-                    }
-                } else {
-                    $response['result'] = $data;
-                }
+            if (isset($data[ 'data' ])) {
+                $data = $data[ 'data' ];
             }
         } elseif (is_object($data)) {
+            if (isset($data->status)) {
+                $response[ 'status' ] = $statusCode = $data->status;
+                unset($data->status);
+            }
+
+            if (isset($data->reason)) {
+                $response[ 'reason' ] = $reasonPhrase = $data->reason;
+                unset($data->reason);
+            }
+
             if (isset($data->success)) {
                 $response[ 'success' ] = $data->success;
                 unset($data->success);
@@ -358,41 +365,40 @@ class Output extends Message\Response
                 unset($data->message);
             }
 
-            if (isset($data->timestamp)) {
-                $response[ 'timestamp' ] = $data->timestamp;
-                unset($data->timestamp);
-            }
-
-            if (isset($data->metadata)) {
-                $response[ 'metadata' ] = $data->metadata;
-                unset($data->metadata);
-            }
-
-            if (isset($data->errors)) {
-                $response[ 'errors' ] = $data->errors;
-                unset($data->errors);
-            }
-
-            if (isset($data->error)) {
-                $response[ 'error' ] = $data->error;
-                unset($data->error);
+            if (isset($data->result)) {
+                $data = $data->result;
             }
 
             if (isset($data->data)) {
-                if ($data->data instanceof \ArrayIterator) {
-                    $data->data = $data->data->getArrayCopy();
-                }
-
-                if (is_array($data->data)) {
-                    if (is_string(key($data->data))) {
-                        $response[ 'result' ] = [$data->data];
-                    } elseif (is_numeric(key($data->data))) {
-                        $response[ 'result' ] = $data->data;
-                    }
-                } else {
-                    $response[ 'result' ] = [$data->data];
-                }
+                $data = $data->data;
             }
+        }
+
+        if (is_object($data) and method_exists($data, 'getArrayCopy')) {
+            $data = $data->getArrayCopy();
+        }
+
+        $this->sendHeaderStatus($statusCode, $reasonPhrase);
+
+        $this->sendHeaders($headers);
+
+        if (is_object($data) and method_exists($data, 'getArrayCopy')) {
+            $data = $data->getArrayCopy();
+        }
+
+        if (is_array($data)) {
+            if (is_string(key($data))) {
+                $response[ 'result' ] = [$data];
+            } elseif (is_numeric(key($data))) {
+                $response[ 'result' ] = $data;
+            }
+        } else {
+            $response[ 'result' ] = $data;
+        }
+
+        if (is_ajax()) {
+            $contentType = isset($_SERVER[ 'HTTP_X_REQUESTED_CONTENT_TYPE' ]) ? $_SERVER[ 'HTTP_X_REQUESTED_CONTENT_TYPE' ] : 'application/json';
+            $this->setContentType($contentType);
         }
 
         if ($this->mimeType === 'application/json') {
@@ -404,11 +410,22 @@ class Output extends Message\Response
             $this->arrayToXml($response, $xml);
 
             echo $xml->asXML();
+        } elseif(is_cli()) {
+            print_cli($response, true);
+        } elseif(is_array($response['result'])) {
+            print_r($response['result']);
         } else {
-            echo $data;
+            echo $response[ 'result' ];
         }
     }
 
+    // ------------------------------------------------------------------------
+
+    /**
+     * Output::sendHeaders
+     *
+     * @param array $headers
+     */
     protected function sendHeaders(array $headers = [])
     {
         ini_set('expose_php', 0);
@@ -450,6 +467,9 @@ class Output extends Message\Response
      */
     public function sendHeaderStatus($statusCode, $reasonPhrase, $protocol = '1.1')
     {
+        $this->statusCode = $statusCode;
+        $this->reasonPhrase = empty($reasonPhrase) ? error_code_string($statusCode) : $reasonPhrase;
+
         @header('HTTP/' . $protocol . ' ' . $statusCode . ' ' . $reasonPhrase, true);
 
         return $this;
@@ -519,57 +539,6 @@ class Output extends Message\Response
 
         $this->sendHeaders();
         echo $payload;
-    }
-
-    // ------------------------------------------------------------------------
-
-    /**
-     * Output::exceptionHandler
-     *
-     * Kernel defined exception handler function.
-     *
-     * @param \Exception|\Error|\O2System\Spl\Exceptions\Abstracts\AbstractException $exception Throwable exception.
-     *
-     * @return void
-     */
-    public function exceptionHandler($exception)
-    {
-        if (is_ajax()) {
-            $this->statusCode = 500;
-            $this->reasonPhrase = 'Internal Server Error';
-
-            $this->send(implode(
-                ' ',
-                [
-                    ($exception->getCode() != 0 ? '[ ' . $exception->getCode() . ']' : ''),
-                    $exception->getMessage(),
-                    $exception->getFile() . ':' . $exception->getLine(),
-                ]
-            ));
-        } elseif ($exception instanceof AbstractException) {
-
-            ob_start();
-            include $this->getFilePath('exception');
-            $htmlOutput = ob_get_contents();
-            ob_end_clean();
-
-            echo $htmlOutput;
-            exit(EXIT_ERROR);
-        } elseif ($exception instanceof \Exception || $exception instanceof \Error) {
-
-            $exceptionClassName = get_class_name($exception);
-            $header = language()->getLine('E_HEADER_' . $exceptionClassName);
-            $description = language()->getLine('E_DESCRIPTION_' . $exceptionClassName);
-            $trace = new Trace($exception->getTrace());
-
-            ob_start();
-            include $this->getFilePath('exception-spl');
-            $htmlOutput = ob_get_contents();
-            ob_end_clean();
-
-            echo $htmlOutput;
-            exit(EXIT_ERROR);
-        }
     }
 
     // ------------------------------------------------------------------------

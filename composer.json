@@ -38,6 +38,9 @@
     "php": "~7.2.0",
     "o2system/psr": "*",
     "o2system/spl": "*",
+    "filp/whoops": "^2.3"
+  },
+  "require-dev": {
     "o2system/gear": "*"
   },
   "autoload": {
