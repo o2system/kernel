@@ -526,7 +526,7 @@ class Output extends Message\Response
      */
     public function sendPayload(array $data, $mimeType = null)
     {
-        $mimeType = isset($mimeType) ? $mimeType : $this->mimeType;
+        $mimeType = isset($mimeType) ? $mimeType : 'application/json';
         $this->setContentType($mimeType);
 
         if ($mimeType === 'application/json') {
