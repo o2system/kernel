@@ -48,13 +48,13 @@ class Language implements \IteratorAggregate
     protected $defaultIdeom = 'US';
 
     /**
-     * Language::$isLoaded
+     * Language::$loaded
      *
      * List of loaded language files.
      *
      * @var array
      */
-    protected $isLoaded = [];
+    protected $loaded = [];
 
     /**
      * Language::$lines
@@ -104,9 +104,9 @@ class Language implements \IteratorAggregate
                 session()->set('language', $this->getDefault());
             }
 
-            if (count($this->isLoaded)) {
-                foreach ($this->isLoaded as $fileIndex => $filePath) {
-                    unset($this->isLoaded[ $fileIndex ]);
+            if (count($this->loaded)) {
+                foreach ($this->loaded as $fileIndex => $filePath) {
+                    unset($this->loaded[ $fileIndex ]);
                     $this->loadFile($fileIndex);
                 }
             }
@@ -177,7 +177,7 @@ class Language implements \IteratorAggregate
      */
     public function isLoaded($filePath)
     {
-        return array_key_exists($this->getFileIndex($filePath), $this->isLoaded);
+        return array_key_exists($this->getFileIndex($filePath), $this->loaded);
     }
 
     // ------------------------------------------------------------------------
@@ -216,7 +216,7 @@ class Language implements \IteratorAggregate
 
         if (is_array($lines)) {
             if (count($lines)) {
-                $this->isLoaded[ $this->getFileIndex($filePath) ] = $filePath;
+                $this->loaded[ $this->getFileIndex($filePath) ] = $filePath;
 
                 $this->lines = array_merge($this->lines, $lines);
 
@@ -251,7 +251,7 @@ class Language implements \IteratorAggregate
             ];
 
             foreach ($filePaths as $filePath) {
-                if (is_file($filePath) AND ! in_array($filePath, $this->isLoaded)) {
+                if (is_file($filePath) AND ! in_array($filePath, $this->loaded)) {
                     return $filePath;
                     break;
                     break;
