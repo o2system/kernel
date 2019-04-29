@@ -1,6 +1,6 @@
 <?php
 /**
- * This file is part of the O2System PHP Framework package.
+ * This file is part of the O2System Framework package.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -27,7 +27,7 @@ abstract class AbstractTransport implements TransportInterface
     protected $options = [];
 
     /**
-     * Constructor.
+     * AbstractTransport::__construct
      *
      * @param   array|\ArrayAccess $options Client options object.
      *
@@ -38,7 +38,11 @@ abstract class AbstractTransport implements TransportInterface
 
     }
 
+    // ------------------------------------------------------------------------
+
     /**
+     * AbstractTransport::getOption
+     *
      * Get option value.
      *
      * @param   string $name    Option name.
@@ -55,7 +59,11 @@ abstract class AbstractTransport implements TransportInterface
         return $this->options[ $name ];
     }
 
+    // ------------------------------------------------------------------------
+
     /**
+     * AbstractTransport::setOption
+     *
      * Set option value.
      *
      * @param   string $name  Option name.
@@ -70,7 +78,11 @@ abstract class AbstractTransport implements TransportInterface
         return $this;
     }
 
+    // ------------------------------------------------------------------------
+
     /**
+     * AbstractTransport::getOptions
+     *
      * Method to get property Options
      *
      * @return  array

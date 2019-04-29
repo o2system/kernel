@@ -3,10 +3,11 @@
 </style>
 <div class="alert alert-danger" role="alert">
     <p>
-        <strong class="badge badge-danger"><?php echo $error->getStringSeverity(); ?></strong>
+        <strong class="badge badge-danger"><?php echo $error->getStringSeverity(); ?></strong><br>
         <?php echo $error->getMessage(); ?>
+        <?php if ($error->getLine() != 0) : ?>
+		    <small class="text-muted text-italic"><?php echo $error->getFile(); ?>
+			    :<?php echo $error->getLine(); ?></small>
+        <?php endif; ?>
     </p>
-    <?php if( $error->getLine() != 0) : ?>
-    <small class="text-muted text-italic"><?php echo $error->getFile(); ?>:<?php echo $error->getLine(); ?></small>
-    <?php endif; ?>
 </div>

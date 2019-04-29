@@ -1,6 +1,6 @@
 <?php
 /**
- * This file is part of the O2System PHP Framework package.
+ * This file is part of the O2System Framework package.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -47,7 +47,7 @@ class Uri implements UriInterface
     protected $suffix;
 
     /**
-     * Uri Host
+     * Uri::$host
      *
      * The host subcomponent of authority is identified by an IP literal
      * encapsulated within square brackets, an IPv4 address in dotted-decimal form,
@@ -60,62 +60,64 @@ class Uri implements UriInterface
     protected $host;
 
     /**
-     * Uri Port
+     * Uri::$port
      *
      * @var int
      */
     protected $port = 80;
 
     /**
-     * Uri Username
+     * Uri::$username
      *
      * @var string
      */
     protected $username;
 
     /**
-     * Uri User Password
+     * Uri::$password
      *
      * @var string
      */
     protected $password;
 
     /**
-     * Uri Path
+     * Uri::$path
      *
      * @var string
      */
     protected $path;
 
     /**
-     * Uri Query Params
+     * Uri::$query
      *
      * @var string
      */
     protected $query;
 
     /**
-     * Uri Fragment
+     * Uri::$fragment
      *
      * @var string
      */
     protected $fragment;
 
     /**
-     * Uri Attribute
+     * Uri::$attribute
      *
      * @var string
      */
     protected $attribute;
 
     /**
-     * Uri SubDomain
+     * Uri::$subDomain
      *
      * @var string
      */
     protected $subDomain;
 
     /**
+     * Uri::$subDomains
+     *
      * List of Uri SubDomains
      *
      * @var array
@@ -123,6 +125,8 @@ class Uri implements UriInterface
     protected $subDomains = [];
 
     /**
+     * Uri::$tld
+     *
      * Uri Top Level Domain
      *
      * @var string
@@ -130,6 +134,8 @@ class Uri implements UriInterface
     protected $tld;
 
     /**
+     * Uri::$tlds
+     *
      * List of Uri Top Level Domains
      *
      * @var array
@@ -259,69 +265,68 @@ class Uri implements UriInterface
         /**
          * Define Uri Tld
          */
-        if (count($xHost) > 1) {
-            $this->tlds = [];
+        if ($xHostNum = count($xHost)) {
+            $this->tlds[] = end($xHost);
+            array_pop($xHost);
 
-            foreach ($xHost as $key => $hostname) {
-                if (strlen($hostname) <= 3 AND $key >= 1 AND $hostname !== 'www') {
-                    $this->tlds[] = $hostname;
+            if (count($xHost) >= 2) {
+                $this->subDomains[] = $this->subDomain = reset($xHost);
+                array_shift($xHost);
+
+                if (count($xHost)) {
+                    if (strlen($tld = end($xHost)) <= 3) {
+                        array_unshift($this->tlds, $tld);
+                        array_pop($xHost);
+                    }
                 }
             }
 
-            if (empty($this->tlds)) {
-                $this->tlds[] = end($xHost);
+            if (count($xHost)) {
+                $this->host = implode('.', $xHost) . '.' . implode('.', $this->tlds);
             }
 
             $this->tld = '.' . implode('.', $this->tlds);
-
-            $this->subDomains = array_diff($xHost, $this->tlds);
-            $this->subDomains = count($this->subDomains) == 0 ? $this->tlds : $this->subDomains;
-
-            $this->host = end($this->subDomains);
-            array_pop($this->subDomains);
-
-            $this->host = implode('.', array_slice($this->subDomains, 1)) . '.' . $this->host . $this->tld;
-            $this->host = ltrim($this->host, '.');
-
-            if (count($this->subDomains) > 0) {
-                $this->subDomain = reset($this->subDomains);
-            }
         }
 
-        $ordinalEnds = ['th', 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th'];
+        $xHost = explode('.', $this->host);
+        $xHostNum = count($xHost);
+        $tldsNum = count($this->tlds);
 
-        foreach ($this->subDomains as $key => $subdomain) {
-            $ordinalNumber = count($xHost) - $key;
+        // Convert Keys to Ordinal
+        $this->setOrdinalKeys($this->subDomains, ($tldsNum + $xHostNum) - 1);
+        $this->setOrdinalKeys($this->tlds, $tldsNum);
 
-            if ((($ordinalNumber % 100) >= 11) && (($ordinalNumber % 100) <= 13)) {
-                $ordinalKey = $ordinalNumber . 'th';
-            } else {
-                $ordinalKey = $ordinalNumber . $ordinalEnds[ $ordinalNumber % 10 ];
-            }
-
-            $this->subDomains[ $ordinalKey ] = $subdomain;
-
-            unset($this->subDomains[ $key ]);
-        }
-
-        foreach ($this->tlds as $key => $tld) {
-            $ordinalNumber = count($this->tlds) - $key;
-
-            if ((($ordinalNumber % 100) >= 11) && (($ordinalNumber % 100) <= 13)) {
-                $ordinalKey = $ordinalNumber . 'th';
-            } else {
-                $ordinalKey = $ordinalNumber . $ordinalEnds[ $ordinalNumber % 10 ];
-            }
-
-            $this->tlds[ $ordinalKey ] = $tld;
-
-            unset($this->tlds[ $key ]);
-        }
-
-        if (function_exists('config')) {
+        if (services()->has('config')) {
             if (config()->offsetExists('uri')) {
                 $this->setSuffix(config('uri')->offsetGet('suffix'));
             }
+        }
+    }
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * Uri::setOrdinalKeys
+     *
+     * @param array $elements
+     * @param int   $startNumber
+     */
+    protected function setOrdinalKeys(array &$elements, $startNumber = 0)
+    {
+        $ordinalEnds = ['th', 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th'];
+
+        foreach ($elements as $key => $subdomain) {
+            $ordinalNumber = $startNumber - intval($key);
+
+            if ((($ordinalNumber % 100) >= 11) && (($ordinalNumber % 100) <= 13)) {
+                $ordinalKey = $ordinalNumber . 'th';
+            } else {
+                $ordinalKey = $ordinalNumber . $ordinalEnds[ $ordinalNumber % 10 ];
+            }
+
+            $elements[ $ordinalKey ] = $subdomain;
+
+            unset($elements[ $key ]);
         }
     }
 
@@ -356,6 +361,13 @@ class Uri implements UriInterface
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Uri::addSegments
+     *
+     * @param Segments|string|array $segments
+     *
+     * @return \O2System\Kernel\Http\Message\Uri
+     */
     public function addSegments($segments)
     {
         if ( ! $segments instanceof Segments) {
@@ -374,7 +386,7 @@ class Uri implements UriInterface
     // ------------------------------------------------------------------------
 
     /**
-     * UriInterface::getScheme
+     * Uri::getScheme
      *
      * Retrieve the scheme component of the URI.
      *
@@ -397,7 +409,7 @@ class Uri implements UriInterface
     // ------------------------------------------------------------------------
 
     /**
-     * UriInterface::getAuthority
+     * Uri::getAuthority
      *
      * Retrieve the authority component of the URI.
      *
@@ -440,7 +452,7 @@ class Uri implements UriInterface
     // ------------------------------------------------------------------------
 
     /**
-     * UriInterface::getUserInfo
+     * Uri::getUserInfo
      *
      * Retrieve the user information component of the URI.
      *
@@ -470,7 +482,7 @@ class Uri implements UriInterface
     // ------------------------------------------------------------------------
 
     /**
-     * UriInterface::getHost
+     * Uri::getHost
      *
      * Retrieve the host component of the URI.
      *
@@ -490,7 +502,7 @@ class Uri implements UriInterface
     // ------------------------------------------------------------------------
 
     /**
-     * UriInterface::getPort
+     * Uri::getPort
      *
      * Retrieve the port component of the URI.
      *
@@ -514,7 +526,7 @@ class Uri implements UriInterface
     // ------------------------------------------------------------------------
 
     /**
-     * UriInterface::getPath
+     * Uri::getPath
      *
      * Retrieve the path component of the URI.
      *
@@ -548,7 +560,7 @@ class Uri implements UriInterface
     // ------------------------------------------------------------------------
 
     /**
-     * UriInterface::getQuery
+     * Uri::getQuery
      *
      * Retrieve the query string of the URI.
      *
@@ -577,7 +589,7 @@ class Uri implements UriInterface
     // ------------------------------------------------------------------------
 
     /**
-     * UriInterface::getFragment
+     * Uri::getFragment
      *
      * Retrieve the fragment component of the URI.
      *
@@ -601,9 +613,18 @@ class Uri implements UriInterface
 
     // ------------------------------------------------------------------------
 
-    public function getSubDomain($level = '3rd')
+    /**
+     * Uri::getSubDomain
+     *
+     * @param string $level
+     *
+     * @return bool|mixed
+     */
+    public function getSubDomain($level = 'AUTO')
     {
-        if (isset($this->subDomains[ $level ])) {
+        if ($level === 'AUTO') {
+            return reset($this->subDomains);
+        } elseif (isset($this->subDomains[ $level ])) {
             return $this->subDomains[ $level ];
         }
 
@@ -612,6 +633,43 @@ class Uri implements UriInterface
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Uri::addSubDomain
+     *
+     * @param string|array|null $subDomain
+     *
+     * @return \O2System\Kernel\Http\Message\Uri
+     */
+    public function addSubDomain($subDomain)
+    {
+        $uri = clone $this;
+
+        if (is_null($subDomain)) {
+            $uri->subDomain = null;
+            $uri->subDomains = [];
+        } elseif (is_string($subDomain)) {
+            $uri->subDomain = $subDomain;
+            array_unshift($uri->subDomains, $subDomain);
+        } elseif (is_array($subDomain)) {
+            $uri->subDomain = reset($subDomain);
+            $uri->subDomains = array_merge($uri->subDomains, $subDomain);
+        }
+
+        $uri->subDomains = array_unique($uri->subDomains);
+        $this->setOrdinalKeys($uri->subDomains, count($uri->subDomains) + 2);
+
+        return $uri;
+    }
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * Uri::withSubDomain
+     *
+     * @param string|array|null $subDomain
+     *
+     * @return \O2System\Kernel\Http\Message\Uri
+     */
     public function withSubDomain($subDomain)
     {
         $uri = clone $this;
@@ -619,16 +677,27 @@ class Uri implements UriInterface
         if (is_null($subDomain)) {
             $uri->subDomain = null;
             $uri->subDomains = [];
-        } else {
+        } elseif (is_string($subDomain)) {
             $uri->subDomain = $subDomain;
             $uri->subDomains = [$subDomain];
+        } elseif (is_array($subDomain)) {
+            $uri->subDomain = reset($subDomain);
+            $uri->subDomains = $subDomain;
         }
+
+        $uri->subDomains = array_unique($uri->subDomains);
+        $this->setOrdinalKeys($uri->subDomains, count($uri->subDomains) + 2);
 
         return $uri;
     }
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Uri::getSubDomains
+     *
+     * @return array
+     */
     public function getSubDomains()
     {
         return $this->subDomains;
@@ -636,6 +705,13 @@ class Uri implements UriInterface
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Uri::withSubDomains
+     *
+     * @param array $subDomains
+     *
+     * @return \O2System\Kernel\Http\Message\Uri
+     */
     public function withSubDomains(array $subDomains)
     {
         $uri = clone $this;
@@ -648,7 +724,7 @@ class Uri implements UriInterface
     // ------------------------------------------------------------------------
 
     /**
-     * UriInterface::withScheme
+     * Uri::withScheme
      *
      * Return an instance with the specified scheme.
      *
@@ -680,7 +756,7 @@ class Uri implements UriInterface
     // ------------------------------------------------------------------------
 
     /**
-     * UriInterface::withUserInfo
+     * Uri::withUserInfo
      *
      * Return an instance with the specified user information.
      *
@@ -707,7 +783,7 @@ class Uri implements UriInterface
     // ------------------------------------------------------------------------
 
     /**
-     * UriInterface::withHost
+     * Uri::withHost
      *
      * Return an instance with the specified host.
      *
@@ -732,7 +808,7 @@ class Uri implements UriInterface
     // ------------------------------------------------------------------------
 
     /**
-     * UriInterface::withPort
+     * Uri::withPort
      *
      * Return an instance with the specified port.
      *
@@ -762,7 +838,7 @@ class Uri implements UriInterface
     // ------------------------------------------------------------------------
 
     /**
-     * UriInterface::withPath
+     * Uri::withPath
      *
      * Return an instance with the specified path.
      *
@@ -796,6 +872,13 @@ class Uri implements UriInterface
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Uri::addPath
+     *
+     * @param string $path
+     *
+     * @return \O2System\Kernel\Http\Message\Uri
+     */
     public function addPath($path)
     {
         $uri = clone $this;
@@ -807,7 +890,7 @@ class Uri implements UriInterface
     // ------------------------------------------------------------------------
 
     /**
-     * UriInterface::withQuery
+     * Uri::withQuery
      *
      * Return an instance with the specified query string.
      *
@@ -834,6 +917,13 @@ class Uri implements UriInterface
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Uri::addQuery
+     *
+     * @param array|string $query
+     *
+     * @return \O2System\Kernel\Http\Message\Uri
+     */
     public function addQuery($query)
     {
         $uri = clone $this;
@@ -858,7 +948,7 @@ class Uri implements UriInterface
     // ------------------------------------------------------------------------
 
     /**
-     * UriInterface::withFragment
+     * Uri::withFragment
      *
      * Return an instance with the specified URI fragment.
      *
@@ -884,6 +974,11 @@ class Uri implements UriInterface
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Uri::getSuffix
+     *
+     * @return string
+     */
     public function getSuffix()
     {
         return $this->suffix;
@@ -891,6 +986,11 @@ class Uri implements UriInterface
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Uri::setSuffix
+     *
+     * @param string $suffix
+     */
     protected function setSuffix($suffix)
     {
         if (is_null($suffix) or is_bool($suffix)) {
@@ -904,6 +1004,13 @@ class Uri implements UriInterface
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Uri::withSuffix
+     *
+     * @param string $suffix
+     *
+     * @return \O2System\Kernel\Http\Message\Uri
+     */
     public function withSuffix($suffix)
     {
         $uri = clone $this;
@@ -915,7 +1022,7 @@ class Uri implements UriInterface
     // ------------------------------------------------------------------------
 
     /**
-     * UriInterface::__toString
+     * Uri::__toString
      *
      * Return the string representation as a URI reference.
      *
@@ -983,7 +1090,7 @@ class Uri implements UriInterface
         $uriString .= str_replace('//', '/', $uriPath);
         $uriString .= empty($this->query)
             ? ''
-            : '/?' . $this->query;
+            : '?' . $this->query;
         $uriString .= empty($this->fragment)
             ? ''
             : $this->fragment;

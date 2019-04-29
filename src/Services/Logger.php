@@ -1,6 +1,6 @@
 <?php
 /**
- * This file is part of the O2System PHP Framework package.
+ * This file is part of the O2System Framework package.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -15,16 +15,20 @@ namespace O2System\Kernel\Services;
 
 // ------------------------------------------------------------------------
 
-use O2System\Kernel\Datastructures\Config;
-use O2System\Psr\Log\LoggerInterface;
+use O2System\Kernel\DataStructures\Config;
+use Psr\Log\LoggerInterface;
+use Psr\Log\LoggerTrait;
+use Psr\Log\LogLevel;
 
 /**
  * Class Logger
  *
  * @package O2System\Kernel
  */
-class Logger implements LoggerInterface
+class Logger extends LogLevel implements LoggerInterface
 {
+    use LoggerTrait;
+
     /**
      * Logger Threshold
      *
@@ -78,10 +82,17 @@ class Logger implements LoggerInterface
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Logger::getLines
+     *
+     * @return array
+     */
     public function getLines()
     {
         return $this->lines;
     }
+
+    // ------------------------------------------------------------------------
 
     /**
      * Logger::setThreshold
@@ -112,7 +123,7 @@ class Logger implements LoggerInterface
     // --------------------------------------------------------------------
 
     /**
-     * Set Path
+     * Logger::setPath
      *
      * @param string $path
      */
@@ -122,23 +133,6 @@ class Logger implements LoggerInterface
     }
 
     // --------------------------------------------------------------------
-
-    /**
-     * Logger::emergency
-     *
-     * System is unusable.
-     *
-     * @param string $message
-     * @param array  $context
-     *
-     * @return void
-     */
-    public function emergency($message, array $context = [])
-    {
-        $this->log(Logger::EMERGENCY, $message, $context);
-    }
-
-    // ------------------------------------------------------------------------
 
     /**
      * Logger::log

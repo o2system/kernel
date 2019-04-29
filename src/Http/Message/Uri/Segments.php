@@ -1,6 +1,6 @@
 <?php
 /**
- * This file is part of the O2System PHP Framework package.
+ * This file is part of the O2System Framework package.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -15,7 +15,7 @@ namespace O2System\Kernel\Http\Message\Uri;
 
 // ------------------------------------------------------------------------
 
-use O2System\Spl\Datastructures\SplArrayObject;
+use O2System\Spl\DataStructures\SplArrayObject;
 use O2System\Spl\Exceptions\RuntimeException;
 
 /**
@@ -25,13 +25,31 @@ use O2System\Spl\Exceptions\RuntimeException;
  */
 class Segments
 {
+    /**
+     * Segments::$string
+     *
+     * @var string
+     */
     protected $string;
+
+    /**
+     * Segments::$parts
+     *
+     * @var array
+     */
     protected $parts;
 
+    // ------------------------------------------------------------------------
+
+    /**
+     * Segments::__construct
+     *
+     * @param string|null $string
+     */
     public function __construct($string = null)
     {
         if (is_null($string)) {
-            if (function_exists('config')) {
+            if (kernel()->services->has('config')) {
                 if (config()->offsetExists('uri')) {
                     $protocol = strtoupper(config('uri')->offsetGet('protocol'));
                 }
@@ -64,7 +82,11 @@ class Segments
         $this->setParts(explode('/', $string));
     }
 
+    // ------------------------------------------------------------------------
+
     /**
+     * Segments::parseRequestUri
+     *
      * Parse REQUEST_URI
      *
      * Will parse REQUEST_URI and automatically detect the URI from it,
@@ -130,6 +152,8 @@ class Segments
     // ------------------------------------------------------------------------
 
     /**
+     * Segments::parseQueryString
+     *
      * Parse QUERY_STRING
      *
      * Will parse QUERY_STRING and automatically detect the URI from it.
@@ -161,6 +185,8 @@ class Segments
     // --------------------------------------------------------------------
 
     /**
+     * Segments::getString
+     *
      * Get String
      *
      * Get Requested Uri String
@@ -176,6 +202,13 @@ class Segments
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Segments::addString
+     *
+     * @param string $string
+     *
+     * @return \O2System\Kernel\Http\Message\Uri\Segments
+     */
     public function addString($string)
     {
         $string = $this->string . '/' . trim($string, '/');
@@ -185,6 +218,13 @@ class Segments
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Segments::withString
+     *
+     * @param string $string
+     *
+     * @return \O2System\Kernel\Http\Message\Uri\Segments
+     */
     public function withString($string)
     {
         $string = trim(remove_invisible_characters($string, false), '/');
@@ -192,6 +232,15 @@ class Segments
         return $this->withParts(explode('/', $string));
     }
 
+    // ------------------------------------------------------------------------
+
+    /**
+     * Segments::withParts
+     *
+     * @param array $parts
+     *
+     * @return \O2System\Kernel\Http\Message\Uri\Segments
+     */
     public function withParts(array $parts)
     {
         $uri = clone $this;
@@ -202,6 +251,13 @@ class Segments
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Segments::addParts
+     *
+     * @param array $parts
+     *
+     * @return \O2System\Kernel\Http\Message\Uri\Segments
+     */
     public function addParts(array $parts)
     {
         $parts = array_merge($this->parts, $parts);
@@ -209,7 +265,11 @@ class Segments
         return $this->withParts($parts);
     }
 
+    // ------------------------------------------------------------------------
+
     /**
+     * Segments::getPart
+     *
      * Get Segment
      *
      * @param int $n (n) of Uri Segments
@@ -223,7 +283,11 @@ class Segments
             : false;
     }
 
+    // ------------------------------------------------------------------------
+
     /**
+     * Segments::getParts
+     *
      * Get Segments
      *
      * @return array
@@ -235,6 +299,13 @@ class Segments
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Segments::setParts
+     *
+     * @param array $parts
+     *
+     * @throws \O2System\Spl\Exceptions\RuntimeException
+     */
     protected function setParts(array $parts)
     {
         if (count($parts)) {
@@ -244,12 +315,15 @@ class Segments
                 foreach ($parts as $part) {
                     // Filter segments for security
                     if ($part = trim($this->filterPart($part))) {
+                        if (class_exists('O2System\Framework', false)) {
+                            if (false !== ($language = language()->registered($part))) {
+                                language()->setDefault($part);
 
-                        if (false !== ($language = language()->packageExists($part))) {
-                            language()->setDefault($part);
+                                continue;
+                            }
+                        }
 
-                            continue;
-                        } elseif ( ! in_array($part, $validSegments)) {
+                        if ( ! in_array($part, $validSegments)) {
                             $validSegments[] = $part;
                         }
                     }
@@ -269,6 +343,8 @@ class Segments
     // ------------------------------------------------------------------------
 
     /**
+     * Segments::hasPart
+     *
      * Has Segment
      *
      * @param string $part
@@ -284,6 +360,8 @@ class Segments
     // ------------------------------------------------------------------------
 
     /**
+     * Segments::getTotalParts
+     *
      * Get Total Segments
      *
      * @return int
@@ -293,17 +371,26 @@ class Segments
         return count($this->parts);
     }
 
+    // ------------------------------------------------------------------------
+
+    /**
+     * Segments::__toString
+     *
+     * @return string
+     */
     public function __toString()
     {
-        if (empty($this->parts)) {
+        if (count($this->parts)) {
             return implode('/', $this->parts);
         }
 
         return '';
     }
 
+    // ------------------------------------------------------------------------
+
     /**
-     * Filter Segment
+     * Segments::filterPart
      *
      * Filters segments for malicious characters.
      *
@@ -333,7 +420,7 @@ class Segments
             throw new RuntimeException('E_URI_HAS_DISALLOWED_CHARACTERS', 105);
         }
 
-        $regex = ['$', '(', ')', '%28', '%29', 'index']; // Bad
+        $regex = ['$', '(', ')', '%28', '%29', 'index', '.php', '.phtml']; // Bad
         $replace = ['&#36;', '&#40;', '&#41;', '&#40;', '&#41;']; // Good
 
         if ( ! empty($config)) {

@@ -1,6 +1,6 @@
 <?php
 /**
- * This file is part of the O2System PHP Framework package.
+ * This file is part of the O2System Framework package.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -11,7 +11,7 @@
 
 // ------------------------------------------------------------------------
 
-namespace O2System\Kernel\Cli\Router\Datastructures;
+namespace O2System\Kernel\Cli\Router\DataStructures;
 
 // ------------------------------------------------------------------------
 
@@ -20,21 +20,45 @@ use O2System\Spl\Info\SplClassInfo;
 /**
  * Class Commander
  *
- * @package O2System\Datastructures
+ * @package O2System\DataStructures
  */
 class Commander extends SplClassInfo
 {
+    /**
+     * Commander::$requestMethod
+     *
+     * @var string|null
+     */
     private $requestMethod = null;
 
-
+    /**
+     * Commander::$requestMethodArgs
+     *
+     * @var array
+     */
     private $requestMethodArgs = [];
 
+    /**
+     * Commander::$properties
+     *
+     * @var array
+     */
     private $properties = [];
 
+    /**
+     * Commander::$instance
+     *
+     * @var \O2System\Kernel\Cli\Commander
+     */
     private $instance;
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Commander::__construct
+     *
+     * @param string $filePath
+     */
     public function __construct($filePath)
     {
         if (is_object($filePath)) {
@@ -64,6 +88,11 @@ class Commander extends SplClassInfo
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Commander::setProperties
+     *
+     * @param array $properties
+     */
     public function setProperties(array $properties)
     {
         $this->properties = $properties;
@@ -71,6 +100,11 @@ class Commander extends SplClassInfo
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Commander::getParameter
+     *
+     * @return string
+     */
     public function getParameter()
     {
         return strtolower(get_class_name($this->name));
@@ -78,6 +112,11 @@ class Commander extends SplClassInfo
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Commander::getInstance
+     *
+     * @return \O2System\Kernel\Cli\Commander|string
+     */
     public function &getInstance()
     {
         if (empty($this->instance)) {
@@ -100,6 +139,13 @@ class Commander extends SplClassInfo
         return $this->instance;
     }
 
+    // ------------------------------------------------------------------------
+
+    /**
+     * Commander::getRequestMethod
+     *
+     * @return string|null
+     */
     public function getRequestMethod()
     {
         return $this->requestMethod;
@@ -107,6 +153,13 @@ class Commander extends SplClassInfo
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Commander::setRequestMethod
+     *
+     * @param string $method
+     *
+     * @return static
+     */
     public function setRequestMethod($method)
     {
         $this->requestMethod = $method;
@@ -116,11 +169,25 @@ class Commander extends SplClassInfo
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Commander::getRequestMethodArgs
+     *
+     * @return array
+     */
     public function getRequestMethodArgs()
     {
         return $this->requestMethodArgs;
     }
 
+    // ------------------------------------------------------------------------
+
+    /**
+     * Commander::setRequestMethodArgs
+     *
+     * @param array $arguments
+     *
+     * @return static
+     */
     public function setRequestMethodArgs(array $arguments)
     {
         $arguments = array_values($arguments);

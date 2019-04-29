@@ -1,6 +1,6 @@
 <?php
 /**
- * This file is part of the O2System PHP Framework package.
+ * This file is part of the O2System Framework package.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -135,7 +135,7 @@ class Addresses
      * @param      $path
      * @param null $domain
      *
-     * @return bool|\O2System\Kernel\Http\Router\Datastructures\Action
+     * @return bool|\O2System\Kernel\Http\Router\DataStructures\Action
      */
     public function getTranslation($path, $domain = null)
     {
@@ -241,6 +241,15 @@ class Addresses
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Addresses::addTranslation
+     *
+     * @param string  $path
+     * @param string  $address
+     * @param string  $method
+     *
+     * @return static
+     */
     public function addTranslation($path, $address, $method = self::HTTP_GET)
     {
         $path = '/' . ltrim($path, '/');
@@ -277,7 +286,7 @@ class Addresses
             $path = '/' . trim(trim($prefix, '/') . '/' . trim($path, '/'), '/');
         }
 
-        $action = new Datastructures\Action($method, $path, $closure, $domain);
+        $action = new DataStructures\Action($method, $path, $closure, $domain);
 
         $this->translations[ $action->getDomain() ][ $action->getPath() ] = $action;
 
@@ -286,6 +295,14 @@ class Addresses
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Addresses::middleware
+     *
+     * @param array $middleware
+     * @param bool  $register
+     *
+     * @return static
+     */
     public function middleware(array $middleware, $register = true)
     {
         foreach ($middleware as $offset => $object) {
@@ -301,6 +318,14 @@ class Addresses
         return $this;
     }
 
+    // ------------------------------------------------------------------------
+
+    /**
+     * Addresses::pool
+     *
+     * @param          $attributes
+     * @param \Closure $closure
+     */
     public function pool($attributes, \Closure $closure)
     {
         $parentAttributes = $this->attributes;
@@ -311,6 +336,13 @@ class Addresses
         $this->attributes = $parentAttributes;
     }
 
+    // ------------------------------------------------------------------------
+
+    /**
+     * Addresses::domains
+     *
+     * @param array $domains
+     */
     public function domains(array $domains)
     {
         foreach ($domains as $domain => $address) {
@@ -318,17 +350,40 @@ class Addresses
         }
     }
 
+    // ------------------------------------------------------------------------
+
+    /**
+     * Addresses::domain
+     *
+     * @param string $domain
+     * @param string $address
+     */
     public function domain($domain, $address)
     {
         if ($domain !== '*') {
             $hostDomain = new Domain();
-            $domain = str_replace('.' . $hostDomain->getParentDomain(), '',
-                    $domain) . '.' . $hostDomain->getParentDomain();
+            $domainParts = explode('.', $domain);
+
+            if (count($domainParts) == 1) {
+                $domain = $domain . '.' . $hostDomain->getParentDomain();
+            } else {
+                $domain = str_replace('.' . $hostDomain->getParentDomain(), '',
+                        $domain) . '.' . $hostDomain->getParentDomain();
+            }
         }
 
         $this->domains[ $domain ] = $address;
     }
 
+    // ------------------------------------------------------------------------
+
+    /**
+     * Addresses::getDomain
+     *
+     * @param string|null $domain
+     *
+     * @return int|mixed|string|null
+     */
     public function getDomain($domain = null)
     {
         $domain = is_null($domain)

@@ -1,6 +1,6 @@
 <?php
 /**
- * This file is part of the O2System PHP Framework package.
+ * This file is part of the O2System Framework package.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -310,9 +310,11 @@ if ( ! function_exists('path_to_url')) {
     function path_to_url($path)
     {
         $path = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $path);
+        $root_dir = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $_SERVER[ 'DOCUMENT_ROOT' ]);
+        $base_dir = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, dirname($_SERVER[ 'SCRIPT_FILENAME' ]));
 
-        $root_dir = $_SERVER[ 'DOCUMENT_ROOT' ] . DIRECTORY_SEPARATOR;
-        $base_dir = dirname($_SERVER[ 'SCRIPT_FILENAME' ]) . DIRECTORY_SEPARATOR;
+        $root_dir = rtrim($root_dir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+        $base_dir = rtrim($base_dir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
 
         if (is_dir(DIRECTORY_SEPARATOR . 'private' . $base_dir)) {
             $root_dir = DIRECTORY_SEPARATOR . 'private' . $root_dir;
@@ -340,11 +342,17 @@ if ( ! function_exists('path_to_url')) {
         $base_url = str_replace(DIRECTORY_SEPARATOR, '/', $base_url);
         $base_url = trim($base_url, '/') . '/';
 
-        if (defined('PATH_PUBLIC')) {
+        if(strpos($path, 'resources') !== false && defined('PATH_RESOURCES')) {
+            $path_url = 'resources' . '/' . str_replace(PATH_RESOURCES, '', $path);
+        } elseif(strpos($path, 'public') !== false && defined('PATH_PUBLIC')) {
             $path_url = str_replace(PATH_PUBLIC, '', $path);
+        } elseif(strpos($path, 'storage') !== false && defined('PATH_RESOURCES')) {
+            $path_url = 'storage' . '/' . str_replace(PATH_RESOURCES, '', $path);
         } else {
             $path_url = str_replace($base_dir, '', $path);
         }
+
+        $path_url = str_replace(['/', '\\'], '/', $path_url);
 
         return $base_url . str_replace(DIRECTORY_SEPARATOR, '/', $path_url);
     }

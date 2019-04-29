@@ -1,6 +1,6 @@
 <?php
 /**
- * This file is part of the O2System PHP Framework package.
+ * This file is part of the O2System Framework package.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -30,36 +30,35 @@ class Language implements \IteratorAggregate
     use FilePathCollectorTrait;
 
     /**
-     * Language Packages
+     * Language::$defaultLocale
      *
-     * @var array
-     */
-    protected $packages = [];
-
-    /**
-     * Active Locale
+     * Default language locale.
      *
-     * @type string
+     * @var string
      */
     protected $defaultLocale = 'en';
 
     /**
-     * Active Ideom
+     * Language::$defaultIdeom
      *
-     * @type string
+     * Default language ideom.
+     *
+     * @var string
      */
     protected $defaultIdeom = 'US';
 
     /**
-     * List of loaded language files
+     * Language::$loaded
      *
-     * @access  protected
+     * List of loaded language files.
      *
      * @var array
      */
-    protected $isLoaded = [];
+    protected $loaded = [];
 
     /**
+     * Language::$lines
+     *
      * Languages Lines
      *
      * @var array
@@ -69,9 +68,7 @@ class Language implements \IteratorAggregate
     // ------------------------------------------------------------------------
 
     /**
-     * Class Constructor
-     *
-     * @access  public
+     * Language::__construct
      */
     public function __construct()
     {
@@ -81,6 +78,15 @@ class Language implements \IteratorAggregate
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Language::setDefault
+     *
+     * Sets default language.
+     *
+     * @param string $default
+     *
+     * @return static
+     */
     public function setDefault($default)
     {
         $xDefault = explode('-', $default);
@@ -93,11 +99,180 @@ class Language implements \IteratorAggregate
             $this->setDefaultLocale(reset($xDefault));
         }
 
+        if (class_exists('O2System\Framework', false) or class_exists('\O2System\Reactor', false)) {
+            if (services()->has('session')) {
+                session()->set('language', $this->getDefault());
+            }
+
+            if (count($this->loaded)) {
+                foreach ($this->loaded as $fileIndex => $filePath) {
+                    unset($this->loaded[ $fileIndex ]);
+                    $this->loadFile($fileIndex);
+                }
+            }
+        }
+
         return $this;
     }
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Language::getDefault
+     *
+     * Get default language with ideom
+     *
+     * @return string
+     */
+    public function getDefault()
+    {
+        return implode('-', [$this->defaultLocale, $this->defaultIdeom]);
+    }
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * Language::load
+     *
+     * Load language file into collections
+     *
+     * @param string|array $filenames
+     *
+     * @return static
+     */
+    public function loadFile($filenames)
+    {
+        $filenames = is_string($filenames) ? [$filenames] : $filenames;
+
+        if (empty($filenames)) {
+            return $this;
+        }
+
+        foreach ($filenames as $filename) {
+            $filename = dash($filename);
+            if ( ! $this->isLoaded($filename)) {
+                if (is_file($filename)) {
+                    $this->parseFile($filename);
+                    break;
+                } elseif (false !== ($filePath = $this->findFile($filename))) {
+                    $this->parseFile($filePath);
+                    break;
+                }
+            }
+        }
+
+        return $this;
+    }
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * Language::isLoaded
+     *
+     * Checks if the language file has been loaded.
+     *
+     * @param string $filePath
+     *
+     * @return bool
+     */
+    public function isLoaded($filePath)
+    {
+        return array_key_exists($this->getFileIndex($filePath), $this->loaded);
+    }
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * Language::getFileIndex
+     *
+     * Gets filepath index key.
+     *
+     * @param string $filePath
+     *
+     * @return string
+     */
+    protected function getFileIndex($filePath)
+    {
+        $fileIndex = pathinfo($filePath, PATHINFO_FILENAME);
+        $fileIndex = str_replace('_' . $this->getDefault(), '', $fileIndex);
+
+        return $fileIndex;
+    }
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * Language::parseFile
+     *
+     * Parse INI language file into collections
+     *
+     * @param string $filePath Language INI filePath
+     *
+     * @return bool
+     */
+    protected function parseFile($filePath)
+    {
+        $lines = parse_ini_file($filePath, true, INI_SCANNER_RAW);
+
+        if (is_array($lines)) {
+            if (count($lines)) {
+                $this->loaded[ $this->getFileIndex($filePath) ] = $filePath;
+
+                $this->lines = array_merge($this->lines, $lines);
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * Language::findFile
+     *
+     * Find language file.
+     *
+     * @param string $filename
+     *
+     * @return string|bool Returns FALSE if failed.
+     */
+    protected function findFile($filename)
+    {
+        $default = $this->getDefault();
+
+        foreach ($this->filePaths as $filePath) {
+            $filePaths = [
+                $filePath . $default . DIRECTORY_SEPARATOR . $filename . '.ini',
+                $filePath . $filename . '_' . $default . '.ini',
+                $filePath . $filename . '-' . $default . '.ini',
+                $filePath . $filename . '.ini',
+            ];
+
+            foreach ($filePaths as $filePath) {
+                if (is_file($filePath) AND ! in_array($filePath, $this->loaded)) {
+                    return $filePath;
+                    break;
+                    break;
+                }
+            }
+
+            unset($filePath);
+        }
+
+        return false;
+    }
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * Language::getDefaultLocale
+     *
+     * Gets default language locale.
+     *
+     * @return string
+     */
     public function getDefaultLocale()
     {
         return $this->defaultLocale;
@@ -106,14 +281,13 @@ class Language implements \IteratorAggregate
     // ------------------------------------------------------------------------
 
     /**
-     * Set Locale
+     * Language::setDefaultLocale
      *
-     * Set active language locale
+     * Sets default language locale.
      *
      * @param string $defaultLocale
      *
-     * @access  public
-     * @return  Language
+     * @return  static
      */
     public function setDefaultLocale($defaultLocale)
     {
@@ -125,6 +299,13 @@ class Language implements \IteratorAggregate
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Language::getDefaultIdeom
+     *
+     * Gets default language ideom
+     *
+     * @return string
+     */
     public function getDefaultIdeom()
     {
         return $this->defaultIdeom;
@@ -133,14 +314,13 @@ class Language implements \IteratorAggregate
     // ------------------------------------------------------------------------
 
     /**
-     * Set Ideom
+     * Langauge::setDefaultIdeom
      *
-     * Set active language ideom
+     * Sets default language ideom
      *
      * @param   string $defaultIdeom
      *
-     * @access  public
-     * @return  Language
+     * @return  static
      */
     public function setDefaultIdeom($defaultIdeom)
     {
@@ -152,80 +332,7 @@ class Language implements \IteratorAggregate
     // ------------------------------------------------------------------------
 
     /**
-     * Load
-     *
-     * Load language file into collections
-     *
-     * @param string $filename
-     *
-     * @return static
-     */
-    public function loadFile($filename)
-    {
-        $filename = is_string($filename) ? [$filename] : $filename;
-        $default = $this->getDefault();
-
-        if (empty($filename)) {
-            return $this;
-        }
-
-        foreach ($filename as $file) {
-            if (is_file($file)) {
-                $this->parseFile($file);
-            } else {
-                foreach ($this->filePaths as $filePath) {
-                    $filePaths = [
-                        $filePath . $default . DIRECTORY_SEPARATOR . $file . '.ini',
-                        $filePath . $file . '_' . $default . '.ini',
-                        $filePath . $file . '-' . $default . '.ini',
-                        $filePath . $file . '.ini',
-                    ];
-
-                    foreach ($filePaths as $filePath) {
-                        if (is_file($filePath) AND ! in_array($filePath, $this->isLoaded)) {
-                            $this->parseFile($filePath);
-                            break;
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-
-        return $this;
-    }
-
-    // ------------------------------------------------------------------------
-
-    public function getDefault()
-    {
-        return implode('-', [$this->defaultLocale, $this->defaultIdeom]);
-    }
-
-    // ------------------------------------------------------------------------
-
-    /**
-     * Parse File
-     *
-     * Parse INI language file into collections
-     *
-     * @param string $filePath Language INI filePath
-     */
-    protected function parseFile($filePath)
-    {
-        $lines = parse_ini_file($filePath, true, INI_SCANNER_RAW);
-
-        if ( ! empty($lines)) {
-            $this->isLoaded[ pathinfo($filePath, PATHINFO_FILENAME) ] = $filePath;
-
-            $this->lines = array_merge($this->lines, $lines);
-        }
-    }
-
-    // ------------------------------------------------------------------------
-
-    /**
-     * Line
+     * Language::getLine
      *
      * Parse single language line of text
      *
@@ -252,14 +359,9 @@ class Language implements \IteratorAggregate
 
     // ------------------------------------------------------------------------
 
-    public function isExists($localeIdeom)
-    {
-        return false;
-    }
-
-    // ------------------------------------------------------------------------
-
     /**
+     * Language::getIterator
+     *
      * Retrieve an external iterator
      *
      * @link  http://php.net/manual/en/iteratoraggregate.getiterator.php

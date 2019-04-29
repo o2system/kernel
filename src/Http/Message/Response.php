@@ -1,6 +1,6 @@
 <?php
 /**
- * This file is part of the O2System PHP Framework package.
+ * This file is part of the O2System Framework package.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -27,6 +27,8 @@ class Response extends AbstractMessage implements
     ResponseFieldInterface
 {
     /**
+     * Response::$statusCode
+     *
      * Response Status Code
      *
      * @var int
@@ -34,6 +36,8 @@ class Response extends AbstractMessage implements
     protected $statusCode = 200;
 
     /**
+     * Response::$reasonPhrase
+     *
      * Response Reason Phrase
      *
      * @var string
@@ -42,10 +46,15 @@ class Response extends AbstractMessage implements
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Response::__construct
+     */
     public function __construct()
     {
         $this->body = new Stream();
     }
+
+    // ------------------------------------------------------------------------
 
     /**
      * ResponseInterface::getStatusCode
@@ -107,7 +116,7 @@ class Response extends AbstractMessage implements
      * Because a reason phrase is not a required element in a response
      * status line, the reason phrase value MAY be empty. Implementations MAY
      * choose to return the default RFC 7231 recommended reason phrase (or those
-     * listed in the IANA HTTP Status Code Datastructures) for the response's
+     * listed in the IANA HTTP Status Code DataStructures) for the response's
      * status code.
      *
      * @see http://tools.ietf.org/html/rfc7231#section-6

@@ -1,6 +1,6 @@
 <?php
 /**
- * This file is part of the O2System PHP Framework package.
+ * This file is part of the O2System Framework package.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -14,10 +14,6 @@
 namespace O2System;
 
 // ------------------------------------------------------------------------
-
-use O2System\Psr\Container\ContainerExceptionInterface;
-use O2System\Psr\Container\ContainerInterface;
-use O2System\Psr\NotFoundExceptionInterface;
 
 /*
  *---------------------------------------------------------------
@@ -39,14 +35,14 @@ require_once 'Helpers/Kernel.php';
  *
  * @package O2System
  */
-class Kernel extends Psr\Patterns\Creational\Singleton\AbstractSingleton implements ContainerInterface
+class Kernel extends Spl\Patterns\Creational\Singleton\AbstractSingleton
 {
     /**
      * Kernel Services
      *
-     * @var array
+     * @var Kernel\Containers\Services
      */
-    private $services = [];
+    public $services;
 
     // ------------------------------------------------------------------------
 
@@ -57,110 +53,34 @@ class Kernel extends Psr\Patterns\Creational\Singleton\AbstractSingleton impleme
     {
         parent::__construct();
 
-        $this->addService(new Gear\Profiler());
+        $this->services = new Kernel\Containers\Services();
 
-        $this->getService('profiler')->watch('INSTANTIATE_KERNEL_SERVICES');
-
-        foreach (['Language', 'Logger', 'Shutdown'] as $serviceClassName) {
-            if (class_exists('O2System\Framework', false)) {
-                if (class_exists('App\Kernel\Services\\' . $serviceClassName)) {
-                    $this->addService(new Kernel\Datastructures\Service('App\Kernel\Services\\' . $serviceClassName));
-                } elseif (class_exists('O2System\Framework\Services\\' . $serviceClassName)) {
-                    $this->addService(
-                        new Kernel\Datastructures\Service('O2System\Framework\Services\\' . $serviceClassName)
-                    );
-                } elseif (class_exists('O2System\Kernel\Services\\' . $serviceClassName)) {
-                    $this->addService(
-                        new Kernel\Datastructures\Service('O2System\Kernel\Services\\' . $serviceClassName)
-                    );
-                }
-            } elseif (class_exists('O2System\Kernel\Services\\' . $serviceClassName)) {
-                $this->addService(new Kernel\Datastructures\Service('O2System\Kernel\Services\\' . $serviceClassName));
+        if (isset($_ENV[ 'DEBUG_STAGE' ]) and $_ENV[ 'DEBUG_STAGE' ] === 'DEVELOPER') {
+            $this->services->load(Gear\Profiler::class);
+            if (profiler() !== false) {
+                profiler()->watch('Starting Kernel Services');
             }
         }
 
-        $this->getService('profiler')->watch('INSTANTIATE_KERNEL_I/O_SERVICE');
+        $services = [
+            'Services\Language' => 'language'
+        ];
 
-        if (is_cli()) {
-            $this->cliIO();
-        } else {
-            $this->httpIO();
-        }
-    }
-
-    // ------------------------------------------------------------------------
-
-    /**
-     * Kernel::addService
-     *
-     * @param object|string $service
-     * @param string|null   $offset
-     */
-    public function addService($service, $offset = null)
-    {
-        if (is_object($service)) {
-            if ( ! $service instanceof Kernel\Datastructures\Service) {
-                $service = new Kernel\Datastructures\Service($service);
-            }
-        } elseif (is_string($service)) {
-            if (strpos($service, 'O2System\Framework\\') !== false) {
-                $serviceExtends = str_replace('O2System\Framework\\', 'App\\', $service);
-
-                if (class_exists($serviceExtends)) {
-                    $service = $serviceExtends;
-                }
-            }
-
-            if (class_exists($service)) {
-                $service = new Kernel\Datastructures\Service($service);
-            }
+        foreach ($services as $className => $classOffset) {
+            $this->services->load($className, $classOffset);
         }
 
-        if ($service instanceof Kernel\Datastructures\Service) {
-            $offset = isset($offset)
-                ? $offset
-                : $service->getClassParameter();
-            $this->services[ $offset ] = $service;
+        if (profiler() !== false) {
+            profiler()->watch('Starting Kernel I/O Service');
         }
-    }
 
-    // ------------------------------------------------------------------------
-
-    /**
-     * Kernel::getService
-     *
-     * @param string $offset
-     * @param bool   $getInstance
-     *
-     * @return mixed
-     */
-    public function &getService($offset, $getInstance = true)
-    {
-        $getService[ $offset ] = false;
-
-        if ($this->hasService($offset)) {
-            if ($getInstance === true) {
-                return $this->services[ $offset ]->getInstance();
+        if (class_exists('O2System\Framework', false) or class_exists('O2System\Reactor', false)) {
+            if (is_cli()) {
+                $this->cliIO();
+            } else {
+                $this->httpIO();
             }
-
-            return $this->services[ $offset ];
         }
-
-        return $getService[ $offset ];
-    }
-
-    // ------------------------------------------------------------------------
-
-    /**
-     * Kernel::hasService
-     *
-     * @param $offset
-     *
-     * @return bool
-     */
-    public function hasService($offset)
-    {
-        return (bool)array_key_exists($offset, $this->services);
     }
 
     // ------------------------------------------------------------------------
@@ -168,14 +88,18 @@ class Kernel extends Psr\Patterns\Creational\Singleton\AbstractSingleton impleme
     /**
      * Kernel::cliIO
      *
+     * Runs command line input/output services.
      */
     private function cliIO()
     {
-        // Instantiate Kernel Cli Input
-        $this->addService(new Kernel\Cli\Input());
+        $services = [
+            'Cli\Input'  => 'input',
+            'Cli\Output' => 'output',
+        ];
 
-        // Instantiate Kernel Cli Browser
-        $this->addService(new Kernel\Cli\Output());
+        foreach ($services as $className => $classOffset) {
+            $this->services->load($className, $classOffset);
+        }
     }
 
     // ------------------------------------------------------------------------
@@ -183,71 +107,54 @@ class Kernel extends Psr\Patterns\Creational\Singleton\AbstractSingleton impleme
     /**
      * Kernel::httpIO
      *
+     * Runs http input/output services.
      */
     private function httpIO()
     {
-        // Instantiate Kernel Http Input
-        $this->addService(new Kernel\Http\Input());
+        $services = [
+            'Http\Message\ServerRequest' => 'serverRequest',
+            'Http\Input'                 => 'input',
+            'Http\Output'                => 'output',
+        ];
 
-        // Instantiate Kernel Http Browser
-        $this->addService(new Kernel\Http\Output());
-    }
-
-    // ------------------------------------------------------------------------
-
-    /**
-     * Kernel::loadService
-     *
-     * @param string      $service
-     * @param string|null $offset
-     */
-    public function loadService($service, $offset = null)
-    {
-        if (class_exists($service)) {
-            $service = new Kernel\Datastructures\Service($service);
-            $offset = isset($offset)
-                ? $offset
-                : $service->getClassParameter();
-            $this->services[ $offset ] = $service;
+        foreach ($services as $className => $classOffset) {
+            $this->services->load($className, $classOffset);
         }
     }
 
     // ------------------------------------------------------------------------
 
     /**
-     * Finds an entry of the container by its identifier and returns it.
+     * Kernel::__isset
      *
-     * @param string $id Identifier of the entry to look for.
-     *
-     * @throws NotFoundExceptionInterface  No entry was found for **this** identifier.
-     * @throws ContainerExceptionInterface Error while retrieving the entry.
-     *
-     * @return mixed Entry.
-     */
-    public function get($id)
-    {
-        if ($this->has($id)) {
-            return $this->getService($id);
-        }
-
-        // @todo throw exception
-    }
-
-    // ------------------------------------------------------------------------
-
-    /**
-     * Returns true if the container can return an entry for the given identifier.
-     * Returns false otherwise.
-     *
-     * `has($id)` returning true does not mean that `get($id)` will not throw an exception.
-     * It does however mean that `get($id)` will not throw a `NotFoundExceptionInterface`.
-     *
-     * @param string $id Identifier of the entry to look for.
+     * @param string $property
      *
      * @return bool
      */
-    public function has($id)
+    public function __isset($property)
     {
-        return (bool)$this->hasService($id);
+        return (bool)isset($this->{$property});
+    }
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * Kernel::__get
+     *
+     * @param string $property
+     *
+     * @return mixed
+     */
+    public function &__get($property)
+    {
+        $get[ $property ] = null;
+
+        if (isset($this->{$property})) {
+            $get[ $property ] =& $this->{$property};
+        } elseif ($this->services->has($property)) {
+            $get[ $property ] = $this->services->get($property);
+        }
+
+        return $get[ $property ];
     }
 }

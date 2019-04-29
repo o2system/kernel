@@ -1,6 +1,6 @@
 <?php
 /**
- * This file is part of the O2System PHP Framework package.
+ * This file is part of the O2System Framework package.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -15,7 +15,7 @@ namespace O2System\Kernel\Http\Message\Uri;
 
 // ------------------------------------------------------------------------
 
-use O2System\Spl\Datastructures\SplArrayObject;
+use O2System\Spl\DataStructures\SplArrayObject;
 use O2System\Spl\Exceptions\RuntimeException;
 
 /**
@@ -25,9 +25,27 @@ use O2System\Spl\Exceptions\RuntimeException;
  */
 class Path
 {
+    /**
+     * Path::$string
+     *
+     * @var string
+     */
     private $string;
+
+    /**
+     * Path::__construct
+     *
+     * @var array
+     */
     private $segments;
 
+    // ------------------------------------------------------------------------
+
+    /**
+     * Path::__construct
+     *
+     * @throws \O2System\Spl\Exceptions\RuntimeException
+     */
     public function __construct()
     {
         if (function_exists('config')) {
@@ -39,7 +57,7 @@ class Path
         switch ($protocol) {
             case 'AUTO':
             case 'REQUEST_URI':
-                $this->string = $this->parseRequestURI();
+                $this->string = $this->parseRequestUri();
                 break;
             case 'QUERY_STRING':
                 $this->string = $this->parseQueryString();
@@ -48,7 +66,7 @@ class Path
             default:
                 $this->string = isset($_SERVER[ $protocol ])
                     ? $_SERVER[ $protocol ]
-                    : $this->parseRequestURI();
+                    : $this->parseRequestUri();
                 break;
         }
 
@@ -57,7 +75,11 @@ class Path
         $this->setSegments(explode('/', $this->string));
     }
 
+    // ------------------------------------------------------------------------
+
     /**
+     * Path::parseRequestUri
+     *
      * Parse REQUEST_URI
      *
      * Will parse REQUEST_URI and automatically detect the URI from it,
@@ -66,7 +88,7 @@ class Path
      * @access  protected
      * @return  string
      */
-    protected function parseRequestURI()
+    protected function parseRequestUri()
     {
         if ( ! isset($_SERVER[ 'REQUEST_URI' ], $_SERVER[ 'SCRIPT_NAME' ])) {
             return '';
@@ -111,7 +133,11 @@ class Path
         return $this->removeRelativeDirectory($uri);
     }
 
+    // ------------------------------------------------------------------------
+
     /**
+     * Path::removeRelativeDirectory
+     *
      * Remove relative directory (../) and multi slashes (///)
      *
      * Do some final cleaning of the URI and return it, currently only used in self::parseRequestURI()
@@ -147,6 +173,8 @@ class Path
     // ------------------------------------------------------------------------
 
     /**
+     * Path::parseQueryString
+     *
      * Parse QUERY_STRING
      *
      * Will parse QUERY_STRING and automatically detect the URI from it.
@@ -177,6 +205,13 @@ class Path
 
     // --------------------------------------------------------------------
 
+    /**
+     * Path::setSegments
+     *
+     * @param array $segments
+     *
+     * @throws \O2System\Spl\Exceptions\RuntimeException
+     */
     public function setSegments(array $segments)
     {
         $validSegments = [];
@@ -185,7 +220,7 @@ class Path
             foreach ($segments as $key => $segment) {
                 // Filter segments for security
                 if ($segment = trim($this->filterSegment($segment))) {
-                    if (false !== ($language = language()->packageExists($segment))) {
+                    if (false !== ($language = language()->registered($segment))) {
                         language()->setDefault($segment);
 
                         continue;
@@ -208,7 +243,7 @@ class Path
     // ------------------------------------------------------------------------
 
     /**
-     * Filter Segment
+     * Path::filterSegment
      *
      * Filters segments for malicious characters.
      *
@@ -244,6 +279,13 @@ class Path
         );
     }
 
+    // ------------------------------------------------------------------------
+
+    /**
+     * Path::getTotalSegments
+     *
+     * @return int
+     */
     public function getTotalSegments()
     {
         return count($this->segments);

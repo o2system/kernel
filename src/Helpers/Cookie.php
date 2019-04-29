@@ -1,6 +1,6 @@
 <?php
 /**
- * This file is part of the O2System PHP Framework package.
+ * This file is part of the O2System Framework package.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -19,7 +19,7 @@ if ( ! function_exists('set_cookie')) {
      *
      * @param   mixed  $name
      * @param   string $value     The value of the cookie
-     * @param   string $expire    The number of seconds until expiration
+     * @param   int    $expire    The number of seconds until expiration
      * @param   string $domain    For site-wide cookie.
      *                            Usually: .yourdomain.com
      * @param   string $path      The cookie path
@@ -80,7 +80,7 @@ if ( ! function_exists('set_cookie')) {
             $value,
             $expire,
             $path,
-            $domain,
+            '.' . ltrim($domain, '.'),
             $secure,
             $httponly
         );
@@ -111,7 +111,9 @@ if ( ! function_exists('get_cookie')) {
         return false;
     }
 }
+
 //--------------------------------------------------------------------
+
 if ( ! function_exists('delete_cookie')) {
     /**
      * delete_cookie

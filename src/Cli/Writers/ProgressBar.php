@@ -1,6 +1,6 @@
 <?php
 /**
- * This file is part of the O2System PHP Framework package.
+ * This file is part of the O2System Framework package.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -22,10 +22,35 @@ namespace O2System\Kernel\Cli\Writers;
  */
 class ProgressBar
 {
+    /**
+     * ProgressBar::$columns
+     *
+     * @var mixed
+     */
     protected $columns;
+
+    /**
+     * ProgressBar::$limiter
+     *
+     * @var \O2System\Kernel\Cli\Writers\ProgressBar\Limiter
+     */
     protected $limiter;
+
+    /**
+     * ProgressBar::$units
+     *
+     * @var mixed
+     */
     protected $units;
+
+    /**
+     * ProgressBar::$total
+     *
+     * @var mixed
+     */
     protected $total;
+
+    // ------------------------------------------------------------------------
 
     /**
      * ProgressBar::__construct
