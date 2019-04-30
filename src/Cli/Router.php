@@ -259,7 +259,14 @@ class Router
         $numSegments = count($segments);
         $commanderRegistry = null;
         $uriSegments = [];
-        $commandersDirectories = modules()->getDirs('Commanders');
+        $commandersDirectories = [
+            defined('PATH_REACTOR') ? PATH_REACTOR : PATH_FRAMEWORK . 'Cli' . DIRECTORY_SEPARATOR . 'Commanders' . DIRECTORY_SEPARATOR,
+            PATH_APP . 'Commanders' . DIRECTORY_SEPARATOR
+        ];
+
+        if (function_exists('modules')) {
+            $commandersDirectories = modules()->getDirs('Commanders');
+        }
 
         for ($i = 0; $i <= $numSegments; $i++) {
             $routedSegments = array_slice($segments, 0, ($numSegments - $i));

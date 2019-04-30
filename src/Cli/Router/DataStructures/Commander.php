@@ -74,14 +74,18 @@ class Commander extends SplClassInfo
                 ) . 'Commanders' . (empty($subNamespace) ? null : str_replace('/', '\\', $subNamespace)) . '\\';
             $className = $classNamespace . $className;
 
-            if (class_exists($className)) {
-                parent::__construct($className);
-            } elseif (class_exists('\O2System\Kernel\Cli\\' . $className)) {
+            if (class_exists('\O2System\Kernel\Cli\\' . $className)) {
                 parent::__construct('\O2System\Kernel\Cli\\' . $className);
             } elseif (class_exists('\O2System\Framework\Cli\\' . $className)) {
                 parent::__construct('\O2System\Framework\Cli\\' . $className);
+            } elseif (class_exists('\O2System\Reactor\Cli\\' . $className)) {
+                parent::__construct('\O2System\Reactor\Cli\\' . $className);
             } elseif (class_exists('\App\Cli\\' . $className)) {
                 parent::__construct('\App\Cli\\' . $className);
+            } elseif (class_exists('\App\\' . $className)) {
+                parent::__construct('\App\\' . $className);
+            } elseif (class_exists($className)) {
+                parent::__construct($className);
             }
         }
     }
