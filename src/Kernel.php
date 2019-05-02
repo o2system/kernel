@@ -56,7 +56,10 @@ class Kernel extends Spl\Patterns\Creational\Singleton\AbstractSingleton
         $this->services = new Kernel\Containers\Services();
 
         if (isset($_ENV[ 'DEBUG_STAGE' ]) and $_ENV[ 'DEBUG_STAGE' ] === 'DEVELOPER') {
-            $this->services->load(Gear\Profiler::class);
+            if(class_exists('\O2System\Gear\Profiler')) {
+                $this->services->load(Gear\Profiler::class);
+            }
+
             if (profiler() !== false) {
                 profiler()->watch('Starting Kernel Services');
             }
