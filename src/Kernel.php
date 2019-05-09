@@ -73,11 +73,12 @@ class Kernel extends Spl\Patterns\Creational\Singleton\AbstractSingleton
             $this->services->load($className, $classOffset);
         }
 
-        if (profiler() !== false) {
-            profiler()->watch('Starting Kernel I/O Service');
-        }
-
-        if (class_exists('O2System\Framework', false) or class_exists('O2System\Reactor', false)) {
+        if (class_exists('O2System\Framework', false) or class_exists(
+            'O2System\Reactor', false)) {
+            if (profiler() !== false) {
+                profiler()->watch('Starting Kernel I/O Service');
+            }
+            
             if (is_cli()) {
                 $this->cliIO();
             } else {
