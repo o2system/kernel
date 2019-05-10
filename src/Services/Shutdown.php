@@ -28,8 +28,10 @@ class Shutdown extends SplClosureContainer
      */
     public function execute()
     {
-        foreach ($this as $offset => $closure) {
-            call_user_func($closure);
+        if ($this->count()) {
+            foreach ($this->closures as $offset => $closure) {
+                call_user_func($closure);
+            }
         }
     }
 

@@ -260,7 +260,7 @@ class Router
         $commanderRegistry = null;
         $uriSegments = [];
         $commandersDirectories = [
-            defined('PATH_REACTOR') ? PATH_REACTOR : PATH_FRAMEWORK . 'Cli' . DIRECTORY_SEPARATOR . 'Commanders' . DIRECTORY_SEPARATOR,
+            defined('PATH_REACTOR') ? PATH_REACTOR . 'Cli' . DIRECTORY_SEPARATOR . 'Commanders' . DIRECTORY_SEPARATOR : PATH_FRAMEWORK . 'Cli' . DIRECTORY_SEPARATOR . 'Commanders' . DIRECTORY_SEPARATOR,
             PATH_APP . 'Commanders' . DIRECTORY_SEPARATOR
         ];
 
