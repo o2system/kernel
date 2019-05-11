@@ -17,6 +17,7 @@ namespace O2System\Kernel\Cli\Abstracts;
 
 use O2System\Kernel\Cli\Writers\Format;
 use O2System\Kernel\Cli\Writers\Table;
+use O2System\Spl\DataStructures\SplArrayObject;
 
 /**
  * Class AbstractCommander
@@ -193,6 +194,65 @@ abstract class AbstractCommander
     // ------------------------------------------------------------------------
 
     /**
+     * AbstractCommander::__callOptions
+     *
+     * Options call executer.
+     *
+     * @return void
+     */
+    protected function __callOptions()
+    {
+        if(false !== ($options = input()->get())) {
+            if(count($options)) {
+                $command = new \ReflectionClass($this);
+
+                foreach ($options as $method => $arguments) {
+
+                    if (array_key_exists('-' . $method, $this->commandOptionsShortcuts)) {
+                        $method = $this->commandOptionsShortcuts[ '-' . $method ];
+                    }
+
+                    $optionMethod = camelcase('option-' . $method);
+
+                    if ($command->hasMethod($optionMethod)) {
+
+                        $commandMethod = $command->getMethod($optionMethod);
+
+                        if ($commandMethod->getNumberOfRequiredParameters() == 0) {
+                            call_user_func_array([&$this, $optionMethod], [$arguments]);
+                        } elseif ($commandMethod->getNumberOfRequiredParameters() > 0 and empty($arguments)) {
+                            if (isset($this->commandOptions[ $method ][ 'help' ])) {
+                                output()->write(
+                                    (new Format())
+                                        ->setContextualClass(Format::INFO)
+                                        ->setString(language()->getLine('CLI_USAGE') . ':')
+                                        ->setNewLinesBefore(1)
+                                        ->setNewLinesAfter(1)
+                                );
+
+                                output()->write(
+                                    (new Format())
+                                        ->setContextualClass(Format::INFO)
+                                        ->setString(language()->getLine($this->commandOptions[ $method ][ 'help' ]))
+                                        ->setNewLinesAfter(2)
+                                );
+                            }
+                        } else {
+                            $optionArguments = is_array($arguments)
+                                ? $arguments
+                                : [$arguments];
+
+                            call_user_func_array([&$this, $optionMethod], $optionArguments);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // ------------------------------------------------------------------------
+
+    /**
      * AbstractCommander::execute
      *
      * Default abstract commander execution to execute help option.
@@ -202,53 +262,10 @@ abstract class AbstractCommander
      */
     public function execute()
     {
-        $command = new \ReflectionClass($this);
-        $options = input()->get();
-
-        if (empty($options)) {
+        if (false !== ($options = input()->get())) {
             $this->optionHelp();
         } else {
-
-            foreach ($options as $method => $arguments) {
-
-                if (array_key_exists('-' . $method, $this->commandOptionsShortcuts)) {
-                    $method = $this->commandOptionsShortcuts[ '-' . $method ];
-                }
-
-                $optionMethod = camelcase('option-' . $method);
-
-                if ($command->hasMethod($optionMethod)) {
-
-                    $commandMethod = $command->getMethod($optionMethod);
-
-                    if ($commandMethod->getNumberOfRequiredParameters() == 0) {
-                        call_user_func([&$this, $optionMethod]);
-                    } elseif ($commandMethod->getNumberOfRequiredParameters() > 0 and empty($arguments)) {
-                        if (isset($this->commandOptions[ $method ][ 'help' ])) {
-                            output()->write(
-                                (new Format())
-                                    ->setContextualClass(Format::INFO)
-                                    ->setString(language()->getLine('CLI_USAGE') . ':')
-                                    ->setNewLinesBefore(1)
-                                    ->setNewLinesAfter(1)
-                            );
-
-                            output()->write(
-                                (new Format())
-                                    ->setContextualClass(Format::INFO)
-                                    ->setString(language()->getLine($this->commandOptions[ $method ][ 'help' ]))
-                                    ->setNewLinesAfter(2)
-                            );
-                        }
-                    } else {
-                        $optionArguments = is_array($arguments)
-                            ? $arguments
-                            : [$arguments];
-
-                        call_user_func_array([&$this, $optionMethod], $optionArguments);
-                    }
-                }
-            }
+            $this->__callOptions();
         }
     }
 
