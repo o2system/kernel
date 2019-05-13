@@ -212,12 +212,13 @@ abstract class AbstractCommander
                         $method = $this->commandOptionsShortcuts[ '-' . $method ];
                     }
 
-                    $optionMethod = camelcase('option-' . $method);
-
-                    if ($command->hasMethod($optionMethod)) {
-
+                    if ( ! $command->hasMethod($optionMethod = camelcase('option-' . $method))) {
                         $commandMethod = $command->getMethod($optionMethod);
+                    } elseif($command->hasMethod($optionMethod = camelcase($method))) {
+                        $commandMethod = $command->getMethod($optionMethod);
+                    }
 
+                    if($commandMethod instanceof \ReflectionMethod) {
                         if ($commandMethod->getNumberOfRequiredParameters() == 0) {
                             call_user_func_array([&$this, $optionMethod], [$arguments]);
                         } elseif ($commandMethod->getNumberOfRequiredParameters() > 0 and empty($arguments)) {
