@@ -17,7 +17,6 @@ namespace O2System\Kernel\Cli\Abstracts;
 
 use O2System\Kernel\Cli\Writers\Format;
 use O2System\Kernel\Cli\Writers\Table;
-use O2System\Spl\DataStructures\SplArrayObject;
 
 /**
  * Class AbstractCommander
@@ -194,6 +193,18 @@ abstract class AbstractCommander
     // ------------------------------------------------------------------------
 
     /**
+     * AbstractCommander::optionVerbose
+     *
+     * Option verbose method, activate verbose output mode.
+     *
+     * @return void
+     */
+    public function optionVerbose()
+    {
+        $this->optionVerbose = true;
+    }
+
+    /**
      * AbstractCommander::__callOptions
      *
      * Options call executer.
@@ -202,8 +213,8 @@ abstract class AbstractCommander
      */
     protected function __callOptions()
     {
-        if(false !== ($options = input()->get())) {
-            if(count($options)) {
+        if (false !== ($options = input()->get())) {
+            if (count($options)) {
                 $command = new \ReflectionClass($this);
 
                 foreach ($options as $method => $arguments) {
@@ -212,15 +223,15 @@ abstract class AbstractCommander
                         $method = $this->commandOptionsShortcuts[ '-' . $method ];
                     }
 
-                    if ( ! $command->hasMethod($optionMethod = camelcase('option-' . $method))) {
-                        $commandMethod = $command->getMethod($optionMethod);
-                    } elseif($command->hasMethod($optionMethod = camelcase($method))) {
-                        $commandMethod = $command->getMethod($optionMethod);
+                    if ($command->hasMethod($commandMethodName = camelcase('option-' . $method))) {
+                        $commandMethod = $command->getMethod($commandMethodName);
+                    } elseif ($command->hasMethod($commandMethodName = camelcase($method))) {
+                        $commandMethod = $command->getMethod($commandMethodName);
                     }
 
-                    if($commandMethod instanceof \ReflectionMethod) {
+                    if ($commandMethod instanceof \ReflectionMethod) {
                         if ($commandMethod->getNumberOfRequiredParameters() == 0) {
-                            call_user_func_array([&$this, $optionMethod], [$arguments]);
+                            call_user_func([&$this, $commandMethodName]);
                         } elseif ($commandMethod->getNumberOfRequiredParameters() > 0 and empty($arguments)) {
                             if (isset($this->commandOptions[ $method ][ 'help' ])) {
                                 output()->write(
@@ -243,7 +254,7 @@ abstract class AbstractCommander
                                 ? $arguments
                                 : [$arguments];
 
-                            call_user_func_array([&$this, $optionMethod], $optionArguments);
+                            call_user_func_array([&$this, $commandMethodName], $optionArguments);
                         }
                     }
                 }
