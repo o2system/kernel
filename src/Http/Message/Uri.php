@@ -37,7 +37,7 @@ class Uri implements UriInterface
      *
      * @var \O2System\Kernel\Http\Message\Uri\Segments
      */
-    protected $segments;
+    public $segments;
 
     /**
      * Uri::$suffix
