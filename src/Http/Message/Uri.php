@@ -910,7 +910,7 @@ class Uri implements UriInterface
     public function withQuery($query)
     {
         $uri = clone $this;
-        $uri->query = is_array($query) ? http_build_query($query, null, null, PHP_QUERY_RFC3986) : $query;
+        $uri->query = is_array($query) ? http_build_query($query, PHP_QUERY_RFC3986, '&', PHP_QUERY_RFC3986) : $query;
 
         return $uri;
     }
@@ -927,7 +927,7 @@ class Uri implements UriInterface
     public function addQuery($query)
     {
         $uri = clone $this;
-        $query = is_array($query) ? http_build_query($query, PHP_QUERY_RFC3986) : $query;
+        $query = is_array($query) ? http_build_query($query, PHP_QUERY_RFC3986, '&', PHP_QUERY_RFC3986) : $query;
 
         parse_str($query, $newQuery);
 
@@ -939,7 +939,7 @@ class Uri implements UriInterface
         }
 
         if (is_array($query)) {
-            $uri->query = http_build_query($query, PHP_QUERY_RFC3986);
+            $uri->query = is_array($query) ? http_build_query($query, PHP_QUERY_RFC3986, '&', PHP_QUERY_RFC3986) : $query;
         }
 
         return $uri;
