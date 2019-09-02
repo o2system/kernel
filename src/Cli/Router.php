@@ -54,14 +54,14 @@ class Router
     // -----------------------------------------------------------------------
 
     /**
-     * Router::parseRequest
+     * Router::handle
      *
      * Parse server argv to determine requested commander.
      *
      * @return void
      * @throws \ReflectionException
      */
-    public function parseRequest()
+    public function handle()
     {
         $argv = $_SERVER[ 'argv' ];
 
