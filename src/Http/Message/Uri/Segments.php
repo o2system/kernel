@@ -17,38 +17,27 @@ namespace O2System\Kernel\Http\Message\Uri;
 
 use O2System\Spl\DataStructures\SplArrayObject;
 use O2System\Spl\Exceptions\RuntimeException;
+use O2System\Spl\Iterators\ArrayIterator;
 
 /**
  * Class Segments
  *
  * @package O2System\Kernel\Http\Message\Uri
  */
-class Segments
+class Segments extends ArrayIterator
 {
-    /**
-     * Segments::$string
-     *
-     * @var string
-     */
-    protected $string;
-
-    /**
-     * Segments::$parts
-     *
-     * @var array
-     */
-    protected $parts;
-
-    // ------------------------------------------------------------------------
-
     /**
      * Segments::__construct
      *
-     * @param string|null $string
+     * @param string|null $segments
+     *
+     * @throws \O2System\Spl\Exceptions\RuntimeException
      */
-    public function __construct($string = null)
+    public function __construct($segments = null)
     {
-        if (is_null($string)) {
+        parent::__construct([]);
+
+        if (is_null($segments)) {
             if (kernel()->services->has('config')) {
                 if (config()->offsetExists('uri')) {
                     $protocol = strtoupper(config('uri')->offsetGet('protocol'));
@@ -60,26 +49,27 @@ class Segments
             switch ($protocol) {
                 case 'AUTO':
                 case 'REQUEST_URI':
-                    $string = $this->parseRequestUri();
+                    $segments = $this->parseRequestUri();
                     break;
                 case 'QUERY_STRING':
-                    $string = $this->parseQueryString();
+                    $segments = $this->parseQueryString();
                     break;
                 case 'PATH_INFO':
                 default:
-                    $string = isset($_SERVER[ $protocol ])
+                    $segments = isset($_SERVER[ $protocol ])
                         ? $_SERVER[ $protocol ]
                         : $this->parseRequestUri();
                     break;
             }
 
-        } elseif (is_array($string)) {
-            $string = implode('/', $string);
+        } elseif (is_array($segments)) {
+            $segments = implode('/', $segments);
         }
 
-        $string = str_replace(['\\', '_'], ['/', '-'], $string);
-        $string = trim(remove_invisible_characters($string, false), '/');
-        $this->setParts(explode('/', $string));
+        $segments = str_replace(['\\', '_'], ['/', '-'], $segments);
+        $segments = trim(remove_invisible_characters($segments, false), '/');
+
+        $this->setParts(explode('/', $segments));
     }
 
     // ------------------------------------------------------------------------
@@ -185,33 +175,16 @@ class Segments
     // --------------------------------------------------------------------
 
     /**
-     * Segments::getString
-     *
-     * Get String
-     *
-     * Get Requested Uri String
-     *
-     * @return string
-     */
-    public function getString()
-    {
-        return empty($this->string)
-            ? '/'
-            : $this->string;
-    }
-
-    // ------------------------------------------------------------------------
-
-    /**
      * Segments::addString
      *
      * @param string $string
      *
      * @return \O2System\Kernel\Http\Message\Uri\Segments
+     * @throws \O2System\Spl\Exceptions\RuntimeException
      */
     public function addString($string)
     {
-        $string = $this->string . '/' . trim($string, '/');
+        $string = $this->__toString() . '/' . trim($string, '/');
 
         return $this->withString($string);
     }
@@ -224,6 +197,7 @@ class Segments
      * @param string $string
      *
      * @return \O2System\Kernel\Http\Message\Uri\Segments
+     * @throws \O2System\Spl\Exceptions\RuntimeException
      */
     public function withString($string)
     {
@@ -240,6 +214,7 @@ class Segments
      * @param array $parts
      *
      * @return \O2System\Kernel\Http\Message\Uri\Segments
+     * @throws \O2System\Spl\Exceptions\RuntimeException
      */
     public function withParts(array $parts)
     {
@@ -257,11 +232,10 @@ class Segments
      * @param array $parts
      *
      * @return \O2System\Kernel\Http\Message\Uri\Segments
+     * @throws \O2System\Spl\Exceptions\RuntimeException
      */
     public function addParts(array $parts)
     {
-        $parts = array_merge($this->parts, $parts);
-
         return $this->withParts($parts);
     }
 
@@ -272,29 +246,17 @@ class Segments
      *
      * Get Segment
      *
-     * @param int $n (n) of Uri Segments
+     * @param int $index (n) of Uri Segments
      *
      * @return mixed
      */
-    public function getPart($n)
+    public function getPart($index)
     {
-        return isset($this->parts[ $n ])
-            ? $this->parts[ $n ]
-            : false;
-    }
+        if($this->offsetExists($index)) {
+            return $this->offsetGet($index);
+        }
 
-    // ------------------------------------------------------------------------
-
-    /**
-     * Segments::getParts
-     *
-     * Get Segments
-     *
-     * @return array
-     */
-    public function getParts()
-    {
-        return $this->parts;
+        return false;
     }
 
     // ------------------------------------------------------------------------
@@ -335,40 +297,8 @@ class Segments
 
             unset($validSegments[ 0 ]);
 
-            $this->parts = $validSegments;
-            $this->string = implode('/', $this->parts);
+            $this->merge($validSegments);
         }
-    }
-
-    // ------------------------------------------------------------------------
-
-    /**
-     * Segments::hasPart
-     *
-     * Has Segment
-     *
-     * @param string $part
-     * @param bool   $isCaseSensitive
-     *
-     * @return bool
-     */
-    public function hasPart($part, $isCaseSensitive = false)
-    {
-        return (bool)in_array($part, $this->parts, $isCaseSensitive);
-    }
-
-    // ------------------------------------------------------------------------
-
-    /**
-     * Segments::getTotalParts
-     *
-     * Get Total Segments
-     *
-     * @return int
-     */
-    public function getTotalParts()
-    {
-        return count($this->parts);
     }
 
     // ------------------------------------------------------------------------
@@ -380,8 +310,8 @@ class Segments
      */
     public function __toString()
     {
-        if (count($this->parts)) {
-            return implode('/', $this->parts);
+        if ($this->count()) {
+            return implode('/', $this->getArrayCopy());
         }
 
         return '';

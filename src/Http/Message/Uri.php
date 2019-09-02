@@ -367,6 +367,7 @@ class Uri implements UriInterface
      * @param Segments|string|array $segments
      *
      * @return \O2System\Kernel\Http\Message\Uri
+     * @throws \O2System\Spl\Exceptions\RuntimeException
      */
     public function addSegments($segments)
     {
@@ -374,8 +375,8 @@ class Uri implements UriInterface
             $segments = new Segments($segments);
         }
 
-        $currentSegments = $this->segments->getParts();
-        $addSegments = $segments->getParts();
+        $currentSegments = $this->segments->getArrayCopy();
+        $addSegments = $segments->getArrayCopy();
 
         $uri = clone $this;
         $uri->segments = new Segments(array_merge($currentSegments, $addSegments));
@@ -1068,9 +1069,9 @@ class Uri implements UriInterface
             ? ''
             : '/' . trim($this->string, '/') . '/';
 
-        $uriPath .= $this->segments->getTotalParts() == 0
+        $uriPath .= $this->segments->count() == 0
             ? ''
-            : '/' . trim($this->segments->getString(), '/');
+            : '/' . trim($this->segments->__toString(), '/');
 
         if ($uriPath !== '/' &&
             substr($uriPath, strlen($uriPath) - 1) !== '/' &&
