@@ -128,7 +128,9 @@ class Router
             $_ENV[ 'VERBOSE' ] = true;
         }
 
-        $this->parseCommands($this->commands);
+        if( $this->parseCommands($this->commands) === false ){
+            output()->sendError(404);
+        }
     }
 
     // ------------------------------------------------------------------------
@@ -138,25 +140,47 @@ class Router
      *
      * Parse and validate requested commands.
      *
-     * @param array $segments
+     * @param array $commands
      *
      * @throws \ReflectionException
+     *
+     * @return bool
      */
-    final private function parseCommands(array $commands)
+    protected function parseCommands(array $commands)
     {
-        static $reflection;
+        $numCommands = count($commands);
+        $commanderRegistry = null;
+        $commandersDirectories = [
+            defined('PATH_REACTOR') ? PATH_REACTOR . 'Cli' . DIRECTORY_SEPARATOR . 'Commanders' . DIRECTORY_SEPARATOR : PATH_FRAMEWORK . 'Cli' . DIRECTORY_SEPARATOR . 'Commanders' . DIRECTORY_SEPARATOR,
+            PATH_APP . 'Commanders' . DIRECTORY_SEPARATOR
+        ];
 
-        if (empty($reflection)) {
-            $reflection = new \ReflectionClass($this);
+        if (function_exists('modules')) {
+            $commandersDirectories = modules()->getDirs('Commanders');
         }
 
-        foreach ($reflection->getMethods() as $method) {
-            if (strpos($method->name, 'validateCommands') !== false) {
-                if ($this->{$method->name}($commands)) {
+        for ($i = 0; $i <= $numCommands; $i++) {
+            $routedCommands = array_slice($commands, 0, ($numCommands - $i));
+
+            $commanderFilename = implode(DIRECTORY_SEPARATOR, $routedCommands);
+            $commanderFilename = prepare_filename($commanderFilename) . '.php';
+
+            foreach ($commandersDirectories as $commanderDirectory) {
+                if (is_file($commanderFilePath = $commanderDirectory . $commanderFilename)) {
+                    $routedCommands = array_diff($commands, $routedCommands);
+                    $commanderRegistry = new Router\DataStructures\Commander($commanderFilePath);
                     break;
                 }
             }
+
+            if ($commanderRegistry instanceof Router\DataStructures\Commander) {
+                $this->setCommander($commanderRegistry, $routedCommands);
+                return true;
+                break;
+            }
         }
+
+        return false;
     }
 
     // ------------------------------------------------------------------------
@@ -181,115 +205,29 @@ class Router
      * Sets requested commander.
      *
      * @param \O2System\Kernel\Cli\Router\DataStructures\Commander $commander
-     * @param array                                                $uriSegments
-     *
-     * @throws \ReflectionException
+     * @param array                                                $commands
      */
-    final protected function setCommander(Router\DataStructures\Commander $commander, array $uriSegments = [])
+    final protected function setCommander(Router\DataStructures\Commander $commander, array $commands = [])
     {
         // Add Commander PSR4 Namespace
         loader()->addNamespace($commander->getNamespaceName(), $commander->getFileInfo()->getPath());
 
-        $commanderMethod = camelcase(reset($uriSegments));
-        $commanderMethodParams = array_slice($uriSegments, 1);
+        $commanderMethod = 'execute';
+        if(count($commands)) {
+            $commanderMethod = camelcase(reset($commands));
+        }
 
-        if (null !== $commander->getRequestMethod()) {
-            $commander->setRequestMethodArgs($commanderMethodParams);
-        } elseif (count($uriSegments)) {
-            if ($commander->hasMethod('route')) {
-                $commander
-                    ->setRequestMethod('route')
-                    ->setRequestMethodArgs(
-                        [
-                            $commanderMethod,
-                            $commanderMethodParams,
-                        ]
-                    );
-            } elseif ($commander->hasMethod($commanderMethod)) {
-                $method = $commander->getMethod($commanderMethod);
-
-                if ($method->isPublic()) {
-                    $commander
-                        ->setRequestMethod($commanderMethod)
-                        ->setRequestMethodArgs($commanderMethodParams);
-                } elseif (is_ajax() AND $method->isProtected()) {
-                    $commander
-                        ->setRequestMethod($commanderMethod)
-                        ->setRequestMethodArgs($commanderMethodParams);
-                }
-            } elseif ($commander->hasMethod('execute')) {
-                $execute = $commander->getMethod('execute');
-
-                if ($execute->getNumberOfParameters() > 0) {
-
-                    array_unshift($commanderMethodParams, $commanderMethod);
-
-                    $commander
-                        ->setRequestMethod('execute')
-                        ->setRequestMethodArgs($commanderMethodParams);
-                } else {
-                    output()->sendError(404);
-                }
-            }
-        } elseif ($commander->hasMethod('route')) {
+        if($commander->hasMethod('route')) {
             $commander
                 ->setRequestMethod('route')
-                ->setRequestMethodArgs(['execute', []]);
-        } elseif ($commander->hasMethod('execute')) {
-            $commander
-                ->setRequestMethod('execute');
+                ->setRequestMethodArgs([$commanderMethod]);
+        } elseif($commander->hasMethod($commanderMethod)) {
+            $commander->setRequestMethod($commanderMethod);
+        } elseif($commander->hasMethod('execute')) {
+            $commander->setRequestMethod('execute');
         }
 
         // Set Router Commander
         $this->commander = $commander;
-    }
-
-    // ------------------------------------------------------------------------
-
-    /**
-     * Router::validateCommandsCommander
-     *
-     * @param array $segments
-     *
-     * @return bool
-     * @throws \ReflectionException
-     */
-    final private function validateCommandsCommander(array $segments)
-    {
-        $numSegments = count($segments);
-        $commanderRegistry = null;
-        $uriSegments = [];
-        $commandersDirectories = [
-            defined('PATH_REACTOR') ? PATH_REACTOR . 'Cli' . DIRECTORY_SEPARATOR . 'Commanders' . DIRECTORY_SEPARATOR : PATH_FRAMEWORK . 'Cli' . DIRECTORY_SEPARATOR . 'Commanders' . DIRECTORY_SEPARATOR,
-            PATH_APP . 'Commanders' . DIRECTORY_SEPARATOR
-        ];
-
-        if (function_exists('modules')) {
-            $commandersDirectories = modules()->getDirs('Commanders');
-        }
-
-        for ($i = 0; $i <= $numSegments; $i++) {
-            $routedSegments = array_slice($segments, 0, ($numSegments - $i));
-
-            $commanderFilename = implode(DIRECTORY_SEPARATOR, $routedSegments);
-            $commanderFilename = prepare_filename($commanderFilename) . '.php';
-
-            foreach ($commandersDirectories as $commanderDirectory) {
-                if (is_file($commanderFilePath = $commanderDirectory . $commanderFilename)) {
-                    $uriSegments = array_diff($segments, $routedSegments);
-                    $commanderRegistry = new Router\DataStructures\Commander($commanderFilePath);
-                    break;
-                }
-            }
-
-            if ($commanderRegistry instanceof Router\DataStructures\Commander) {
-                $this->setCommander($commanderRegistry, $uriSegments);
-                break;
-
-                return true;
-            }
-        }
-
-        return false;
     }
 }

@@ -151,8 +151,6 @@ abstract class AbstractCommander
      * @param string $optionName
      * @param string $optionDescription
      * @param string $optionShortcut
-     *
-     * @return $this;
      */
     public function addCommandOption($optionName, $optionDescription, $optionShortcut = null)
     {
@@ -210,6 +208,7 @@ abstract class AbstractCommander
      * Options call executer.
      *
      * @return void
+     * @throws \ReflectionException
      */
     protected function __callOptions()
     {
@@ -378,9 +377,6 @@ abstract class AbstractCommander
      * AbstractCommander::loadActions
      *
      * Load all actions.
-     *
-     * @param $namespace
-     * @param $commandsPath
      *
      * @throws \ReflectionException
      */
