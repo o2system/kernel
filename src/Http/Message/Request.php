@@ -60,6 +60,24 @@ class Request extends AbstractMessage implements
     // ------------------------------------------------------------------------
 
     /**
+     * Request::__get
+     *
+     * @param string $property
+     *
+     * @return mixed
+     */
+    public function __get($property)
+    {
+        if(property_exists($this, $property)) {
+            return $this->{$property};
+        }
+
+        return null;
+    }
+
+    // ------------------------------------------------------------------------
+
+    /**
      * Request::getClientIpAddress
      *
      * @return bool|string
@@ -404,7 +422,7 @@ class Request extends AbstractMessage implements
      * Retrieve an external iterator
      *
      * @link  http://php.net/manual/en/iteratoraggregate.getiterator.php
-     * @return Traversable An instance of an object implementing <b>Iterator</b> or
+     * @return \Traversable An instance of an object implementing <b>Iterator</b> or
      *        <b>Traversable</b>
      * @since 5.0.0
      */
