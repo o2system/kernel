@@ -15,6 +15,9 @@ namespace O2System\Kernel\Http;
 
 // ------------------------------------------------------------------------
 
+use O2System\Kernel\Http\Message\Uri as KernelMessageUri;
+use O2System\Kernel\Http\Message\Uri\Segments as KernelMessageUriSegments;
+
 /**
  * Class Router
  * @package O2System\Kernel\Http
@@ -92,26 +95,11 @@ class Router
      */
     public function handle(Message\Uri $uri = null)
     {
-        $this->uri = is_null($uri) ? server_request()->getUri() : $uri;
-        $uriSegments = $this->uri->segments->getArrayCopy();
-        $uriString = $this->uri->segments->__toString();
+        $this->uri = is_null($uri) ? new KernelMessageUri() : $uri;
 
-        if (count($uriSegments)) {
-            if (strpos(end($uriSegments), '.json') !== false) {
-                output()->setContentType('application/json');
-                $endSegment = str_replace('.json', '', end($uriSegments));
-                array_pop($uriSegments);
-                array_push($uriSegments, $endSegment);
-                $this->uri = $this->uri->withSegments(new Message\Uri\Segments($uriSegments));
-                $uriString = $this->uri->segments->__toString();
-            } elseif (strpos(end($uriSegments), '.xml') !== false) {
-                output()->setContentType('application/xml');
-                $endSegment = str_replace('.xml', '', end($uriSegments));
-                array_pop($uriSegments);
-                array_push($uriSegments, $endSegment);
-                $this->uri = $this->uri->withSegments(new Message\Uri\Segments($uriSegments));
-                $uriString = $this->uri->segments->__toString();
-            }
+        // Handle Extension Request
+        if ($this->uri->segments->count()) {
+            $this->handleExtensionRequest();
         } else {
             $uriPath = urldecode(
                 parse_url($_SERVER[ 'REQUEST_URI' ], PHP_URL_PATH)
@@ -121,48 +109,108 @@ class Router
             $uriPath = end($uriPathParts);
 
             if ($uriPath !== '/') {
-                $uriString = $uriPath;
-                $uriSegments = array_filter(explode('/', $uriString));
-
-                $this->uri = $this->uri->withSegments(new Message\Uri\Segments($uriSegments));
-                $uriString = $this->uri->segments->__toString();
+                $this->uri = $this->uri->withSegments(new KernelMessageUriSegments(
+                        array_filter(explode('/', $uriPath)))
+                );
             }
+
+            unset($uriPathParts, $uriPath);
         }
+
+        // Load app addresses config
+        $this->addresses = config()->loadFile('addresses', true);
 
         // Try to translate from uri string
-        if (false !== ($action = $this->addresses->getTranslation($uriString))) {
-            if ( ! $action->isValidHttpMethod(server_request()->getMethod()) && ! $action->isAnyHttpMethod()) {
+        if (false !== ($action = $this->addresses->getTranslation($this->uri->segments->__toString()))) {
+            if ( ! $action->isValidHttpMethod(input()->server('REQUEST_METHOD')) && ! $action->isAnyHttpMethod()) {
                 output()->sendError(405);
             } else {
-                if (false !== ($parseSegments = $action->getParseUriString($uriString))) {
-                    $uriSegments = $parseSegments;
+                // Checks if action closure is an array
+                if (is_array($closureSegments = $action->getClosure())) {
+                    $this->uri->segments->exchangeArray($closureSegments);
+
+                    $this->handleSegmentsRequest();
                 } else {
-                    $uriSegments = [];
-                }
+                    if (false !== ($parseSegments = $action->getParseUriString($this->uri->segments->__toString()))) {
+                        $uriSegments = $parseSegments;
+                    } else {
+                        $uriSegments = [];
+                    }
 
-                $this->uri = $this->uri->withSegments(new Message\Uri\Segments($uriSegments));
+                    $this->uri = $this->uri->withSegments(new KernelMessageUriSegments($uriSegments));
 
-                $this->parseAction($action, $uriSegments);
-
-                if (services()->has('controller')) {
-                    return true;
+                    $this->parseAction($action, $uriSegments);
+                    if ( ! empty(services()->has('controller'))) {
+                        return true;
+                    }
                 }
             }
+        } else {
+            $this->handleSegmentsRequest();
         }
 
-        // Try to get route from controller & page
-        if ($uriTotalSegments = count($uriSegments)) {
+        // break the loop if the controller has been set
+        if (services()->has('controller')) {
+            return true;
+        }
+
+        // Let's the app do the rest when there is no controller found
+        // the app should redirect to PAGE 404
+    }
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * Router::handleExtensionRequest
+     */
+    protected function handleExtensionRequest()
+    {
+        $lastSegment = $this->uri->segments->last();
+
+        if (strpos($lastSegment, '.json') !== false) {
+            output()->setContentType('application/json');
+            $lastSegment = str_replace('.json', '', $lastSegment);
+            $this->uri->segments->pop();
+            $this->uri->segments->push($lastSegment);
+        } elseif (strpos($lastSegment, '.xml') !== false) {
+            output()->setContentType('application/xml');
+            $lastSegment = str_replace('.xml', '', $lastSegment);
+            $this->uri->segments->pop();
+            $this->uri->segments->push($lastSegment);
+        } elseif (strpos($lastSegment, '.js') !== false) {
+            output()->setContentType('application/x-javascript');
+            $lastSegment = str_replace('.js', '', $lastSegment);
+            $this->uri->segments->pop();
+            $this->uri->segments->push($lastSegment);
+        } elseif (strpos($lastSegment, '.css') !== false) {
+            output()->setContentType('text/css');
+            $lastSegment = str_replace('.css', '', $lastSegment);
+            $this->uri->segments->pop();
+            $this->uri->segments->push($lastSegment);
+        }
+    }
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * Router::handleModuleRequest
+     */
+    public function handleSegmentsRequest()
+    {
+        // Try to get route from controller
+        if ($numOfUriSegments = $this->uri->segments->count()) {
+            $uriSegments = $this->uri->segments->getArrayCopy();
+
             $namespaces = [
                 'App\Controllers\\',
                 'App\Http\Controllers\\',
                 'O2System\Reactor\Http\Controllers\\',
             ];
 
-            for ($i = 0; $i <= $uriTotalSegments; $i++) {
-                $uriRoutedSegments = array_slice($uriSegments, 0, ($uriTotalSegments - $i));
+            for ($i = 0; $i <= $numOfUriSegments; $i++) {
+                $uriRoutedSegments = array_slice($uriSegments, 0, ($numOfUriSegments - $i));
 
                 foreach ($namespaces as $namespace) {
-
                     $controllerClassName = $namespace . implode('\\',
                             array_map('studlycase', $uriRoutedSegments));
 
@@ -176,14 +224,10 @@ class Router
 
                 // break the loop if the controller has been set
                 if (services()->has('controller')) {
-                    return true;
                     break;
                 }
             }
         }
-
-        // Let's the app do the rest when there is no controller found
-        // the app should redirect to PAGE 404
     }
 
     // ------------------------------------------------------------------------

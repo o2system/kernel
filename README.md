@@ -1,4 +1,4 @@
-[![O2System Framework](https://camo.githubusercontent.com/0459c276edfa2724f16b0af3cb491e5f4dbccc54/687474703a2f2f6f3273797374656d2e69642f6173736574732f696d672f6c6f676f2f6c6f676f2d32303070782e706e67)](http://o2system.id)
+[![O2System Framework](https://lh3.googleusercontent.com/2ne9UthZUg1YzTPcoo7uijRpzYcYbLbw9bvbK4HOc8JMGHQNUgrPCEyKPku80dFa7zVHDHOlxsacpNZH2_w8=w1366-h594)](http://o2system.id)
 
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/o2system/kernel/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/o2system/kernel/?branch=master)
 [![Build Status](https://scrutinizer-ci.com/g/o2system/kernel/badges/build.png?b=master)](https://scrutinizer-ci.com/g/o2system/kernel/build-status/master)
