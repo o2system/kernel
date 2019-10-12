@@ -172,7 +172,7 @@ class Addresses
         $hostDomain = new Domain();
 
         if (is_null($domain)) {
-            $domain = $hostDomain->getOrigin();
+            $domain = $hostDomain->getHost();
         }
 
         $translations = [];
@@ -181,15 +181,15 @@ class Addresses
             $translations = $this->translations[ $domain ];
         } else {
             $domain = new Domain($domain);
-            if (array_key_exists($domain->getString(), $this->translations)) {
-                $translations = $this->translations[ $domain->getString() ];
+            if (array_key_exists($domain->getHost(), $this->translations)) {
+                $translations = $this->translations[ $domain->getHost() ];
             } else {
                 foreach ($this->translations as $domainRoute => $domainMap) {
                     if (preg_match('/[{][a-zA-Z0-9$_]+[}]/', $domainRoute)) {
                         $domainRoute = new Domain($domainRoute);
 
-                        if ($domain->getParentDomain() === $domainRoute->getParentDomain() AND
-                            $domain->getTotalSubDomains() == $domainRoute->getTotalSubDomains()
+                        if ($domain->getMainDomain() === $domainRoute->getMainDomain() AND
+                            $domain->getNumOfSubDomains() == $domainRoute->getNumOfSubDomains()
                         ) {
                             if (isset($domainMap[ $domainRoute->getSubDomain() ])) {
                                 $translations = $domainMap;
@@ -365,10 +365,10 @@ class Addresses
             $domainParts = explode('.', $domain);
 
             if (count($domainParts) == 1) {
-                $domain = $domain . '.' . $hostDomain->getParentDomain();
+                $domain = $domain . '.' . $hostDomain->getMainDomain();
             } else {
-                $domain = str_replace('.' . $hostDomain->getParentDomain(), '',
-                        $domain) . '.' . $hostDomain->getParentDomain();
+                $domain = str_replace('.' . $hostDomain->getMainDomain(), '',
+                        $domain) . '.' . $hostDomain->getMainDomain();
             }
         }
 
@@ -411,7 +411,7 @@ class Addresses
                     $checkDomain = new Domain($domain);
                     $parameters = [];
 
-                    if ($addressDomain->getTotalSubDomains() === $checkDomain->getTotalSubDomains()) {
+                    if ($addressDomain->getNumOfSubDomains() === $checkDomain->getNumOfSubDomains()) {
                         foreach ($addressDomain->getSubDomains() as $level => $name) {
                             if (false !== ($checkDomainName = $checkDomain->getSubDomain($level))) {
                                 $parameters[] = $checkDomainName;

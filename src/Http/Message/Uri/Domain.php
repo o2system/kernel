@@ -23,25 +23,18 @@ namespace O2System\Kernel\Http\Message\Uri;
 class Domain
 {
     /**
-     * Domain::$string
+     * Domain::$host
      *
      * @var string
      */
-    protected $string;
-
-    /**
-     * Domain::$origin
-     *
-     * @var string
-     */
-    protected $origin;
+    protected $host;
 
     /**
      * Domain::$scheme
      *
      * @var string
      */
-    protected $scheme = 'http';
+    protected $scheme;
 
     /**
      * Domain::$www
@@ -51,6 +44,13 @@ class Domain
     protected $www = false;
 
     /**
+     * Domain::$ipv4
+     *
+     * @var string
+     */
+    protected $ipv4 = null;
+
+    /**
      * Domain::$port
      *
      * @var int
@@ -58,11 +58,11 @@ class Domain
     protected $port = 80;
 
     /**
-     * Domain::$parentDomain
+     * Domain::$mainDomain
      *
      * @var string|null
      */
-    protected $parentDomain = null;
+    protected $mainDomain = null;
 
     /**
      * Domain::$subDomains
@@ -72,6 +72,13 @@ class Domain
     protected $subDomains = [];
 
     /**
+     * Domain::$subDomain
+     *
+     * @var string
+     */
+    protected $subDomain = null;
+
+    /**
      * Domain::$tlds
      *
      * @var array
@@ -79,11 +86,11 @@ class Domain
     protected $tlds = [];
 
     /**
-     * Domain::$path
+     * Domain::$tld
      *
      * @var string
      */
-    protected $path;
+    protected $tld = null;
 
     // ------------------------------------------------------------------------
 
@@ -92,153 +99,92 @@ class Domain
      *
      * @param string|null $string
      */
-    public function __construct($string = null)
+    public function __construct($host = null)
     {
-        $this->origin = isset($_SERVER[ 'HTTP_HOST' ])
-            ? $_SERVER[ 'HTTP_HOST' ]
-            : $_SERVER[ 'SERVER_NAME' ];
-        $this->scheme = is_https()
-            ? 'https'
-            : 'http';
+        if (isset($host)) {
+            $this->host = parse_url($host, PHP_URL_HOST);
+            $this->scheme = parse_url($host, PHP_URL_SCHEME);
+            $this->ipv4 = gethostbyname($this->host);
+            $this->port = parse_url($host, PHP_URL_PORT);
+        } else {
+            $this->host = isset($_SERVER[ 'HTTP_HOST' ])
+                ? $_SERVER[ 'HTTP_HOST' ]
+                : $_SERVER[ 'SERVER_NAME' ];
 
-        $paths = explode('.php', $_SERVER[ 'PHP_SELF' ]);
-        $paths = explode('/', trim($paths[ 0 ], '/'));
-        array_pop($paths);
-
-        $this->path = empty($paths)
-            ? null
-            : implode('/', $paths);
-
-        if (isset($string)) {
-            $this->string = trim($string, '/');
-            $metadata = parse_url($string);
-            $metadata[ 'path' ] = empty($metadata[ 'path' ])
-                ? null
-                : $metadata[ 'path' ];
-
-            $this->scheme = empty($metadata[ 'scheme' ])
-                ? $this->scheme
-                : $metadata[ 'scheme' ];
-
-            if ($metadata[ 'path' ] === $this->string) {
-                $paths = explode('/', $this->string);
-                $this->origin = $paths[ 0 ];
-
-                $this->path = implode('/', array_slice($paths, 1));
-            } elseif (isset($metadata[ 'host' ])) {
-                $this->path = trim($metadata[ 'path' ]);
-                $this->origin = $metadata[ 'host' ];
+            $this->scheme = is_https() ? 'https' : 'http';
+            if (preg_match('/(:)([0-9]+)/', $this->host, $matches)) {
+                $this->port = $matches[ 2 ];
+            } else {
+                $this->port = is_https() ? 443 : 80;
             }
         }
 
-        $directories = explode('/', str_replace('\\', '/', dirname($_SERVER[ 'SCRIPT_FILENAME' ])));
-        $paths = explode('/', $this->path);
-        $paths = array_intersect($paths, $directories);
+        $this->ipv4 = gethostbyname($this->host);
 
-        $this->path = '/' . trim(implode('/', $paths), '/');
-
-        if (strpos($this->origin, 'www') !== false) {
+        if (strpos($this->host, 'www') !== false) {
             $this->www = true;
-            $this->origin = ltrim($this->origin, 'www.');
+            $this->host = ltrim($this->host, 'www.');
         }
 
-        if (preg_match('/(:)([0-9]+)/', $this->string, $matches)) {
-            $this->port = $matches[ 2 ];
-        }
-
-        if (filter_var($this->origin, FILTER_VALIDATE_IP) !== false) {
-            $tlds = [$this->origin];
+        if (filter_var($this->host, FILTER_VALIDATE_IP) !== false) {
+            $tlds = [$this->host];
         } else {
-            $tlds = explode('.', $this->origin);
+            $tlds = explode('.', $this->host);
         }
 
-        if (count($tlds) > 1) {
-            foreach ($tlds as $key => $tld) {
-                if (strlen($tld) <= 3 AND $key >= 1) {
-                    $this->tlds[] = $tld;
+        $tldsDatabase = require(PATH_KERNEL . 'Config' . DIRECTORY_SEPARATOR . 'Tlds.php');
+
+        if (($numTlds = count($tlds)) > 1) {
+            $possibleTlds[] = implode('.', array_slice($tlds, $numTlds - 2, 2));
+            $possibleTlds[] = end($tlds);
+
+            foreach($possibleTlds as $possibleTld) {
+                if(in_array($possibleTld, $tldsDatabase) or in_array($possibleTld, ['local', 'test', end($tlds)])) {
+                    $this->setSubDomain(array_diff($tlds, $this->tlds = explode('.', $possibleTld)));
+                    $this->setTld($possibleTld);
+                    break;
                 }
             }
 
-            if (empty($this->tlds)) {
-                $this->tlds[] = end($tlds);
-            }
-
-            $this->tld = '.' . implode('.', $this->tlds);
-
-            $this->subDomains = array_diff($tlds, $this->tlds);
-            $this->subDomains = count($this->subDomains) == 0
-                ? $this->tlds
-                : $this->subDomains;
-
-            $this->parentDomain = end($this->subDomains);
+            $this->mainDomain = end($this->subDomains);
             array_pop($this->subDomains);
 
-            $this->parentDomain = implode('.', array_slice($this->subDomains, 1))
+            $this->mainDomain = implode('.', array_slice($this->subDomains, 1))
                 . '.'
-                . $this->parentDomain
+                . $this->mainDomain
                 . $this->tld;
-            $this->parentDomain = ltrim($this->parentDomain, '.');
+            $this->mainDomain = ltrim($this->mainDomain, '.');
 
             if (count($this->subDomains) > 0) {
                 $this->subDomain = reset($this->subDomains);
             }
         } else {
-            $this->parentDomain = $this->origin;
-        }
-
-        $ordinalEnds = ['th', 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th'];
-
-        foreach ($this->subDomains as $key => $subdomain) {
-            $ordinalNumber = count($tlds) - $key;
-
-            if ((($ordinalNumber % 100) >= 11) && (($ordinalNumber % 100) <= 13)) {
-                $ordinalKey = $ordinalNumber . 'th';
-            } else {
-                $ordinalKey = $ordinalNumber . $ordinalEnds[ $ordinalNumber % 10 ];
-            }
-
-            $this->subDomains[ $ordinalKey ] = $subdomain;
-
-            unset($this->subDomains[ $key ]);
-        }
-
-        foreach ($this->tlds as $key => $tld) {
-            $ordinalNumber = count($this->tlds) - $key;
-
-            if ((($ordinalNumber % 100) >= 11) && (($ordinalNumber % 100) <= 13)) {
-                $ordinalKey = $ordinalNumber . 'th';
-            } else {
-                $ordinalKey = $ordinalNumber . $ordinalEnds[ $ordinalNumber % 10 ];
-            }
-
-            $this->tlds[ $ordinalKey ] = $tld;
-
-            unset($this->tlds[ $key ]);
+            $this->mainDomain = $this->host;
         }
     }
 
     // ------------------------------------------------------------------------
 
     /**
-     * Domain::getString
+     * Domain::getHost
      *
      * @return string
      */
-    public function getString()
+    public function getHost()
     {
-        return $this->string;
+        return $this->host;
     }
 
     // ------------------------------------------------------------------------
 
     /**
-     * Domain::getOrigin
+     * Domain::setHost
      *
-     * @return string
+     * @param string $host
      */
-    public function getOrigin()
+    public function setHost($host)
     {
-        return $this->origin;
+        $this->host = parse_url($host, PHP_URL_HOST);
     }
 
     // ------------------------------------------------------------------------
@@ -251,6 +197,18 @@ class Domain
     public function getScheme()
     {
         return $this->scheme;
+    }
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * Domain::setScheme
+     *
+     * @param string $scheme
+     */
+    public function setScheme($scheme)
+    {
+        $this->scheme = $scheme;
     }
 
     // ------------------------------------------------------------------------
@@ -274,7 +232,7 @@ class Domain
      */
     public function getIpAddress()
     {
-        return gethostbyname($this->origin);
+        return gethostbyname($this->host);
     }
 
     // ------------------------------------------------------------------------
@@ -292,13 +250,49 @@ class Domain
     // ------------------------------------------------------------------------
 
     /**
-     * Domain::getParentDomain
+     * Domain::setPort
+     *
+     * @param int $port
+     */
+    public function setPort($port)
+    {
+        $this->port = intval($port);
+    }
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * Domain::getMainDomain
      *
      * @return string|null
      */
-    public function getParentDomain()
+    public function getMainDomain()
     {
-        return $this->parentDomain;
+        return $this->mainDomain;
+    }
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * Domain::setMainDomain
+     *
+     * @param $mainDomain
+     */
+    public function setMainDomain($mainDomain)
+    {
+        $this->mainDomain = $mainDomain;
+        if( ! empty($this->subDomain)) {
+            $domain = new Domain($this->mainDomain);
+        } else {
+            $domain = new Domain($this->subDomain . '.' . $this->mainDomain);
+        }
+
+        $this->host = $domain->getHost();
+        $this->ipv4 = $domain->getIpAddress();
+        $this->subDomain = $domain->getSubDomain();
+        $this->subDomains= $domain->getSubDomains();
+        $this->tld = $domain->getTld();
+        $this->tlds = $domain->getTlds();
     }
 
     // ------------------------------------------------------------------------
@@ -334,11 +328,60 @@ class Domain
     // ------------------------------------------------------------------------
 
     /**
-     * Domain::getTotalSubDOmains
+     * Domain::setSubDomain
+     *
+     * @param string|array $subDomains
+     */
+    public function setSubDomain($subDomains)
+    {
+        if(is_string($subDomains)) {
+            $subDomains = explode('.', $subDomain);
+        }
+
+        $this->subDomains = [];
+        foreach($subDomains as $subDomain) {
+            $this->addSubDomain($subDomain);
+        }
+    }
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * Domain::addSubDomain
+     *
+     * @param string $subDomain
+     */
+    public function addSubDomain($subDomain)
+    {
+        $subDomains = array_values($this->subDomains);
+        array_push($subDomains, $subDomain);
+
+        $ordinalEnds = ['th', 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th'];
+
+        $this->subDomains = [];
+        foreach ($subDomains as $key => $subdomain) {
+            $ordinalNumber = count($subDomains) - $key;
+
+            if ((($ordinalNumber % 100) >= 11) && (($ordinalNumber % 100) <= 13)) {
+                $ordinalKey = $ordinalNumber . 'th';
+            } else {
+                $ordinalKey = $ordinalNumber . $ordinalEnds[ $ordinalNumber % 10 ];
+            }
+
+            $this->subDomains[ $ordinalKey ] = $subdomain;
+        }
+
+        $this->subDomain = reset($this->subDomains);
+    }
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * Domain::getNumOfSubDomains
      *
      * @return int
      */
-    public function getTotalSubDomains()
+    public function getNumOfSubDomains()
     {
         return count($this->subDomains);
     }
@@ -378,12 +421,71 @@ class Domain
     // ------------------------------------------------------------------------
 
     /**
-     * Domain::getTotalTlds
+     * Domain::setTld
+     *
+     * @param string|array $tlds
+     */
+    public function setTld($tlds)
+    {
+        if(is_string($tlds)) {
+            $tlds = explode('.', $tlds);
+        }
+
+        $this->tlds = [];
+        foreach($tlds as $tld) {
+            $this->addTld($tld);
+        }
+    }
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * Domain::addTld
+     *
+     * @param string $tld
+     */
+    public function addTld($tld)
+    {
+        $tlds = array_values($this->tlds);
+        array_push($tlds, $tld);
+
+        $ordinalEnds = ['th', 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th'];
+
+        $this->tlds = [];
+        foreach ($tlds as $key => $tld) {
+            $ordinalNumber = count($tlds) - $key;
+
+            if ((($ordinalNumber % 100) >= 11) && (($ordinalNumber % 100) <= 13)) {
+                $ordinalKey = $ordinalNumber . 'th';
+            } else {
+                $ordinalKey = $ordinalNumber . $ordinalEnds[ $ordinalNumber % 10 ];
+            }
+
+            $this->tlds[ $ordinalKey ] = $tld;
+        }
+
+        $this->tld = '.' . implode('.', $this->tlds);
+    }
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * Domain::getNumOfTlds
      *
      * @return int
      */
-    public function getTotalTlds()
+    public function getNumOfTlds()
     {
         return count($this->tlds);
+    }
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * Domain::__toString
+     */
+    public function __toString()
+    {
+        return $this->host;
     }
 }
