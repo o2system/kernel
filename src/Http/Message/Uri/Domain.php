@@ -304,10 +304,14 @@ class Domain
      *
      * @return bool|mixed
      */
-    public function getSubDomain($level = '3rd')
+    public function getSubDomain($level = null)
     {
-        if (isset($this->subDomains[ $level ])) {
-            return $this->subDomains[ $level ];
+        if (isset($level)) {
+            if(isset($this->subDomains[$level])) {
+                return $this->subDomains[ $level ];
+            }
+        } elseif(count($this->subDomains)) {
+            return reset($this->subDomains);
         }
 
         return false;

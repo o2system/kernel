@@ -487,10 +487,10 @@ class Uri implements UriInterface
     public function getSubDomain($level = 'AUTO')
     {
         if ($level === 'AUTO') {
-            return $this->domain->getTld();
+            return $this->domain->getSubDomain();
         }
 
-        return $this->domain->getTld($level);
+        return $this->domain->getSubDomain($level);
     }
 
     // ------------------------------------------------------------------------
