@@ -880,11 +880,7 @@ class Uri implements UriInterface
      */
     public function __toString()
     {
-        $uriString = $this->getScheme() . '://' . $this->domain->getHost();
-
-        if ( ! in_array($this->getPort(), [80, 443])) {
-            $uriString .= ':' . $this->getPort();
-        }
+        $uriString = $this->getScheme() . '://' . $this->domain->getHost();        
 
         $uriPath = empty($this->path)
             ? '/'
