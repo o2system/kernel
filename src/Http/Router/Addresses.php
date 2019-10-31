@@ -142,7 +142,9 @@ class Addresses
         $path = '/' . ltrim($path, '/');
         $translations = $this->getTranslations($domain);
 
-        if (isset($translations[ $path ])) {
+        if($path === '/' and isset($translations['/(:any)'])) {
+            return $translations['/(:any)'];
+        } elseif (isset($translations[ $path ])) {
             return $translations[ $path ];
         } elseif (count($translations)) {
             foreach ($translations as $translation => $action) {

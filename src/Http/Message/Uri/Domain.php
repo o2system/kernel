@@ -339,7 +339,7 @@ class Domain
     public function setSubDomain($subDomains)
     {
         if(is_string($subDomains)) {
-            $subDomains = explode('.', $subDomain);
+            $subDomains = explode('.', $subDomains);
         }
 
         $this->subDomains = [];
@@ -490,6 +490,10 @@ class Domain
      */
     public function __toString()
     {
+        if(count($this->subDomains)) {
+            return implode('.', $this->subDomains) . '.' . $this->mainDomain;
+        }
+
         return $this->host;
     }
 }

@@ -119,7 +119,6 @@ class Uri implements UriInterface
     public function __construct($httpStringRequest = null)
     {
         if (isset($httpStringRequest)) {
-            $this->segments = new Segments('');
             $httpStringRequest = ltrim($httpStringRequest, '//');
 
             if (strpos($httpStringRequest, 'http://') === false) {
@@ -131,7 +130,7 @@ class Uri implements UriInterface
             $httpStringRequest = trim($httpStringRequest, '/');
             $parseUrl = parse_url($httpStringRequest);
 
-            $this->host = isset($parseUrl[ 'host' ]) ? $parseUrl[ 'host' ] : null;
+            $this->domain = new Domain($httpStringRequest);
 
             if (isset($parseUrl[ 'path' ])) {
                 $xRequest = explode('/', $parseUrl[ 'path' ]);
@@ -151,6 +150,8 @@ class Uri implements UriInterface
             $this->password = isset($parseUrl[ 'pass' ]) ? $parseUrl[ 'pass' ] : null;
             $this->port = isset($parseUrl[ 'port' ]) ? $parseUrl[ 'port' ] : 80;
             $this->fragment = isset($parseUrl[ 'fragment' ]) ? $parseUrl[ 'fragment' ] : null;
+
+            $this->segments = new Segments($this->path);
         } else {
             $this->domain = new Domain();
             $this->segments = new Segments();
@@ -880,7 +881,7 @@ class Uri implements UriInterface
      */
     public function __toString()
     {
-        $uriString = $this->getScheme() . '://' . $this->domain->getHost();        
+        $uriString = $this->getScheme() . '://' . $this->domain->__toString();
 
         $uriPath = empty($this->path)
             ? '/'

@@ -216,3 +216,88 @@ if ( ! function_exists('server_request')) {
         return services('serverRequest');
     }
 }
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('get')) {
+    /**
+     * get
+     *
+     * @param string $offset
+     * @param mixed  $default
+     *
+     * @return mixed
+     */
+    function get($offset, $default = null)
+    {
+        return input()->get($offset, $default);
+    }
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('get_post')) {
+    /**
+     * get_post
+     *
+     * @param string $offset
+     * @param mixed  $default
+     *
+     * @return mixed
+     */
+    function get_post($offset, $default = null)
+    {
+        return input()->getPost($offset, $default);
+    }
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('post')) {
+    /**
+     * post
+     *
+     * @param string $offset
+     * @param mixed  $default
+     *
+     * @return mixed
+     */
+    function post($offset, $default = null)
+    {
+        return input()->post($offset, $default);
+    }
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('post_get')) {
+    /**
+     * post_get
+     *
+     * @param string $offset
+     * @param mixed  $default
+     *
+     * @return mixed
+     */
+    function post_get($offset, $default = null)
+    {
+        return input()->postGet($offset, $default);
+    }
+}
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('request')) {
+    /**
+     * request
+     *
+     * @param string $offset
+     * @param mixed  $default
+     *
+     * @return mixed
+     */
+    function request($offset, $default = null)
+    {
+        return input()->request($offset, $default);
+    }
+}

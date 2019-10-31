@@ -15,6 +15,7 @@ namespace O2System\Kernel\Http\Message;
 
 // ------------------------------------------------------------------------
 
+use O2System\Kernel\DataStructures\Input\Files;
 use O2System\Psr\Http\Message\ServerRequestInterface;
 use O2System\Psr\Http\Message\StreamInterface;
 use O2System\Psr\Http\Message\UploadedFileInterface;
@@ -50,9 +51,11 @@ class ServerRequest extends Request implements ServerRequestInterface
     /**
      * Server Uploaded Files
      *
-     * @var array
+     * @var Files
      */
     protected $uploadedFiles = [];
+
+    // ------------------------------------------------------------------------
 
     /**
      * ServerRequest::__construct
@@ -97,34 +100,23 @@ class ServerRequest extends Request implements ServerRequestInterface
         }
 
         // Populate file array
-        $uploadedFiles = [];
+        $this->uploadedFiles = new Files();
 
         if (count($_FILES)) {
-            foreach ($_FILES as $key => $value) {
-                if (is_array($value[ 'name' ])) {
-                    for ($i = 0; $i < count($value[ 'name' ]); $i++) {
-                        if ( ! is_array($value[ 'name' ])) {
-                            $uploadedFiles[ $key ][ $i ] = $value;
-                            break;
-                        }
-
-                        $uploadedFiles[ $key ][ $i ][ 'name' ] = $value[ 'name' ][ $i ];
-                        $uploadedFiles[ $key ][ $i ][ 'type' ] = $value[ 'type' ][ $i ];
-                        $uploadedFiles[ $key ][ $i ][ 'tmp_name' ] = $value[ 'tmp_name' ][ $i ];
-                        $uploadedFiles[ $key ][ $i ][ 'error' ] = $value[ 'error' ][ $i ];
-                        $uploadedFiles[ $key ][ $i ][ 'size' ] = $value[ 'size' ][ $i ];
+            foreach ($_FILES as $key => $file) {
+                if (is_array($file['name'])) {
+                    $multipleFiles = [];
+                    foreach($file as $multipleKey => $multipleFile) {
+                        $multipleFiles[$i] = new UploadFile($multipleFile);
                     }
+
+                    $this->uploadedFiles->offsetSet($key, $multipleFiles);
+                    unset($multipleFiles);
                 } else {
-                    $uploadedFiles[ $key ][ 'name' ] = $value[ 'name' ];
-                    $uploadedFiles[ $key ][ 'type' ] = $value[ 'type' ];
-                    $uploadedFiles[ $key ][ 'tmp_name' ] = $value[ 'tmp_name' ];
-                    $uploadedFiles[ $key ][ 'error' ] = $value[ 'error' ];
-                    $uploadedFiles[ $key ][ 'size' ] = $value[ 'size' ];
+                    $this->uploadedFiles->offsetSet($key, new UploadFile($file));
                 }
             }
         }
-
-        $this->uploadedFiles = $uploadedFiles;
     }
 
     //--------------------------------------------------------------------
@@ -188,13 +180,13 @@ class ServerRequest extends Request implements ServerRequestInterface
      */
     public function withCookieParams(array $cookies)
     {
-        $message = clone $this;
+        $serverRequest = clone $this;
 
         foreach ($cookies as $key => $value) {
-            $message->cookieParams[ $key ] = $value;
+            $serverRequest->cookieParams[ $key ] = $value;
         }
 
-        return $message;
+        return $serverRequest;
     }
 
     //--------------------------------------------------------------------
@@ -247,11 +239,11 @@ class ServerRequest extends Request implements ServerRequestInterface
      */
     public function withQueryParams(array $query)
     {
-        $message = clone $this;
-        $message->queryParams = $query;
-        $message->uri = $this->uri->withQuery(http_build_query($query));
+        $serverRequest = clone $this;
+        $serverRequest->queryParams = $query;
+        $serverRequest->uri = $this->uri->withQuery(http_build_query($query));
 
-        return $message;
+        return $serverRequest;
     }
 
     //--------------------------------------------------------------------
@@ -273,20 +265,7 @@ class ServerRequest extends Request implements ServerRequestInterface
      */
     public function getUploadedFiles()
     {
-        $response = [];
-        foreach ($this->uploadedFiles as $key => $uploadedFile) {
-            if (empty($uploadedFile[ 'name' ])) {
-                continue;
-            } elseif (is_numeric(key($uploadedFile))) {
-                foreach ($uploadedFile as $index => $file) {
-                    $response[ $key ][ $index ] = new UploadFile($file);
-                }
-            } else {
-                $response[ $key ] = new UploadFile($uploadedFile);
-            }
-        }
-
-        return $response;
+        return $this->uploadedFiles;
     }
 
     // --------------------------------------------------------------------------------------
@@ -307,18 +286,11 @@ class ServerRequest extends Request implements ServerRequestInterface
      */
     public function withUploadedFiles(array $uploadedFiles)
     {
-        $message = clone $this;
+        $serverRequest = clone $this;
+        $serverRequest->uploadedFiles = new Files();
+        $serverRequest->uploadedFiles->exchangeArray($uploadedFiles);
 
-        foreach ($uploadedFiles as $uploadedFile) {
-            if ($uploadedFile instanceof UploadedFileInterface) {
-                $message->uploadedFiles[] = $uploadedFile;
-            } else {
-                throw new \InvalidArgumentException('Not Instance Of UploadedFileInterface');
-                break;
-            }
-        }
-
-        return $message;
+        return $serverRequest;
     }
 
     //--------------------------------------------------------------------
@@ -519,12 +491,12 @@ class ServerRequest extends Request implements ServerRequestInterface
         $name = str_replace('SERVER_', '', $name);
         $name = strtoupper($name);
 
-        $message = clone $this;
+        $serverRequest = clone $this;
 
         if (isset($this->serverParams[ $name ])) {
             unset($this->serverParams[ $name ]);
         }
 
-        return $message;
+        return $serverRequest;
     }
 }

@@ -339,7 +339,7 @@ class Request extends AbstractMessage implements
      * @return Uri|\O2System\Kernel\Http\Message\Uri Returns a UriInterface instance
      *     representing the URI of the request.
      */
-    public function &getUri()
+    public function getUri()
     {
         if (empty($this->uri)) {
             $this->uri = new Uri();
