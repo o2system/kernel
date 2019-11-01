@@ -272,7 +272,7 @@ class Files extends SplArrayObject
                         $file->moveTo($targetPath);
 
                         if ( ! $file->getError()) {
-                            $this->stored[] = $fileInfo;
+                            $this->stored[] = $file;
                         } else {
                             $this->errors[] = $file->getError();
                         }
@@ -376,10 +376,16 @@ class Files extends SplArrayObject
     /**
      * Files::getStored
      *
+     * @param string $offset Stored files offset
+     *                       
      * @return array|\O2System\Spl\Iterators\ArrayIterator
      */
-    public function getStored()
+    public function getStored($offset = null)
     {
+        if(isset($offset)) {
+            return $this->stored[$offset];
+        }
+        
         return $this->stored;
     }
 }

@@ -491,7 +491,9 @@ class Domain
     public function __toString()
     {
         if(count($this->subDomains)) {
-            return implode('.', $this->subDomains) . '.' . $this->mainDomain;
+            return implode('.', $this->subDomains) . '.' . str_replace(array_map(function($subDomain){
+                    return $subDomain . '.';
+                }, $this->subDomains), '', $this->mainDomain);
         }
 
         return $this->host;

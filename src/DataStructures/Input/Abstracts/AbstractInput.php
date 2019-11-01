@@ -15,8 +15,9 @@ namespace O2System\Kernel\DataStructures\Input\Abstracts;
 
 // ------------------------------------------------------------------------
 
-use O2System\Security\Filters\Rules;
 use O2System\Security\Filters\Xss;
+use O2System\Security\Form\Validator;
+use O2System\Spl\DataStructures\SplArrayStorage;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 
@@ -24,12 +25,7 @@ use Psr\Container\ContainerInterface;
  * Class AbstractInput
  * @package O2System\Kernel\DataStructures\Input\Abstracts
  */
-abstract class AbstractInput implements
-    \ArrayAccess,
-    \IteratorAggregate,
-    \Countable,
-    \Serializable,
-    \JsonSerializable,
+abstract class AbstractInput extends SplArrayStorage implements
     ContainerInterface
 {
     /**
@@ -40,11 +36,11 @@ abstract class AbstractInput implements
     protected $filter = FILTER_DEFAULT;
 
     /**
-     * AbstractInput::$rules
+     * AbstractInput::$validator
      *
-     * @var Rules
+     * @var Validator
      */
-    protected $rules;
+    public $validator;
 
     // ------------------------------------------------------------------------
 
@@ -64,99 +60,6 @@ abstract class AbstractInput implements
     public function has($id)
     {
         return (bool)$this->offsetExists($id);
-    }
-
-    // ------------------------------------------------------------------------
-
-    /**
-     * AbstractInput::exists
-     *
-     * Checks if the data exists on the storage.
-     * An alias of AbstractInput::__isset method.
-     *
-     * @param string $offset The object offset key.
-     *
-     * @return bool Returns TRUE on success or FALSE on failure.
-     */
-    public function exists($offset)
-    {
-        return $this->__isset($offset);
-    }
-
-    // ------------------------------------------------------------------------
-
-    /**
-     * AbstractInput::__isset
-     *
-     * @param mixed $offset PHP native global variable offset.
-     *
-     * @return bool
-     */
-    public function __isset($offset)
-    {
-        return $this->offsetExists($offset);
-    }
-
-    // ------------------------------------------------------------------------
-
-    /**
-     * AbstractInput::store
-     *
-     * Store the data into the storage.
-     * An alias of AbstractInput::__set method.
-     *
-     * @param string $offset The data offset key.
-     * @param mixed  $value  The data to be stored.
-     *
-     * @return void
-     */
-    public function store($offset, $value)
-    {
-        $this->__set($offset, $value);
-    }
-
-    // ------------------------------------------------------------------------
-
-    /**
-     * AbstractInput::__set
-     *
-     * @param mixed $offset PHP native global variable offset.
-     * @param mixed $value  PHP native global variable offset value to set.
-     */
-    public function __set($offset, $value)
-    {
-        $this->offsetSet($offset, $value);
-    }
-
-    // ------------------------------------------------------------------------
-
-    /**
-     * AbstractInput::remove
-     *
-     * Removes a data from the storage.
-     * An alias of AbstractInput::__unset method.
-     *
-     * @param string $offset The object offset key.
-     *
-     * @return void
-     */
-    public function remove($offset)
-    {
-        $this->__unset($offset);
-    }
-
-    // ------------------------------------------------------------------------
-
-    /**
-     * AbstractInput::__unset
-     *
-     * @param mixed $offset PHP Native globals variable offset
-     *
-     * @return void
-     */
-    public function __unset($offset)
-    {
-        $this->offsetUnset($offset);
     }
 
     // ------------------------------------------------------------------------
@@ -185,16 +88,53 @@ abstract class AbstractInput implements
     // ------------------------------------------------------------------------
 
     /**
-     * AbstractInput::validate
+     * AbstractInput::offsetGet
+     *
+     * Offset to retrieve
+     *
+     * @link  http://php.net/manual/en/arrayaccess.offsetget.php
+     *
+     * @param mixed $offset <p>
+     *                      The offset to retrieve.
+     *                      </p>
+     *
+     * @return mixed Can return all value types.
+     * @since 5.0.0
+     */
+    public function offsetGet($offset)
+    {
+        if ($this->offsetExists($offset)) {
+            $value = $this->filterVar(parent::offsetGet($offset));
+
+            if ($this->validator instanceof Validator) {
+                if ($this->validator->hasRule($offset)) {
+                    if ($this->validator->validate([
+                        $offset => $value,
+                    ], true)) {
+                        return $value;
+                    }
+                }
+            }
+
+            return $value;
+        }
+
+        return false;
+    }
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * AbstractInput::validation
      *
      * @param array $rules
      *
-     * @return bool
+     * @return static
      */
-    public function validate(array $rules)
+    public function validation(array $rules, array $customErrors = [])
     {
-        $this->rules = new Rules();
-        $this->rules->sets($rules);
+        $this->validator = new Validator();
+        $this->validator->setRules($rules, $customErrors);
 
         return $this;
     }
@@ -202,11 +142,49 @@ abstract class AbstractInput implements
     // ------------------------------------------------------------------------
 
     /**
-     * AbstractInput::filter
+     * AbstractInput::validate
+     *
+     * @param string $field
+     * @param string $rule
+     * @param array  $customErrors
+     *
+     * @return bool
+     */
+    public function validate(string $field = null, string $rule = null, array $customErrors = [])
+    {
+        if(isset($field) and isset($rule)) {
+            $this->validator = new Validator();
+            $this->validator->addRule($field, $rule, $customErrors);
+
+            return $this->offsetGet($field);
+        } elseif ($this->validator instanceof Validator) {
+            if($this->validator->validate($this->storage)) {
+                return $this;
+            }
+        }
+
+        return false;
+    }
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * AbstractInput::setFilter
      *
      * @param mixed $filter
+     *
+     * @return static
+     * @example
+     *         AbstractInput::setFilter(FILTER_DEFAULT);
+     *
+     *         // Callback filter example
+     *         AbstractInput::setFilter(function($value){
+     *              // do something
+     *              return $filteredValue;
+     *         });
+     *
      */
-    public function filter($filter)
+    public function setFilter($filter)
     {
         if (in_array($filter, filter_list())) {
             $this->filter = $filter;
@@ -220,7 +198,26 @@ abstract class AbstractInput implements
     // ------------------------------------------------------------------------
 
     /**
-     * AbstractInput::offsetGet
+     * AbstractInput::filter
+     *
+     * @param string $offset
+     * @param mixed  $filter
+     */
+    public function filter(string $offset, $filter)
+    {
+        $this->setFilter($filter);
+
+        if ($this->offsetExists($offset)) {
+            return $this->filterVar(parent::offsetGet($offset));
+        }
+
+        return null;
+    }
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * AbstractInput::filterVar
      *
      * @param mixed $offset
      *
@@ -228,9 +225,7 @@ abstract class AbstractInput implements
      */
     protected function filterVar($value)
     {
-        if($this->rules instanceof Rules) {
-
-        } elseif (is_array($value) and is_int($this->filter)) {
+        if (is_array($value) and is_int($this->filter)) {
             $value = $this->filterVarRecursive($value, $this->filter);
         } elseif (is_callable($this->filter)) {
             $value = call_user_func_array($this->filter, [$value]);
@@ -238,7 +233,7 @@ abstract class AbstractInput implements
             $value = filter_var($value, $this->filter);
         }
 
-        if(class_exists('O2System\Framework', false)) {
+        if (class_exists('O2System\Framework', false)) {
             if (services()->has('xssProtection')) {
                 if ( ! services()->get('xssProtection')->verify()) {
                     if (is_string($value)) {
@@ -254,7 +249,7 @@ abstract class AbstractInput implements
     // ------------------------------------------------------------------------
 
     /**
-     * Input::filterRecursive
+     * AbstractInput::filterRecursive
      *
      * Gets multiple variables and optionally filters them.
      *

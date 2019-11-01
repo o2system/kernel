@@ -226,9 +226,9 @@ if ( ! function_exists('get')) {
      * @param string $offset
      * @param mixed  $default
      *
-     * @return mixed
+     * @return mixed|\O2System\Kernel\DataStructures\Input\Get
      */
-    function get($offset, $default = null)
+    function get($offset = null, $default = null)
     {
         return input()->get($offset, $default);
     }
@@ -260,9 +260,9 @@ if ( ! function_exists('post')) {
      * @param string $offset
      * @param mixed  $default
      *
-     * @return mixed
+     * @return mixed|\O2System\Kernel\DataStructures\Input\Post
      */
-    function post($offset, $default = null)
+    function post($offset = null, $default = null)
     {
         return input()->post($offset, $default);
     }
@@ -294,9 +294,9 @@ if ( ! function_exists('request')) {
      * @param string $offset
      * @param mixed  $default
      *
-     * @return mixed
+     * @return mixed|\O2System\Kernel\DataStructures\Input\Request
      */
-    function request($offset, $default = null)
+    function request($offset = null, $default = null)
     {
         return input()->request($offset, $default);
     }

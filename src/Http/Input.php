@@ -225,7 +225,7 @@ class Input
      * @param string|null $offset The offset of $_FILES variable to fetch.
      *                            When set null will returns filtered $_FILES variable.
      *
-     * @return array|UploadedFileInterface
+     * @return array|UploadedFileInterface|\O2System\Kernel\DataStructures\Input\Files
      */
     final public function files($offset = null)
     {
