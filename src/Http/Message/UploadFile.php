@@ -52,7 +52,7 @@ class UploadFile implements UploadedFileInterface
 
     /**
      * UploadFile::$path
-     * 
+     *
      * @var string
      */
     protected $path;
@@ -260,23 +260,21 @@ class UploadFile implements UploadedFileInterface
         if ($this->isMoved) {
             throw new \RuntimeException('Uploaded File Has Been Moved');
         }
-        
-        $filename = pathinfo($targetPath, PATHINFO_FILENAME);
-        $fileExtension = pathinfo($targetPath, PATHINFO_EXTENSION);
-        $targetPath = pathinfo($targetPath, PATHINFO_DIRNAME) . DIRECTORY_SEPARATOR;
 
-        if ( ! is_file($filePath = $targetPath . $filename . '.' . $fileExtension)) {
+        $fileInfo = pathinfo($targetPath);
+
+        if ( ! is_file($filePath = $fileInfo['dirname'] . DIRECTORY_SEPARATOR . $fileInfo['filename'] . '.' . $fileInfo['extension'])) {
             $targetPath = $filePath;
-        } elseif ( ! is_file($filePath = $targetPath . $filename . '-1' . '.' . $fileExtension)) {
+        } elseif ( ! is_file($filePath = $fileInfo['dirname'] . DIRECTORY_SEPARATOR . $fileInfo['filename'] . '-1' . '.' . $fileInfo['extension'])) {
             $targetPath = $filePath;
         } else {
-            $existingFiles = glob($targetPath . $filename . '*.' . $fileExtension);
+            $existingFiles = glob($fileInfo['dirname'] . DIRECTORY_SEPARATOR . $fileInfo['filename'] . '*.' . $fileInfo['extension']);
             if (count($existingFiles)) {
                 $increment = count($existingFiles) - 1;
             }
 
             foreach (range($increment + 1, $increment + 3, 1) as $increment) {
-                if ( ! is_file($filePath = $targetPath . $filename . '-' . $increment . '.' . $fileExtension)) {
+                if ( ! is_file($filePath = $fileInfo['dirname'] . DIRECTORY_SEPARATOR . $fileInfo['filename'] . '-' . $increment . '.' . $fileInfo['extension'])) {
                     $targetPath = $filePath;
                     break;
                 }

@@ -50,16 +50,16 @@ abstract class AbstractInput extends SplArrayStorage implements
      * Returns true if the container can return an entry for the given identifier.
      * Returns false otherwise.
      *
-     * `has($id)` returning true does not mean that `get($id)` will not throw an exception.
+     * `has($offset)` returning true does not mean that `get($id)` will not throw an exception.
      * It does however mean that `get($id)` will not throw a `NotFoundExceptionInterface`.
      *
-     * @param string $id Identifier of the entry to look for.
+     * @param string $offset Identifier of the entry to look for.
      *
      * @return bool
      */
-    public function has($id)
+    public function has($offset)
     {
-        return (bool)$this->offsetExists($id);
+        return (bool)$this->offsetExists($offset);
     }
 
     // ------------------------------------------------------------------------
@@ -69,17 +69,17 @@ abstract class AbstractInput extends SplArrayStorage implements
      *
      * Finds an entry of the container by its identifier and returns it.
      *
-     * @param string $id Identifier of the entry to look for.
+     * @param string $offset Identifier of the entry to look for.
      *
      * @return mixed Entry.
      * @throws ContainerExceptionInterface Error while retrieving the entry.
      *
      * @throws NotFoundExceptionInterface  No entry was found for **this** identifier.
      */
-    public function get($id)
+    public function get($offset)
     {
-        if ($this->has($id)) {
-            return $this->offsetGet($id);
+        if ($this->has($offset)) {
+            return $this->offsetGet($offset);
         }
 
         // @todo throw exception
@@ -203,8 +203,11 @@ abstract class AbstractInput extends SplArrayStorage implements
      * @param string $offset
      * @param mixed  $filter
      */
-    public function filter(string $offset, $filter)
+    public function filter($offset, $filter)
     {
+        if(is_null($offset)) {
+            print_out($offset);
+        }
         $this->setFilter($filter);
 
         if ($this->offsetExists($offset)) {

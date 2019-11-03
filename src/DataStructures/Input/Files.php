@@ -75,7 +75,7 @@ class Files extends SplArrayObject
      * @var array|\O2System\Spl\Iterators\ArrayIterator
      */
     protected $stored = [];
-    
+
     // --------------------------------------------------------------------------------------
 
     /**
@@ -112,7 +112,7 @@ class Files extends SplArrayObject
         } else {
             $this->path = dirname($_SERVER[ 'SCRIPT_FILENAME' ]) . DIRECTORY_SEPARATOR . $path;
         }
-        
+
         return $this;
     }
 
@@ -258,18 +258,9 @@ class Files extends SplArrayObject
                         }
                     }
 
-                    $targetPath = $this->path;
-
-                    if (empty($this->targetFilename)) {
-                        $this->setTargetFilename($file->getClientFilename());
-                    }
-
-                    $filename = $this->targetFilename;
-
                     if ($this->validate($file)) {
-                        $file->moveTo($targetPath . $filename . '.' . $file->getExtension());
-
-                        $file->moveTo($targetPath);
+                        $filename = dash( pathinfo($file->getClientFilename(), PATHINFO_FILENAME) );
+                        $file->moveTo($this->path . $filename . '.' . $file->getExtension());
 
                         if ( ! $file->getError()) {
                             $this->stored[] = $file;
@@ -347,13 +338,13 @@ class Files extends SplArrayObject
     }
 
     // ------------------------------------------------------------------------
-    
+
     /**
      * Files::store
      *
      * @param string      $index
      * @param string|null $path
-     *                         
+     *
      * @return bool
      */
     public function store($index = null)
@@ -362,12 +353,12 @@ class Files extends SplArrayObject
             $this->process($index);
         } else {
             $files = $this->getKeys();
-            
+
             foreach($files as $file) {
                 $this->process($file);
             }
         }
-        
+
         return $this->getErrors() ? false : true;
     }
 
@@ -377,7 +368,7 @@ class Files extends SplArrayObject
      * Files::getStored
      *
      * @param string $offset Stored files offset
-     *                       
+     *
      * @return array|\O2System\Spl\Iterators\ArrayIterator
      */
     public function getStored($offset = null)
@@ -385,7 +376,7 @@ class Files extends SplArrayObject
         if(isset($offset)) {
             return $this->stored[$offset];
         }
-        
+
         return $this->stored;
     }
 }

@@ -134,7 +134,7 @@ class Input
      *
      * @return mixed
      */
-    final public function getPost($offset, $default = null, $filter = null)
+    final public function getPost($offset, $default = null, $filter = FILTER_DEFAULT)
     {
         // Use $_GET directly here, since filter_has_var only
         // checks the initial GET data, not anything that might
@@ -161,7 +161,7 @@ class Input
      *
      * @return mixed
      */
-    final public function get($offset = null, $default = null, $filter = null)
+    final public function get($offset = null, $default = null, $filter = FILTER_DEFAULT)
     {
         return $this->fetchData(INPUT_GET, $offset, $default, $filter);
     }
@@ -182,7 +182,7 @@ class Input
      *
      * @return mixed
      */
-    final public function post($offset = null, $default = null, $filter = null)
+    final public function post($offset = null, $default = null, $filter = FILTER_DEFAULT)
     {
         return $this->fetchData(INPUT_POST, $offset, $default, $filter);
     }
@@ -204,7 +204,7 @@ class Input
      *
      * @return mixed
      */
-    final public function postGet($offset, $default = null, $filter = null)
+    final public function postGet($offset, $default = null, $filter = FILTER_DEFAULT)
     {
         // Use $_POST directly here, since filter_has_var only
         // checks the initial POST data, not anything that might
@@ -257,7 +257,7 @@ class Input
      *
      * @return mixed
      */
-    final public function env($offset = null, $default = null, $filter = null)
+    final public function env($offset = null, $default = null, $filter = FILTER_DEFAULT)
     {
         return $this->fetchData(INPUT_ENV, $offset, $default, $filter);
     }
@@ -279,7 +279,7 @@ class Input
      *
      * @return mixed
      */
-    final public function cookie($offset = null, $default = null, $filter = null)
+    final public function cookie($offset = null, $default = null, $filter = FILTER_DEFAULT)
     {
         return $this->fetchData(INPUT_COOKIE, $offset, $default, $filter);
     }
@@ -300,7 +300,7 @@ class Input
      *
      * @return mixed
      */
-    final public function request($offset = null, $filter = null)
+    final public function request($offset = null, $filter = FILTER_DEFAULT)
     {
         return $this->fetchData(INPUT_REQUEST, $offset, $filter);
     }
@@ -322,7 +322,7 @@ class Input
      *
      * @return mixed
      */
-    final public function session($offset = null, $default = null, $filter = null)
+    final public function session($offset = null, $default = null, $filter = FILTER_DEFAULT)
     {
         return $this->fetchData(INPUT_SESSION, $offset, $default, $filter);
     }
@@ -383,7 +383,7 @@ class Input
      *
      * @return mixed
      */
-    final public function server($offset = null, $default = null, $filter = null)
+    final public function server($offset = null, $default = null, $filter = FILTER_DEFAULT)
     {
         return $this->fetchData(INPUT_SERVER, $offset, $default, $filter);
     }
@@ -519,7 +519,9 @@ class Input
         }
 
         // Set filter mode
-        $data->filter($filter);
+        if( ! empty($filter)) {
+            $data->setFilter($filter);
+        }
 
         if (isset($offset)) {
             if ($data->offsetExists($offset)) {
