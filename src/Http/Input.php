@@ -132,7 +132,7 @@ class Input
      *                             If omitted, FILTER_DEFAULT will be used, which is equivalent to FILTER_UNSAFE_RAW.
      *                             This will result in no filtering taking place by default.
      *
-     * @return mixed
+     * @return mixed|DataStructures\Input\Get|DataStructures\Input\Post
      */
     final public function getPost($offset, $default = null, $filter = FILTER_DEFAULT)
     {
@@ -159,7 +159,7 @@ class Input
      *                            If omitted, FILTER_DEFAULT will be used, which is equivalent to FILTER_UNSAFE_RAW.
      *                            This will result in no filtering taking place by default.
      *
-     * @return mixed
+     * @return mixed|DataStructures\Input\Get
      */
     final public function get($offset = null, $default = null, $filter = FILTER_DEFAULT)
     {
@@ -180,7 +180,7 @@ class Input
      *                            If omitted, FILTER_DEFAULT will be used, which is equivalent to FILTER_UNSAFE_RAW.
      *                            This will result in no filtering taking place by default.
      *
-     * @return mixed
+     * @return mixed|DataStructures\Input\Post
      */
     final public function post($offset = null, $default = null, $filter = FILTER_DEFAULT)
     {
@@ -202,7 +202,7 @@ class Input
      *                             If omitted, FILTER_DEFAULT will be used, which is equivalent to FILTER_UNSAFE_RAW.
      *                             This will result in no filtering taking place by default.
      *
-     * @return mixed
+     * @return mixed|DataStructures\Input\Get|DataStructures\Input\Post
      */
     final public function postGet($offset, $default = null, $filter = FILTER_DEFAULT)
     {
@@ -255,7 +255,7 @@ class Input
      *                             If omitted, FILTER_DEFAULT will be used, which is equivalent to FILTER_UNSAFE_RAW.
      *                             This will result in no filtering taking place by default.
      *
-     * @return mixed
+     * @return mixed|DataStructures\Input\Env
      */
     final public function env($offset = null, $default = null, $filter = FILTER_DEFAULT)
     {
@@ -277,7 +277,7 @@ class Input
      *                             If omitted, FILTER_DEFAULT will be used, which is equivalent to FILTER_UNSAFE_RAW.
      *                             This will result in no filtering taking place by default.
      *
-     * @return mixed
+     * @return mixed|DataStructures\Input\Cookie
      */
     final public function cookie($offset = null, $default = null, $filter = FILTER_DEFAULT)
     {
@@ -298,7 +298,7 @@ class Input
      *                            If omitted, FILTER_DEFAULT will be used, which is equivalent to FILTER_UNSAFE_RAW.
      *                            This will result in no filtering taking place by default.
      *
-     * @return mixed
+     * @return mixed|DataStructures\Input\Request
      */
     final public function request($offset = null, $filter = FILTER_DEFAULT)
     {
@@ -320,7 +320,7 @@ class Input
      *                             If omitted, FILTER_DEFAULT will be used, which is equivalent to FILTER_UNSAFE_RAW.
      *                             This will result in no filtering taking place by default.
      *
-     * @return mixed
+     * @return mixed|DataStructures\Input\Session
      */
     final public function session($offset = null, $default = null, $filter = FILTER_DEFAULT)
     {
@@ -381,7 +381,7 @@ class Input
      *                             If omitted, FILTER_DEFAULT will be used, which is equivalent to FILTER_UNSAFE_RAW.
      *                             This will result in no filtering taking place by default.
      *
-     * @return mixed
+     * @return mixed|DataStructures\Input\Server
      */
     final public function server($offset = null, $default = null, $filter = FILTER_DEFAULT)
     {
@@ -519,7 +519,7 @@ class Input
         }
 
         // Set filter mode
-        if( ! empty($filter)) {
+        if( ! empty($filter) ) {
             $data->setFilter($filter);
         }
 

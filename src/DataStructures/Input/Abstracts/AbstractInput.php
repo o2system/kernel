@@ -128,6 +128,7 @@ abstract class AbstractInput extends SplArrayStorage implements
      * AbstractInput::validation
      *
      * @param array $rules
+     * @param array $customErrors
      *
      * @return static
      */
@@ -148,13 +149,13 @@ abstract class AbstractInput extends SplArrayStorage implements
      * @param string $rule
      * @param array  $customErrors
      *
-     * @return bool
+     * @return bool|static
      */
     public function validate(string $field = null, string $rule = null, array $customErrors = [])
     {
         if(isset($field) and isset($rule)) {
             $this->validator = new Validator();
-            $this->validator->addRule($field, $rule, $customErrors);
+            $this->validator->addRule($field, $field, $rule, $customErrors);
 
             return $this->offsetGet($field);
         } elseif ($this->validator instanceof Validator) {
@@ -202,12 +203,11 @@ abstract class AbstractInput extends SplArrayStorage implements
      *
      * @param string $offset
      * @param mixed  $filter
+     *                      
+     * @return mixed
      */
-    public function filter($offset, $filter)
+    public function filter(string $offset, $filter)
     {
-        if(is_null($offset)) {
-            print_out($offset);
-        }
         $this->setFilter($filter);
 
         if ($this->offsetExists($offset)) {
@@ -222,7 +222,7 @@ abstract class AbstractInput extends SplArrayStorage implements
     /**
      * AbstractInput::filterVar
      *
-     * @param mixed $offset
+     * @param mixed $value
      *
      * @return mixed|void
      */
@@ -232,6 +232,8 @@ abstract class AbstractInput extends SplArrayStorage implements
             $value = $this->filterVarRecursive($value, $this->filter);
         } elseif (is_callable($this->filter)) {
             $value = call_user_func_array($this->filter, [$value]);
+        } elseif(is_object($value)) {
+            return $value;
         } else {
             $value = filter_var($value, $this->filter);
         }
