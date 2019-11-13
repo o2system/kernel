@@ -65,7 +65,7 @@ class Segments extends ArrayIterator
         } elseif (is_array($segments)) {
             $segments = implode('/', $segments);
         }
-
+        
         $segments = str_replace(['\\', '_'], ['/', '-'], $segments);
         $segments = trim(remove_invisible_characters($segments, false), '/');
 
@@ -98,12 +98,14 @@ class Segments extends ArrayIterator
         $uri = isset($uri[ 'path' ])
             ? $uri[ 'path' ]
             : '';
-
-        if (isset($_SERVER[ 'SCRIPT_NAME' ][ 0 ])) {
-            if (strpos($uri, $_SERVER[ 'SCRIPT_NAME' ]) === 0) {
-                $uri = (string)substr($uri, strlen($_SERVER[ 'SCRIPT_NAME' ]));
-            } elseif (strpos($uri, dirname($_SERVER[ 'SCRIPT_NAME' ])) === 0) {
-                $uri = (string)substr($uri, strlen(dirname($_SERVER[ 'SCRIPT_NAME' ])));
+        
+        if(pathinfo($uri, PATHINFO_EXTENSION) === 'php') {
+            if (isset($_SERVER[ 'SCRIPT_NAME' ][ 0 ])) {
+                if (strpos($uri, $_SERVER[ 'SCRIPT_NAME' ]) === 0) {
+                    $uri = (string)substr($uri, strlen($_SERVER[ 'SCRIPT_NAME' ]));
+                } elseif (strpos($uri, dirname($_SERVER[ 'SCRIPT_NAME' ])) === 0) {
+                    $uri = (string)substr($uri, strlen(dirname($_SERVER[ 'SCRIPT_NAME' ])));
+                }
             }
         }
 
