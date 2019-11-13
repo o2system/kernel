@@ -222,6 +222,8 @@ abstract class AbstractCommander
                         $method = $this->commandOptionsShortcuts[ '-' . $method ];
                     }
 
+                    $commandMethod = null;
+                    
                     if ($command->hasMethod($commandMethodName = camelcase('option-' . $method))) {
                         $commandMethod = $command->getMethod($commandMethodName);
                     } elseif ($command->hasMethod($commandMethodName = camelcase($method))) {
