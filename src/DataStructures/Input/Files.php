@@ -257,17 +257,9 @@ class Files extends SplArrayObject
                             }
                         }
                     }
-
-                    $targetPath = $this->path;
-
-                    if (empty($this->targetFilename)) {
-                        $this->setTargetFilename($file->getClientFilename());
-                    }
-
-                    $filename = $this->targetFilename;
-
+                    
                     if ($this->validate($file)) {
-                        $file->moveTo($targetPath . $filename . '.' . $file->getExtension());
+                        $file->moveTo($this->path . $file->getClientFilename() . '.' . $file->getExtension());
 
                         if ( ! $file->getError()) {
                             $this->stored[] = $file;
