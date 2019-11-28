@@ -241,7 +241,7 @@ class Files extends SplArrayObject
     {
         $uploadFiles = input()->files($field);
 
-        if ( ! is_array($uploadFiles)) {
+        if ($uploadFiles instanceof UploadFile) {
             $uploadFiles = [$uploadFiles];
         }
 
@@ -259,7 +259,7 @@ class Files extends SplArrayObject
                     }
                     
                     if ($this->validate($file)) {
-                        $file->moveTo($this->path . $file->getClientFilename() . '.' . $file->getExtension());
+                        $file->moveTo($this->path . $file->getClientFilename());
 
                         if ( ! $file->getError()) {
                             $this->stored[] = $file;
@@ -346,8 +346,12 @@ class Files extends SplArrayObject
      *                         
      * @return bool
      */
-    public function store($index = null)
+    public function store($index = null, $path = null)
     {
+        if(isset($path)) {
+            $this->setPath($path);
+        }
+
         if(isset($index)) {
             $this->process($index);
         } else {
