@@ -301,3 +301,20 @@ if ( ! function_exists('request')) {
         return input()->request($offset, $default);
     }
 }
+
+// ------------------------------------------------------------------------
+
+if ( ! function_exists('files')) {
+    /**
+     * files
+     *
+     * @param string $offset
+     * @param mixed  $default
+     *
+     * @return mixed|\O2System\Kernel\DataStructures\Input\Files
+     */
+    function files($offset = null)
+    {
+        return input()->files($offset);
+    }
+}
