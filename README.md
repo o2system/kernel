@@ -1,4 +1,4 @@
-![alt text](https://www.o2system.id/assets/img/covers/cover-o2system-atom-kernel.png "O2System Kernel Atom")
+![alt text](https://repository-images.githubusercontent.com/75944552/994e0400-5c99-11ea-8c2f-818a6585875c "O2System Kernel Atom")
 
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/o2system/kernel/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/o2system/kernel/?branch=master)
 [![Build Status](https://scrutinizer-ci.com/g/o2system/kernel/badges/build.png?b=master)](https://scrutinizer-ci.com/g/o2system/kernel/build-status/master)
