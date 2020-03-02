@@ -15,6 +15,7 @@ namespace O2System\Kernel\Cli;
 
 // ------------------------------------------------------------------------
 
+use O2System\Psr\Http\Message\UploadedFileInterface;
 use O2System\Spl\DataStructures\SplArrayObject;
 
 /**
@@ -428,6 +429,24 @@ class Input
     }
 
     // ------------------------------------------------------------------------
+
+    /**
+     * Input::files
+     *
+     * Fetch input from FILES data. Returns an array of all files that have been uploaded with this
+     * request. Each file is represented by an UploadedFileInterface instance.
+     *
+     * @param string|null $offset The offset of $_FILES variable to fetch.
+     *                            When set null will returns filtered $_FILES variable.
+     *
+     * @return array|UploadedFileInterface|\O2System\Kernel\DataStructures\Input\Files|bool
+     */
+    final public function files($offset = null)
+    {
+        return false;
+    }
+
+    //--------------------------------------------------------------------
 
     /**
      * Input::env

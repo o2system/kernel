@@ -332,6 +332,23 @@ class Language implements \IteratorAggregate
     // ------------------------------------------------------------------------
 
     /**
+     * Language::addLine
+     * 
+     * @param string $offset
+     * @param string $translation
+     *
+     * @return static
+     */
+    public function addLine($offset, $translation)
+    {
+        $this->lines[$offset] = $translation;
+        
+        return $this;
+    }
+
+    // ------------------------------------------------------------------------
+
+    /**
      * Language::getLine
      *
      * Parse single language line of text

@@ -29,15 +29,15 @@ class Segments extends ArrayIterator
     /**
      * Segments::__construct
      *
-     * @param string|null $segments
+     * @param string|null $points
      *
      * @throws \O2System\Spl\Exceptions\RuntimeException
      */
-    public function __construct($segments = null)
+    public function __construct($points = null)
     {
         parent::__construct([]);
 
-        if (is_null($segments)) {
+        if (is_null($points)) {
             if (kernel()->services->has('config')) {
                 if (config()->offsetExists('uri')) {
                     $protocol = strtoupper(config('uri')->offsetGet('protocol'));
@@ -49,27 +49,27 @@ class Segments extends ArrayIterator
             switch ($protocol) {
                 case 'AUTO':
                 case 'REQUEST_URI':
-                    $segments = $this->parseRequestUri();
+                    $points = $this->parseRequestUri();
                     break;
                 case 'QUERY_STRING':
-                    $segments = $this->parseQueryString();
+                    $points = $this->parseQueryString();
                     break;
                 case 'PATH_INFO':
                 default:
-                    $segments = isset($_SERVER[ $protocol ])
+                    $points = isset($_SERVER[ $protocol ])
                         ? $_SERVER[ $protocol ]
                         : $this->parseRequestUri();
                     break;
             }
 
-        } elseif (is_array($segments)) {
-            $segments = implode('/', $segments);
+        } elseif (is_array($points)) {
+            $points = implode('/', $points);
         }
         
-        $segments = str_replace(['\\', '_'], ['/', '-'], $segments);
-        $segments = trim(remove_invisible_characters($segments, false), '/');
+        $points = str_replace(['\\', '_'], ['/', '-'], $points);
+        $points = trim(remove_invisible_characters($points, false), '/');
 
-        $this->setParts(explode('/', $segments));
+        $this->setPoints(explode('/', $points));
     }
 
     // ------------------------------------------------------------------------
@@ -205,23 +205,23 @@ class Segments extends ArrayIterator
     {
         $string = trim(remove_invisible_characters($string, false), '/');
 
-        return $this->withParts(explode('/', $string));
+        return $this->withPoints(explode('/', $string));
     }
 
     // ------------------------------------------------------------------------
 
     /**
-     * Segments::withParts
+     * Segments::withPoints
      *
-     * @param array $parts
+     * @param array $points
      *
      * @return \O2System\Kernel\Http\Message\Uri\Segments
      * @throws \O2System\Spl\Exceptions\RuntimeException
      */
-    public function withParts(array $parts)
+    public function withPoints(array $points)
     {
         $uri = clone $this;
-        $uri->setParts($parts);
+        $uri->setPoints($points);
 
         return $uri;
     }
@@ -229,22 +229,22 @@ class Segments extends ArrayIterator
     // ------------------------------------------------------------------------
 
     /**
-     * Segments::addParts
+     * Segments::addPoints
      *
-     * @param array $parts
+     * @param array $points
      *
      * @return \O2System\Kernel\Http\Message\Uri\Segments
      * @throws \O2System\Spl\Exceptions\RuntimeException
      */
-    public function addParts(array $parts)
+    public function addPoints(array $points)
     {
-        return $this->withParts($parts);
+        return $this->withPoints($points);
     }
 
     // ------------------------------------------------------------------------
 
     /**
-     * Segments::getPart
+     * Segments::getPoint
      *
      * Get Segment
      *
@@ -252,7 +252,7 @@ class Segments extends ArrayIterator
      *
      * @return mixed
      */
-    public function getPart($index)
+    public function getPoint($index)
     {
         if($this->offsetExists($index)) {
             return $this->offsetGet($index);
@@ -264,21 +264,21 @@ class Segments extends ArrayIterator
     // ------------------------------------------------------------------------
 
     /**
-     * Segments::setParts
+     * Segments::setPoints
      *
-     * @param array $parts
+     * @param array $points
      *
      * @throws \O2System\Spl\Exceptions\RuntimeException
      */
-    protected function setParts(array $parts)
+    protected function setPoints(array $points)
     {
-        if (count($parts)) {
-            $validSegments = [];
+        if (count($points)) {
+            $validPoints = [];
 
-            if (count($parts)) {
-                foreach ($parts as $part) {
+            if (count($points)) {
+                foreach ($points as $part) {
                     // Filter segments for security
-                    if ($part = trim($this->filterPart($part))) {
+                    if ($part = trim($this->filterPoint($part))) {
                         if (class_exists('O2System\Framework', false)) {
                             if (false !== ($language = language()->registered($part))) {
                                 language()->setDefault($part);
@@ -287,19 +287,19 @@ class Segments extends ArrayIterator
                             }
                         }
 
-                        if ( ! in_array($part, $validSegments)) {
-                            $validSegments[] = $part;
+                        if ( ! in_array($part, $validPoints)) {
+                            $validPoints[] = $part;
                         }
                     }
                 }
             }
 
-            $validSegments = array_filter($validSegments);
-            array_unshift($validSegments, null);
+            $validPoints = array_filter($validPoints);
+            array_unshift($validPoints, null);
 
-            unset($validSegments[ 0 ]);
+            unset($validPoints[ 0 ]);
 
-            $this->merge($validSegments);
+            $this->merge($validPoints);
         }
     }
 
@@ -322,7 +322,7 @@ class Segments extends ArrayIterator
     // ------------------------------------------------------------------------
 
     /**
-     * Segments::filterPart
+     * Segments::filterPoint
      *
      * Filters segments for malicious characters.
      *
@@ -331,7 +331,7 @@ class Segments extends ArrayIterator
      * @return mixed
      * @throws RuntimeException
      */
-    protected function filterPart($string)
+    protected function filterPoint($string)
     {
         if (function_exists('config')) {
             $config = config('uri');

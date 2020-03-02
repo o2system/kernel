@@ -73,8 +73,8 @@ class ServerRequest extends Request implements ServerRequestInterface
             $this->headers = apache_request_headers();
         }
 
-        $this->headers[ 'Content-Type' ] = isset($_SERVER[ 'CONTENT_TYPE' ])
-            ? $_SERVER[ 'CONTENT_TYPE' ]
+        $this->headers['Content-Type'] = isset($_SERVER['CONTENT_TYPE'])
+            ? $_SERVER['CONTENT_TYPE']
             : @getenv(
                 'CONTENT_TYPE'
             );
@@ -82,7 +82,7 @@ class ServerRequest extends Request implements ServerRequestInterface
         foreach ($_SERVER as $key => $val) {
             if (strpos($key, 'SERVER') !== false) {
                 $key = str_replace('SERVER_', '', $key);
-                $this->serverParams[ $key ] = $val;
+                $this->serverParams[$key] = $val;
             }
 
             if (sscanf($key, 'HTTP_%s', $header) === 1) {
@@ -90,7 +90,7 @@ class ServerRequest extends Request implements ServerRequestInterface
                 $header = str_replace('_', ' ', strtolower($header));
                 $header = str_replace(' ', '-', ucwords($header));
 
-                $this->headers[ $header ] = $_SERVER[ $key ];
+                $this->headers[$header] = $_SERVER[$key];
             }
         }
 
@@ -103,19 +103,55 @@ class ServerRequest extends Request implements ServerRequestInterface
         $this->uploadedFiles = new Files();
 
         if (count($_FILES)) {
-            foreach ($_FILES as $key => $file) {
-                if (is_array($file['name'])) {
-                    $multipleFiles = [];
-                    foreach($file as $multipleKey => $multipleFile) {
-                        $multipleFiles[$i] = new UploadFile($multipleFile);
-                    }
+            $uploadedFiles = $this->arrangeFiles($_FILES);
+            array_walk($uploadedFiles, [&$this, 'convertToUploadFile']);
 
-                    $this->uploadedFiles->offsetSet($key, $multipleFiles);
-                    unset($multipleFiles);
+            $this->uploadedFiles->exchangeArray($uploadedFiles);
+        }
+    }
+
+    //--------------------------------------------------------------------
+
+    /**
+     * ServerRequest::arrangeFiles
+     *
+     * @param array $files
+     * @return array
+     */
+    private function arrangeFiles(array $files)
+    {
+        foreach ($files as &$file) {
+            $subFiles = [];
+            foreach ($file as $property => $value) {
+                if (is_array($value)) {
+                    array_walk_recursive($value, function (&$item, $key, $value) use ($property) {
+                        $item = [$property => $item];
+                    }, $file);
+
+                    $subFiles = array_replace_recursive($subFiles, $value);
                 } else {
-                    $this->uploadedFiles->offsetSet($key, new UploadFile($file));
+                    $subFiles[$property] = $value;
                 }
             }
+
+            $file = $subFiles;
+        }
+        return $files;
+    }
+
+    //--------------------------------------------------------------------
+
+    /**
+     * ServerRequest::convertToUploadFile
+     *
+     * @param $uploadFile
+     * @throws \O2System\Spl\Exceptions\Logic\BadFunctionCall\BadPhpExtensionCallException
+     */
+    private function convertToUploadFile(&$uploadFile) {
+        if(isset($uploadFile['name'])) {
+            $uploadFile = new UploadFile($uploadFile);
+        } else {
+            array_walk($uploadFile, [&$this, 'convertToUploadFile']);
         }
     }
 
@@ -183,7 +219,7 @@ class ServerRequest extends Request implements ServerRequestInterface
         $serverRequest = clone $this;
 
         foreach ($cookies as $key => $value) {
-            $serverRequest->cookieParams[ $key ] = $value;
+            $serverRequest->cookieParams[$key] = $value;
         }
 
         return $serverRequest;
@@ -314,9 +350,9 @@ class ServerRequest extends Request implements ServerRequestInterface
      */
     public function getParsedBody()
     {
-        if (isset($this->headers[ 'Content-Type' ])) {
+        if (isset($this->headers['Content-Type'])) {
             if (in_array(
-                strtolower($this->headers[ 'Content-Type' ]),
+                strtolower($this->headers['Content-Type']),
                 [
                     'application/x-www-form-urlencoded',
                     'multipart/form-data',
@@ -409,22 +445,22 @@ class ServerRequest extends Request implements ServerRequestInterface
      * This method obviates the need for a hasAttribute() method, as it allows
      * specifying a default value to return if the attribute is not found.
      *
-     * @see getAttributes()
-     *
-     * @param string $name    The attribute name.
-     * @param mixed  $default Default value to return if the attribute does not exist.
+     * @param string $name The attribute name.
+     * @param mixed $default Default value to return if the attribute does not exist.
      *
      * @return mixed
+     * @see getAttributes()
+     *
      */
     public function getAttribute($name, $default = null)
     {
         $name = str_replace('SERVER_', '', $name);
         $name = strtoupper($name);
 
-        if (isset($this->serverParams[ $name ])) {
-            return $this->serverParams[ $name ];
-        } elseif (isset($_SERVER[ $name ])) {
-            return $_SERVER[ $name ];
+        if (isset($this->serverParams[$name])) {
+            return $this->serverParams[$name];
+        } elseif (isset($_SERVER[$name])) {
+            return $_SERVER[$name];
         }
 
         return $default;
@@ -444,12 +480,12 @@ class ServerRequest extends Request implements ServerRequestInterface
      * immutability of the message, and MUST return an instance that has the
      * updated attribute.
      *
-     * @see getAttributes()
-     *
-     * @param string $name  The attribute name.
-     * @param mixed  $value The value of the attribute.
+     * @param string $name The attribute name.
+     * @param mixed $value The value of the attribute.
      *
      * @return static
+     * @see getAttributes()
+     *
      */
     public function withAttribute($name, $value)
     {
@@ -457,10 +493,10 @@ class ServerRequest extends Request implements ServerRequestInterface
         $name = strtoupper($name);
 
         $message = clone $this;
-        $message->serverParams[ $name ] = $value;
+        $message->serverParams[$name] = $value;
 
-        if (empty($_SERVER[ 'SERVER_' . $name ])) {
-            $_SERVER[ 'SERVER_' . $name ] = $value;
+        if (empty($_SERVER['SERVER_' . $name])) {
+            $_SERVER['SERVER_' . $name] = $value;
         }
 
         return $message;
@@ -480,11 +516,11 @@ class ServerRequest extends Request implements ServerRequestInterface
      * immutability of the message, and MUST return an instance that removes
      * the attribute.
      *
-     * @see getAttributes()
-     *
      * @param string $name The attribute name.
      *
      * @return static
+     * @see getAttributes()
+     *
      */
     public function withoutAttribute($name)
     {
@@ -493,8 +529,8 @@ class ServerRequest extends Request implements ServerRequestInterface
 
         $serverRequest = clone $this;
 
-        if (isset($this->serverParams[ $name ])) {
-            unset($this->serverParams[ $name ]);
+        if (isset($this->serverParams[$name])) {
+            unset($this->serverParams[$name]);
         }
 
         return $serverRequest;

@@ -363,6 +363,8 @@ class Input
             }
         }
 
+        $ipAddress = $ipAddress === '::1' ? '127.0.0.1' : $ipAddress;
+
         return (empty($ipAddress) ? '0.0.0.0' : $ipAddress);
     }
 

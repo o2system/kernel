@@ -898,7 +898,7 @@ class Uri implements UriInterface
         if ($uriPath !== '/' &&
             substr($uriPath, strlen($uriPath) - 1) !== '/' &&
             $this->suffix !== '' && $this->suffix !== '.' &&
-            ($uriPath . '/' !== $_SERVER[ 'REQUEST_URI' ]) &&
+            ( ! is_cli() && $uriPath . '/' !== $_SERVER[ 'REQUEST_URI' ]) &&
             pathinfo($uriPath, PATHINFO_EXTENSION) === '' &&
             strpos($uriPath, '#') === false &&
             empty($this->query)

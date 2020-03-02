@@ -106,7 +106,7 @@ class Domain
             $this->scheme = parse_url($host, PHP_URL_SCHEME);
             $this->ipv4 = gethostbyname($this->host);
             $this->port = parse_url($host, PHP_URL_PORT);
-        } else {
+        } elseif(!is_cli()) {
             $this->host = isset($_SERVER[ 'HTTP_HOST' ])
                 ? $_SERVER[ 'HTTP_HOST' ]
                 : $_SERVER[ 'SERVER_NAME' ];

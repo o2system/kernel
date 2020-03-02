@@ -89,11 +89,6 @@ class Router
             if (strpos($option, '--') !== false
                 || strpos($option, '-') !== false
             ) {
-                $option = str_replace(['-', '--'], '', $option);
-                $option = str_replace(':', '=', $option);
-                $option = str_replace('"', '', $option);
-                $value = null;
-
                 if (strpos($option, '=') !== false) {
                     $optionParts = explode('=', $option);
                     $option = $optionParts[ 0 ];
@@ -101,6 +96,10 @@ class Router
                 } else {
                     $value = current($options);
                 }
+
+                $option = str_replace(['-', '--'], '', $option);
+                $option = str_replace(':', '=', $option);
+                $option = str_replace('"', '', $option);
 
                 if ($value === 'true') {
                     $value = true;

@@ -14,7 +14,7 @@
 |  PHP File Extension Constant
 | -------------------------------------------------------------------
 */
-define('__EXT__', '.php');
+defined('__EXT__') || define('__EXT__', '.php');
 
 /*
 |--------------------------------------------------------------------------
@@ -75,13 +75,13 @@ defined('EXIT__AUTO_MAX') || define('EXIT__AUTO_MAX', 125); // highest automatic
 | Logger Constants
 | -------------------------------------------------------------------
 */
-define('LOGGER_DISABLED', 0); // disabled all log writing
-define('LOGGER_INFO', 1); // write log marked as INFO
-define('LOGGER_ERROR', 2); // write log marked as ERROR
-define('LOGGER_DEBUG', 3); // write log marked as DEBUG
-define('LOGGER_NOTICE', 4); // write log marked as NOTICE
-define('LOGGER_WARNING', 5); // write log marked as WARNING
-define('LOGGER_ALERT', 6); // write log marked as ALERT
-define('LOGGER_EMERGENCY', 7); // write log marked as EMERGENCY
-define('LOGGER_CRITICAL', 8); // write log marked as CRITICAL
-define('LOGGER_ALL', 9); // enabled all log writing
+defined('LOGGER_DISABLED') || define('LOGGER_DISABLED', 0); // disabled all log writing
+defined('LOGGER_INFO') || define('LOGGER_INFO', 1); // write log marked as INFO
+defined('LOGGER_ERROR') || define('LOGGER_ERROR', 2); // write log marked as ERROR
+defined('LOGGER_DEBUG') || define('LOGGER_DEBUG', 3); // write log marked as DEBUG
+defined('LOGGER_NOTICE') || define('LOGGER_NOTICE', 4); // write log marked as NOTICE
+defined('LOGGER_WARNING') || define('LOGGER_WARNING', 5); // write log marked as WARNING
+defined('LOGGER_ALERT') || define('LOGGER_ALERT', 6); // write log marked as ALERT
+defined('LOGGER_EMERGENCY') || define('LOGGER_EMERGENCY', 7); // write log marked as EMERGENCY
+defined('LOGGER_CRITICAL') || define('LOGGER_CRITICAL', 8); // write log marked as CRITICAL
+defined('LOGGER_ALL') || define('LOGGER_ALL', 9); // enabled all log writing

@@ -374,10 +374,6 @@ class Output extends Message\Response
             }
         }
 
-        if (is_object($data) and method_exists($data, 'getArrayCopy')) {
-            $data = $data->getArrayCopy();
-        }
-
         $this->sendHeaderStatus($statusCode, $reasonPhrase);
 
         $this->sendHeaders($headers);
@@ -388,7 +384,7 @@ class Output extends Message\Response
 
         if (is_array($data)) {
             if (is_string(key($data))) {
-                $response[ 'result' ] = [$data];
+                $response[ 'result' ] = $data;
             } elseif (is_numeric(key($data))) {
                 $response[ 'result' ] = $data;
             }

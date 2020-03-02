@@ -68,18 +68,18 @@ class UploadFile implements UploadedFileInterface
     protected $error;
 
     /**
-     * UploadFIle::$isMoved
-     *
-     * @var bool
-     */
-    protected $isMoved = false;
-
-    /**
      * Uploader File Stream
      *
      * @var Stream
      */
     protected $stream;
+
+    /**
+     * UploadFile::$isMoved
+     *
+     * @var bool
+     */
+    public $isMoved = false;
 
     // ------------------------------------------------------------------------
 
@@ -217,7 +217,7 @@ class UploadFile implements UploadedFileInterface
             $this->setPath($path);
         }
 
-        $this->moveTo($this->path . pathinfo($this->name, PATHINFO_FILENAME) . $this->getExtension());
+        $this->moveTo($this->path . pathinfo($this->name, PATHINFO_FILENAME) . '.' . $this->getExtension());
 
         return empty($this->error) ? true : false;
     }
@@ -262,60 +262,59 @@ class UploadFile implements UploadedFileInterface
      */
     public function moveTo($targetPath)
     {
-        if ($this->isMoved) {
-            throw new \RuntimeException('Uploaded File Has Been Moved');
-        }
+        if ( ! $this->isMoved) {
+            $filename = pathinfo($targetPath, PATHINFO_FILENAME);
+            $filename = dash($filename);
 
-        $filename = pathinfo($targetPath, PATHINFO_FILENAME);
-        $filename = dash($filename);
-        
-        $fileExtension = pathinfo($targetPath, PATHINFO_EXTENSION);
-        $targetPath = pathinfo($targetPath, PATHINFO_DIRNAME) . DIRECTORY_SEPARATOR;
+            $fileExtension = pathinfo($targetPath, PATHINFO_EXTENSION);
+            $targetPath = pathinfo($targetPath, PATHINFO_DIRNAME) . DIRECTORY_SEPARATOR;
+            $targetPath = str_replace(['\\','/'], DIRECTORY_SEPARATOR, $targetPath);
 
-        if ( ! is_file($filePath = $targetPath . $filename . '.' . $fileExtension)) {
-            $targetPath = $filePath;
-        } elseif ( ! is_file($filePath = $targetPath . $filename . '-1' . '.' . $fileExtension)) {
-            $targetPath = $filePath;
-        } else {
-            $existingFiles = glob($targetPath . $filename . '*.' . $fileExtension);
-            if (count($existingFiles)) {
-                $increment = count($existingFiles) - 1;
-            }
+            if ( ! is_file($filePath = $targetPath . $filename . '.' . $fileExtension)) {
+                $targetPath = $filePath;
+            } elseif ( ! is_file($filePath = $targetPath . $filename . '-1' . '.' . $fileExtension)) {
+                $targetPath = $filePath;
+            } else {
+                $existingFiles = glob($targetPath . $filename . '*.' . $fileExtension);
+                if (count($existingFiles)) {
+                    $increment = count($existingFiles) - 1;
+                }
 
-            foreach (range($increment + 1, $increment + 3, 1) as $increment) {
-                if ( ! is_file($filePath = $targetPath . $filename . '-' . $increment . '.' . $fileExtension)) {
-                    $targetPath = $filePath;
-                    break;
+                foreach (range($increment + 1, $increment + 3, 1) as $increment) {
+                    if ( ! is_file($filePath = $targetPath . $filename . '-' . $increment . '.' . $fileExtension)) {
+                        $targetPath = $filePath;
+                        break;
+                    }
                 }
             }
+
+            if ( ! is_writable(dirname($targetPath))) {
+                @mkdir(dirname($targetPath), 0777, true);
+            }
+
+            if (strpos($targetPath, '://') !== false) {
+                if ( ! copy($this->tmpName, $targetPath)) {
+                    throw new \RuntimeException(sprintf('Cant Move Uploaded File %1 to %2', $this->tmpName, $targetPath));
+                }
+
+                if ( ! unlink($this->tmpName)) {
+                    throw new \RuntimeException('Failed To Remove Uploaded Temp File');
+                }
+            } else {
+                if ( ! is_uploaded_file($this->tmpName)) {
+                    throw new \RuntimeException('File Is Not Valid Uploaded File');
+                }
+
+                if ( ! move_uploaded_file($this->tmpName, $targetPath)) {
+                    throw new \RuntimeException(sprintf('Cant Move Uploaded File %1 to %2', $this->tmpName, $targetPath));
+                }
+            }
+
+            $this->name = pathinfo($targetPath, PATHINFO_BASENAME);
+            $this->path = pathinfo($targetPath, PATHINFO_DIRNAME) . DIRECTORY_SEPARATOR;
+
+            $this->isMoved = true;
         }
-
-        if ( ! is_writable(dirname($targetPath))) {
-            @mkdir(dirname($targetPath), 0777, true);
-        }
-
-        if (strpos($targetPath, '://') !== false) {
-            if ( ! copy($this->tmpName, $targetPath)) {
-                throw new \RuntimeException(sprintf('Cant Move Uploaded File %1 to %2', $this->tmpName, $targetPath));
-            }
-
-            if ( ! unlink($this->tmpName)) {
-                throw new \RuntimeException('Failed To Remove Uploaded Temp File');
-            }
-        } else {
-            if ( ! is_uploaded_file($this->tmpName)) {
-                throw new \RuntimeException('File Is Not Valid Uploaded File');
-            }
-
-            if ( ! move_uploaded_file($this->tmpName, $targetPath)) {
-                throw new \RuntimeException(sprintf('Cant Move Uploaded File %1 to %2', $this->tmpName, $targetPath));
-            }
-        }
-
-        $this->name = pathinfo($targetPath, PATHINFO_BASENAME);
-        $this->path = pathinfo($targetPath, PATHINFO_DIRNAME) . DIRECTORY_SEPARATOR;
-
-        $this->isMoved = true;
     }
 
     // ------------------------------------------------------------------------
