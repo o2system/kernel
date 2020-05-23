@@ -413,6 +413,8 @@ class Output extends Message\Response
         } else {
             echo $response[ 'result' ];
         }
+        
+        exit(EXIT_SUCCESS);
     }
 
     // ------------------------------------------------------------------------

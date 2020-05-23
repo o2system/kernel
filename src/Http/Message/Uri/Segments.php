@@ -280,7 +280,7 @@ class Segments extends ArrayIterator
                     // Filter segments for security
                     if ($part = trim($this->filterPoint($part))) {
                         if (class_exists('O2System\Framework', false)) {
-                            if (false !== ($language = language()->registered($part))) {
+                            if (false !== ($language = language()->hasOption($part))) {
                                 language()->setDefault($part);
 
                                 continue;

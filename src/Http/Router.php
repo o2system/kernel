@@ -31,13 +31,6 @@ class Router
      */
     protected $uri;
 
-    /**
-     * Router::$addresses
-     *
-     * @var Router\Addresses
-     */
-    protected $addresses;
-
     // ------------------------------------------------------------------------
 
     /**
@@ -50,36 +43,6 @@ class Router
     public function getUri()
     {
         return $this->uri;
-    }
-
-    // ------------------------------------------------------------------------
-
-    /**
-     * Router::getAddresses
-     *
-     * @return \O2System\Kernel\Http\Router\Addresses
-     */
-    public function getAddresses()
-    {
-        return $this->addresses;
-    }
-
-    // ------------------------------------------------------------------------
-
-    /**
-     * Router::setAddresses
-     *
-     * Sets router addresses.
-     *
-     * @param \O2System\Kernel\Http\Router\Addresses $addresses
-     *
-     * @return static
-     */
-    public function setAddresses(Router\Addresses $addresses)
-    {
-        $this->addresses = $addresses;
-
-        return $this;
     }
 
     // ------------------------------------------------------------------------
