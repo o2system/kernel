@@ -154,9 +154,7 @@ class Router
             PATH_APP . 'Commanders' . DIRECTORY_SEPARATOR
         ];
 
-        if (function_exists('modules')) {
-            $commandersDirectories = modules()->getDirs('Commanders');
-        }
+        $commandersDirectories = modules()->getDirs('Commanders');
 
         for ($i = 0; $i <= $numCommands; $i++) {
             $routedCommands = array_slice($commands, 0, ($numCommands - $i));
