@@ -94,7 +94,7 @@ abstract class AbstractCommander
      *
      * @final   This method cannot be overwritten.
      */
-    final public function __construct()
+    public function __construct()
     {
         language()->loadFile('cli');
 
@@ -275,11 +275,7 @@ abstract class AbstractCommander
      */
     public function execute()
     {
-        if (false !== ($options = input()->get())) {
-            $this->__callOptions();
-        } else {
-            $this->optionHelp();
-        }
+        $this->optionHelp();
     }
 
     // ------------------------------------------------------------------------
