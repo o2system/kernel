@@ -87,6 +87,8 @@ abstract class AbstractCommandersPool
             $this->commandersPath = $path;
         }
 
+        router()->addFilePath($this->commandersPath);
+
         return $this;
     }
 
