@@ -15,6 +15,7 @@ namespace O2System\Kernel\Http\Message;
 
 // ------------------------------------------------------------------------
 
+use O2System\Kernel\Http\Message\Uri\Path;
 use O2System\Psr\Http\Message\StreamInterface;
 use O2System\Psr\Http\Message\UploadedFileInterface;
 use O2System\Spl\Exceptions\Logic\BadFunctionCall\BadPhpExtensionCallException;
@@ -62,8 +63,8 @@ class UploadFile implements UploadedFileInterface
 
     /**
      * UploadFile::$error
-     * 
-     * @var mixed 
+     *
+     * @var mixed
      */
     protected $error;
 
@@ -92,20 +93,20 @@ class UploadFile implements UploadedFileInterface
      */
     public function __construct(array $uploadedFile)
     {
-        if ( ! class_exists('finfo')) {
+        if (!class_exists('finfo')) {
             throw new BadPhpExtensionCallException('E_HEADER_BADPHPEXTENSIONCALLEXCEPTION', 1);
         }
 
-        $this->name = $uploadedFile[ 'name' ];
-        $this->type = $uploadedFile[ 'type' ];
-        $this->tmpName = $uploadedFile[ 'tmp_name' ];
-        $this->size = $uploadedFile[ 'size' ];
-        $this->error = $uploadedFile[ 'error' ];
+        $this->name = $uploadedFile['name'];
+        $this->type = $uploadedFile['type'];
+        $this->tmpName = $uploadedFile['tmp_name'];
+        $this->size = $uploadedFile['size'];
+        $this->error = $uploadedFile['error'];
 
         if (defined('PATH_STORAGE')) {
             $this->path = PATH_STORAGE;
         } else {
-            $this->path = dirname($_SERVER[ 'SCRIPT_FILENAME' ]) . DIRECTORY_SEPARATOR . $path;
+            $this->path = dirname($_SERVER['SCRIPT_FILENAME']) . DIRECTORY_SEPARATOR . $path;
         }
     }
 
@@ -155,7 +156,7 @@ class UploadFile implements UploadedFileInterface
      *
      * Sets target filename.
      *
-     * @param string $name               The target filename.
+     * @param string $name The target filename.
      * @param string $conversionFunction Conversion function name, by default it's using dash inflector function.
      *
      * @return static
@@ -198,7 +199,7 @@ class UploadFile implements UploadedFileInterface
                 $this->path = PATH_STORAGE . str_replace(PATH_STORAGE, '', $path);
             }
         } else {
-            $this->path = dirname($_SERVER[ 'SCRIPT_FILENAME' ]) . DIRECTORY_SEPARATOR . $path;
+            $this->path = dirname($_SERVER['SCRIPT_FILENAME']) . DIRECTORY_SEPARATOR . $path;
         }
     }
 
@@ -262,17 +263,17 @@ class UploadFile implements UploadedFileInterface
      */
     public function moveTo($targetPath)
     {
-        if ( ! $this->isMoved) {
+        if (!$this->isMoved) {
             $filename = pathinfo($targetPath, PATHINFO_FILENAME);
             $filename = dash($filename);
 
             $fileExtension = pathinfo($targetPath, PATHINFO_EXTENSION);
             $targetPath = pathinfo($targetPath, PATHINFO_DIRNAME) . DIRECTORY_SEPARATOR;
-            $targetPath = str_replace(['\\','/'], DIRECTORY_SEPARATOR, $targetPath);
+            $targetPath = str_replace(['\\', '/'], DIRECTORY_SEPARATOR, $targetPath);
 
-            if ( ! is_file($filePath = $targetPath . $filename . '.' . $fileExtension)) {
+            if (!is_file($filePath = $targetPath . $filename . '.' . $fileExtension)) {
                 $targetPath = $filePath;
-            } elseif ( ! is_file($filePath = $targetPath . $filename . '-1' . '.' . $fileExtension)) {
+            } elseif (!is_file($filePath = $targetPath . $filename . '-1' . '.' . $fileExtension)) {
                 $targetPath = $filePath;
             } else {
                 $existingFiles = glob($targetPath . $filename . '*.' . $fileExtension);
@@ -281,32 +282,34 @@ class UploadFile implements UploadedFileInterface
                 }
 
                 foreach (range($increment + 1, $increment + 3, 1) as $increment) {
-                    if ( ! is_file($filePath = $targetPath . $filename . '-' . $increment . '.' . $fileExtension)) {
+                    if (!is_file($filePath = $targetPath . $filename . '-' . $increment . '.' . $fileExtension)) {
                         $targetPath = $filePath;
                         break;
                     }
                 }
             }
 
-            if ( ! is_writable(dirname($targetPath))) {
+            if (!is_writable(dirname($targetPath))) {
                 @mkdir(dirname($targetPath), 0777, true);
             }
 
             if (strpos($targetPath, '://') !== false) {
-                if ( ! copy($this->tmpName, $targetPath)) {
-                    throw new \RuntimeException(sprintf('Cant Move Uploaded File %1 to %2', $this->tmpName, $targetPath));
+                if (!copy($this->tmpName, $targetPath)) {
+                    throw new \RuntimeException(sprintf('Cant Move Uploaded File %1 to %2', $this->tmpName,
+                        $targetPath));
                 }
 
-                if ( ! unlink($this->tmpName)) {
+                if (!unlink($this->tmpName)) {
                     throw new \RuntimeException('Failed To Remove Uploaded Temp File');
                 }
             } else {
-                if ( ! is_uploaded_file($this->tmpName)) {
+                if (!is_uploaded_file($this->tmpName)) {
                     throw new \RuntimeException('File Is Not Valid Uploaded File');
                 }
 
-                if ( ! move_uploaded_file($this->tmpName, $targetPath)) {
-                    throw new \RuntimeException(sprintf('Cant Move Uploaded File %1 to %2', $this->tmpName, $targetPath));
+                if (!move_uploaded_file($this->tmpName, $targetPath)) {
+                    throw new \RuntimeException(sprintf('Cant Move Uploaded File %1 to %2', $this->tmpName,
+                        $targetPath));
                 }
             }
 
@@ -321,7 +324,7 @@ class UploadFile implements UploadedFileInterface
 
     /**
      * UploadFile::getName
-     * 
+     *
      * @return string
      */
     public function getName()
@@ -333,7 +336,7 @@ class UploadFile implements UploadedFileInterface
 
     /**
      * UploadFile::getPath
-     * 
+     *
      * @return string
      */
     public function getPath()
@@ -437,7 +440,30 @@ class UploadFile implements UploadedFileInterface
      */
     public function getFileMime()
     {
-        $mime = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $this->tmpName);
+        $finfo = finfo_open(FILEINFO_MIME_TYPE); // return mime type ala mimetype extension
+        $mime = finfo_file($finfo, $this->tmpName);
+
+        if (empty($mime)) {
+            if (function_exists('mime_content_type')) {
+                $mime = mime_content_type($this->name);
+            }
+        }
+
+        if (empty($mime)) {
+            $mimeTypes = require(PATH_KERNEL . 'Config' . DIRECTORY_SEPARATOR . 'Mimes.php');
+
+            if (array_key_exists($this->getExtension(), $mimeTypes)) {
+                $mime = $mimeTypes[$this->getExtension()];
+
+                if (is_array($mime)) {
+                    $mime = reset($mimeTypes[$this->getExtension()]);
+                }
+            }
+        }
+
+        if (empty($mime)) {
+            $mime = empty($this->type) ? 'application/octet-stream' : $this->type;
+        }
 
         return $mime;
     }

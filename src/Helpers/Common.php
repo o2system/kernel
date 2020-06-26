@@ -311,7 +311,16 @@ if ( ! function_exists('path_to_url')) {
     {
         $path = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $path);
         $root_dir = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $_SERVER[ 'DOCUMENT_ROOT' ]);
-        $base_dir = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, dirname($_SERVER[ 'SCRIPT_FILENAME' ]));
+
+        if(strpos($_SERVER['SCRIPT_FILENAME'], 'server.php') !== false) {
+            $base_dir = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, dirname($_SERVER[ 'SCRIPT_FILENAME' ]));
+
+            if(is_dir($base_dir) . DIRECTORY_SEPARATOR . 'public') {
+                $base_dir = $base_dir . DIRECTORY_SEPARATOR . 'public';
+            }
+        } else {
+            $base_dir = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, dirname($_SERVER[ 'SCRIPT_FILENAME' ]));
+        }
 
         $root_dir = rtrim($root_dir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
         $base_dir = rtrim($base_dir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;

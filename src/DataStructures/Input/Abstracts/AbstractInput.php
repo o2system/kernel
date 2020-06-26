@@ -247,7 +247,7 @@ abstract class AbstractInput extends SplArrayStorage implements
                 }
             }
         }
-
+ 
         return $value;
     }
 

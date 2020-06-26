@@ -275,11 +275,7 @@ abstract class AbstractCommander
      */
     public function execute()
     {
-        $this->__callOptions();
-
-        if ($options = input()->get()) {
-            $this->optionHelp();
-        }
+        $this->optionHelp();
     }
 
     // ------------------------------------------------------------------------

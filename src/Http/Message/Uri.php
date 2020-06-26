@@ -187,6 +187,15 @@ class Uri implements UriInterface
             $xPath = explode('/', trim($xPath[ 0 ], '/'));
             array_pop($xPath);
 
+            if(class_exists('O2System\Framework', false)) {
+                if(!empty($xPath)) {
+                    $app = studlycase($xPath[0]);
+                    if(is_file(PATH_APP . $app . DIRECTORY_SEPARATOR . 'app.json')) {
+                        unset($xPath[0]);
+                    }
+                }
+            }
+
             $this->path = empty($xPath) ? null : implode('/', $xPath) . '/';
 
             $this->query = isset($_SERVER[ 'QUERY_STRING' ]) ? $_SERVER[ 'QUERY_STRING' ] : null;
