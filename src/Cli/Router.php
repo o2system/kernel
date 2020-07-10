@@ -16,6 +16,7 @@ namespace O2System\Kernel\Cli;
 // ------------------------------------------------------------------------
 
 use O2System\Kernel\Cli\Router\DataStructures\Commander;
+use O2System\Spl\Traits\Collectors\FilePathCollectorTrait;
 
 /**
  * Class Router
@@ -24,6 +25,8 @@ use O2System\Kernel\Cli\Router\DataStructures\Commander;
  */
 class Router
 {
+    use FilePathCollectorTrait;
+    
     /**
      * Router::$string
      *
@@ -50,6 +53,13 @@ class Router
      * @var Commander
      */
     protected $commander;
+
+    // -----------------------------------------------------------------------
+    
+    public function __construct()
+    {
+        $this->setFileDirName('Commanders');
+    }
 
     // -----------------------------------------------------------------------
 
@@ -149,12 +159,8 @@ class Router
     {
         $numCommands = count($commands);
         $commanderRegistry = null;
-        $commandersDirectories = [
-            defined('PATH_REACTOR') ? PATH_REACTOR . 'Cli' . DIRECTORY_SEPARATOR . 'Commanders' . DIRECTORY_SEPARATOR : PATH_FRAMEWORK . 'Cli' . DIRECTORY_SEPARATOR . 'Commanders' . DIRECTORY_SEPARATOR,
-            PATH_APP . 'Commanders' . DIRECTORY_SEPARATOR
-        ];
 
-        $commandersDirectories = modules()->getDirs('Commanders');
+        $commandersDirectories = $this->getFilePaths(true);
 
         for ($i = 0; $i <= $numCommands; $i++) {
             $routedCommands = array_slice($commands, 0, ($numCommands - $i));

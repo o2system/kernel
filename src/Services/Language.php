@@ -149,7 +149,6 @@ class Language implements \IteratorAggregate
         }
 
         foreach ($filenames as $filename) {
-            $filename = dash($filename);
             if ( ! $this->isLoaded($filename)) {
                 if (is_file($filename)) {
                     $this->parseFile($filename);

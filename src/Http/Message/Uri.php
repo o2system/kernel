@@ -132,24 +132,24 @@ class Uri implements UriInterface
 
             $this->domain = new Domain($httpStringRequest);
 
-            if (isset($parseUrl[ 'path' ])) {
-                $xRequest = explode('/', $parseUrl[ 'path' ]);
+            if (isset($parseUrl['path'])) {
+                $xRequest = explode('/', $parseUrl['path']);
                 $this->path = implode('/', array_slice($xRequest, 1));
             }
 
             if (strpos($this->path, '.php') !== false) {
                 $xPath = explode('.php', $this->path);
-                $xPath = explode('/', trim($xPath[ 0 ], '/'));
+                $xPath = explode('/', trim($xPath[0], '/'));
                 array_pop($xPath);
 
                 $this->path = empty($xPath) ? null : implode('/', $xPath);
             }
 
-            $this->query = isset($parseUrl[ 'query' ]) ? $parseUrl[ 'query' ] : null;
-            $this->username = isset($parseUrl[ 'user' ]) ? $parseUrl[ 'user' ] : null;
-            $this->password = isset($parseUrl[ 'pass' ]) ? $parseUrl[ 'pass' ] : null;
-            $this->port = isset($parseUrl[ 'port' ]) ? $parseUrl[ 'port' ] : 80;
-            $this->fragment = isset($parseUrl[ 'fragment' ]) ? $parseUrl[ 'fragment' ] : null;
+            $this->query = isset($parseUrl['query']) ? $parseUrl['query'] : null;
+            $this->username = isset($parseUrl['user']) ? $parseUrl['user'] : null;
+            $this->password = isset($parseUrl['pass']) ? $parseUrl['pass'] : null;
+            $this->port = isset($parseUrl['port']) ? $parseUrl['port'] : 80;
+            $this->fragment = isset($parseUrl['fragment']) ? $parseUrl['fragment'] : null;
 
             $this->segments = new Segments($this->path);
         } else {
@@ -159,47 +159,41 @@ class Uri implements UriInterface
             /**
              * Define Uri Attribute
              */
-            if (strpos($_SERVER[ 'PHP_SELF' ], '/@') !== false) {
-                $xPhpSelf = explode('/@', $_SERVER[ 'PHP_SELF' ]);
+            if (strpos($_SERVER['PHP_SELF'], '/@') !== false) {
+                $xPhpSelf = explode('/@', $_SERVER['PHP_SELF']);
 
-                $this->attribute = '@' . $xPhpSelf[ 1 ];
+                $this->attribute = '@' . $xPhpSelf[1];
 
                 if (strpos($this->attribute, '/') !== false) {
                     $xAttribute = explode('/', $this->attribute);
 
-                    $this->attribute = $xAttribute[ 0 ];
+                    $this->attribute = $xAttribute[0];
                 }
             }
 
             /**
              * Define Uri User and Password
              */
-            if (preg_match("/[a-zA-Z0-9]+[@][a-zA-Z0-9]+/", $_SERVER[ 'PHP_SELF' ], $usernamePassword)) {
-                $xUsernamePassword = explode('@', $usernamePassword[ 0 ]);
-                $this->username = $xUsernamePassword[ 0 ];
-                $this->password = $xUsernamePassword[ 1 ];
+            if (preg_match("/[a-zA-Z0-9]+[@][a-zA-Z0-9]+/", $_SERVER['PHP_SELF'], $usernamePassword)) {
+                $xUsernamePassword = explode('@', $usernamePassword[0]);
+                $this->username = $xUsernamePassword[0];
+                $this->password = $xUsernamePassword[1];
             }
 
             /**
              * Define Uri Path
              */
-            $xPath = explode('.php', $_SERVER[ 'PHP_SELF' ]);
-            $xPath = explode('/', trim($xPath[ 0 ], '/'));
-            array_pop($xPath);
-
-            if(class_exists('O2System\Framework', false)) {
-                if(!empty($xPath)) {
-                    $app = studlycase($xPath[0]);
-                    if(is_file(PATH_APP . $app . DIRECTORY_SEPARATOR . 'app.json')) {
-                        unset($xPath[0]);
-                    }
+            if (!is_file(input()->server('DOCUMENT_ROOT') . input()->server('PHP_SELF'))) {
+                $this->path = null;
+            } else {
+                $this->path = input()->server('PHP_SELF');
+                
+                if ($this->path === '/index.php') {
+                    $this->path = null;
                 }
             }
 
-            $this->path = empty($xPath) ? null : implode('/', $xPath) . '/';
-
-            $this->query = isset($_SERVER[ 'QUERY_STRING' ]) ? $_SERVER[ 'QUERY_STRING' ] : null;
-
+            $this->query = isset($_SERVER['QUERY_STRING']) ? $_SERVER['QUERY_STRING'] : null;
         }
     }
 
@@ -244,7 +238,7 @@ class Uri implements UriInterface
      */
     public function addSegments($segments)
     {
-        if ( ! $segments instanceof Segments) {
+        if (!$segments instanceof Segments) {
             $segments = new Segments($segments);
         }
 
@@ -310,11 +304,11 @@ class Uri implements UriInterface
 
         $authority = $this->getHost();
 
-        if ( ! empty($this->getUserInfo())) {
+        if (!empty($this->getUserInfo())) {
             $authority = $this->getUserInfo() . '@' . $authority;
         }
 
-        if ( ! empty($this->getPort())) {
+        if (!empty($this->getPort())) {
             if ($this->getPort() != 80) {
                 $authority .= ':' . $this->getPort();
             }
@@ -346,7 +340,7 @@ class Uri implements UriInterface
     {
         $userInfo = $this->username;
 
-        if ( ! empty($this->password)) {
+        if (!empty($this->password)) {
             $userInfo .= ':' . $this->password;
         }
 
@@ -609,7 +603,7 @@ class Uri implements UriInterface
      * user; an empty string for the user is equivalent to removing user
      * information.
      *
-     * @param string      $user     The user name to use for authority.
+     * @param string $user The user name to use for authority.
      * @param null|string $password The password associated with $user.
      *
      * @return static|\O2System\Kernel\Http\Message\Uri A new instance with the specified user information.
@@ -773,7 +767,7 @@ class Uri implements UriInterface
 
         parse_str($query, $newQuery);
 
-        if ( ! empty($uri->query)) {
+        if (!empty($uri->query)) {
             parse_str($uri->query, $oldQuery);
             $query = array_merge($oldQuery, $newQuery);
         } else {
@@ -781,7 +775,8 @@ class Uri implements UriInterface
         }
 
         if (is_array($query)) {
-            $uri->query = is_array($query) ? http_build_query($query, PHP_QUERY_RFC3986, '&', PHP_QUERY_RFC3986) : $query;
+            $uri->query = is_array($query) ? http_build_query($query, PHP_QUERY_RFC3986, '&',
+                PHP_QUERY_RFC3986) : $query;
         }
 
         return $uri;
@@ -907,7 +902,7 @@ class Uri implements UriInterface
         if ($uriPath !== '/' &&
             substr($uriPath, strlen($uriPath) - 1) !== '/' &&
             $this->suffix !== '' && $this->suffix !== '.' &&
-            ( ! is_cli() && $uriPath . '/' !== $_SERVER[ 'REQUEST_URI' ]) &&
+            (!is_cli() && $uriPath . '/' !== $_SERVER['REQUEST_URI']) &&
             pathinfo($uriPath, PATHINFO_EXTENSION) === '' &&
             strpos($uriPath, '#') === false &&
             empty($this->query)
@@ -926,6 +921,8 @@ class Uri implements UriInterface
         $uriString .= empty($this->fragment)
             ? ''
             : $this->fragment;
+
+        $uriString = str_replace(['https://.', 'http://.'], ['https://', 'http://'], $uriString);
 
         return $uriString;
     }

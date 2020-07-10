@@ -306,6 +306,7 @@ class Output extends Message\Response
         $response = [
             'status'  => $statusCode = $this->statusCode,
             'reason'  => $reasonPhrase = readable($this->reasonPhrase),
+            'timestamp' => gmdate('D, d M Y H:i:s e', time()),
             'success' => true,
             'message' => null,
             'result'  => [],
