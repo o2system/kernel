@@ -538,6 +538,8 @@ class Output extends Message\Response
 
         $this->sendHeaders();
         echo $payload;
+
+        exit(EXIT_SUCCESS);
     }
 
     // ------------------------------------------------------------------------

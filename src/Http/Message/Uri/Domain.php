@@ -149,7 +149,7 @@ class Domain
             $this->mainDomain = end($this->subDomains);
             array_pop($this->subDomains);
 
-            $this->mainDomain = implode('.', array_slice($this->subDomains, 1))
+            $this->mainDomain = implode('.', array_slice($this->subDomains, (count($this->subDomains) - 1)))
                 . '.'
                 . $this->mainDomain
                 . $this->tld;
@@ -494,6 +494,10 @@ class Domain
     public function __toString()
     {
         if(count($this->subDomains)) {
+            foreach($this->subDomains as $subDomain) {
+                $this->mainDomain = str_replace($subDomain . '.', '', $this->mainDomain);
+            }
+
             return implode('.', array_merge(array_filter($this->subDomains), [$this->mainDomain]));
         }
 

@@ -18,10 +18,10 @@ namespace O2System\Kernel\DataStructures\Input;
 use O2System\Kernel\DataStructures\Input\Abstracts\AbstractInput;
 
 /**
- * Class Session
+ * Class Data
  * @package O2System\Kernel\DataStructures\Input
  */
-class Session extends AbstractInput
+class Data extends AbstractInput
 {
 
 }
