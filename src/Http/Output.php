@@ -307,7 +307,7 @@ class Output extends Message\Response
             'status'  => $statusCode = $this->statusCode,
             'reason'  => $reasonPhrase = readable($this->reasonPhrase),
             'timestamp' => gmdate('D, d M Y H:i:s e', time()),
-            'success' => true,
+            'success' => $this->statusCode == 200 ? true : false,
             'message' => null,
             'result'  => [],
         ];
@@ -414,7 +414,7 @@ class Output extends Message\Response
         } else {
             echo $response[ 'result' ];
         }
-        
+
         exit(EXIT_SUCCESS);
     }
 

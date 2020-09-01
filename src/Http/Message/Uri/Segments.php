@@ -66,7 +66,7 @@ class Segments extends ArrayIterator
             $points = implode('/', $points);
         }
         
-        $points = str_replace(['\\', '_'], ['/', '-'], $points);
+        $points = str_replace('\\', '/', $points);
         $points = trim(remove_invisible_characters($points, false), '/');
 
         $this->setPoints(explode('/', $points));
