@@ -45,3 +45,11 @@ Temporary Items
 # Others
 .svn
 .idea
+
+# phpunit
+phpunit.xml
+.phpunit.result.cache
+
+#php
+/vendor
+composer.lock
