@@ -308,9 +308,7 @@ if ( ! function_exists('files')) {
     /**
      * files
      *
-     * @param string $offset
-     * @param mixed  $default
-     *
+     * @param null $offset
      * @return mixed|\O2System\Kernel\DataStructures\Input\Files
      */
     function files($offset = null)

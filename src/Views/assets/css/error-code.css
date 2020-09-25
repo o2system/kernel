@@ -79,7 +79,7 @@ h1.error-code-number {
     font-weight: bold;
     color: #333;
     text-transform: uppercase;
-    padding: 0px;
+    padding: 0;
     margin: 0;
 }
 
@@ -95,7 +95,7 @@ h2.error-code-title {
 p.error-code-message {
     color: #3c3c3c;
     font-weight: normal;
-    margin: 20px 0px;
+    margin: 20px 0;
     font-size: 14px;
     max-width: 400px;
 }

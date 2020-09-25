@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Tests;
+namespace Tests\Helpers;
 
 
 use PHPUnit\Framework\TestCase;
@@ -316,6 +316,7 @@ class InflectorTest extends TestCase
     public function testCamelCase($expected, $str)
     {
         $result = camelcase($str);
+        $this->implodeResult($expected, $result);
         $this->assertEquals($expected, $result);
     }
 
@@ -349,6 +350,7 @@ class InflectorTest extends TestCase
     public function testDasherize($expected, $str)
     {
         $result = dash($str);
+        $this->implodeResult($expected, $result);
         $this->assertEquals($expected, $result);
     }
 
@@ -382,6 +384,7 @@ class InflectorTest extends TestCase
     public function testUnderscored($expected, $str)
     {
         $result = underscore($str);
+        $this->implodeResult($expected, $result);
         $this->assertEquals($expected, $result);
     }
 
@@ -412,6 +415,7 @@ class InflectorTest extends TestCase
     public function testHumanize($expected, $str)
     {
         $result = humanize($str);
+        $this->implodeResult($expected, $result);
         $this->assertEquals($expected, $result);
     }
 
