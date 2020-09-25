@@ -29,11 +29,6 @@
     "issues": "https://github.com/o2system/psr/issues",
     "forum": "https://www.facebook.com/groups/498147006994512"
   },
-  "links": {
-    "info": "http://www.o2system.id/libraries/core.html",
-    "documentation": "http://www.o2system.id/libraries/core/documentation.html",
-    "github-wiki": "http://github.com/o2system/core/wiki"
-  },
   "require": {
     "php": "^7.2.0",
     "o2system/spl": "*",
@@ -47,11 +42,6 @@
     "psr-4": {
       "O2System\\Kernel\\": "src"
     },
-    "autoload-dev": {
-      "psr-4": {
-        "Tests\\": "tests/"
-      }
-    },
     "files": [
       "src/Config/Constants.php",
       "src/Helpers/Common.php",
@@ -59,5 +49,10 @@
       "src/Helpers/Cookie.php",
       "src/Kernel.php"
     ]
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\": "tests/"
+    }
   }
 }

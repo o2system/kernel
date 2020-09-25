@@ -4,27 +4,21 @@
 namespace Tests\Helpers;
 
 
-use O2System\Kernel\Http\Message\Request;
 use PHPUnit\Framework\TestCase;
 
 class CommonTest extends TestCase
 {
     public function testIsPhp()
     {
-        $result = is_php('7.4');
-        $this->assertTrue($result);
+        $result = is_php(phpversion());
+        $this->assertTrue($result, 'the php version is'. phpversion());
     }
 
     public function testIsTrue()
     {
         $result = is_true(true);
+        $this->assertFalse(false);
         $this->assertTrue($result);
-    }
-
-    public function testIsAjax()
-    {
-        $request = new Request();
-        $this->assertFalse($request->isAjax());
     }
 
 }
