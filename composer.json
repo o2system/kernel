@@ -34,10 +34,6 @@
     "o2system/spl": "*",
     "filp/whoops": "^2.3"
   },
-  "require-dev": {
-    "o2system/gear": "*",
-    "phpunit/phpunit": "^8.5"
-  },
   "autoload": {
     "psr-4": {
       "O2System\\Kernel\\": "src"
